@@ -28,9 +28,7 @@
 ;;; Code:
 
 (require 'widget)
-
-(eval-when-compile
-  (require 'wid-edit))
+(require 'wid-edit)
 
 (defconst syncthing-buffer
   "*syncthing*"
@@ -53,7 +51,7 @@
 Argument METHOD HTTP method/verb.
 Argument URL API to call.
 Optional argument DATA Data to send."
-  (when (eq nil syncthing-token)
+  (when (not syncthing-token)
     (setq syncthing-token (read-string "Synchting REST API token: ")))
 
   (let ((network-security-level 'low)
@@ -61,6 +59,10 @@ Optional argument DATA Data to send."
         (url-request-data data)
         (url-request-extra-headers
          `(("X-Api-Key" . ,syncthing-token))))
+    (ignore network-security-level
+            url-request-method method
+            url-request-data data
+            url-request-extra-headers)
     (with-temp-buffer
       (url-insert-file-contents url)
       (json-parse-buffer :object-type 'alist))))
@@ -155,16 +157,16 @@ Argument POS Incoming EVENT position."
            (mapc
             #'syncthing--list-37-folder
             (sort .folders
-                  #'(lambda (left right)
-                      (let ((lname "")
-                            (rname ""))
-                        (dolist (litem left)
-                          (when (string-equal "label" (car litem))
-                            (setq lname (cdr litem))))
-                        (dolist (ritem right)
-                          (when (string-equal "label" (car ritem))
-                            (setq rname (cdr ritem))))
-                        (string< lname rname)))))
+                  (lambda (left right)
+                    (let ((lname "")
+                          (rname ""))
+                      (dolist (litem left)
+                        (when (string-equal "label" (car litem))
+                          (setq lname (cdr litem))))
+                      (dolist (ritem right)
+                        (when (string-equal "label" (car ritem))
+                          (setq rname (cdr ritem))))
+                      (string< lname rname)))))
            (save-window-excursion
              (switch-to-buffer (get-buffer-create syncthing-buffer))
              (widget-insert (syncthing--title "\n"))
@@ -172,16 +174,16 @@ Argument POS Incoming EVENT position."
            (mapc
             #'syncthing--list-37-device
             (sort .devices
-                  #'(lambda (left right)
-                      (let ((lname "")
-                            (rname ""))
-                        (dolist (litem left)
-                          (when (string-equal "name" (car litem))
-                            (setq lname (cdr litem))))
-                        (dolist (ritem right)
-                          (when (string-equal "name" (car ritem))
-                            (setq rname (cdr ritem))))
-                        (string< lname rname)))))))))
+                  (lambda (left right)
+                    (let ((lname "")
+                          (rname ""))
+                      (dolist (litem left)
+                        (when (string-equal "name" (car litem))
+                          (setq lname (cdr litem))))
+                      (dolist (ritem right)
+                        (when (string-equal "name" (car ritem))
+                          (setq rname (cdr ritem))))
+                      (string< lname rname)))))))))
 
 (defun syncthing--progress (device-id folder-id)
   "Get progress for DEVICE-ID and FOLDER-ID."
