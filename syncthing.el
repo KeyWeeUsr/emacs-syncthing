@@ -38,7 +38,7 @@
   nil
   "Syncthing REST API token.")
 
-(defconst syncthing-start-collapsed
+(defcustom syncthing-start-collapsed
   t
   "Start all items collapsed.")
 
@@ -144,6 +144,10 @@ Argument POS Incoming EVENT position."
   (list)
   "Tmp to hold IDs of folds.")
 
+(defvar syncthing--collapse-after-start
+  nil
+  "Tmp to hold collapse toggle.")
+
 (defun syncthing--list ()
   "List all resources."
   (let-alist (syncthing--request
@@ -204,7 +208,7 @@ Argument POS Incoming EVENT position."
              (setq name (cdr item)))
             ((string-equal "id" (car item))
              (setq id (cdr item))
-             (when syncthing-start-collapsed
+             (when syncthing--collapse-after-start
                (push id syncthing--fold-folders)))
             ((string-equal "type" (car item))
              (setq type (cdr item)))
@@ -276,7 +280,7 @@ Argument POS Incoming EVENT position."
              (setq name (format "%s" (cdr item))))
             ((string-equal "deviceID" (car item))
              (setq id (format "%s" (cdr item)))
-             (when syncthing-start-collapsed
+             (when syncthing--collapse-after-start
                (push id syncthing--fold-devices)))
             ((string-equal "paused" (car item))
              (setq paused (if (eq (cdr item) :false) "active" "paused")))
@@ -334,6 +338,8 @@ Argument POS Incoming EVENT position."
   (interactive)
   (setq syncthing--fold-folders (list))
   (setq syncthing--fold-devices (list))
+  (setq syncthing--collapse-after-start
+        syncthing-start-collapsed)
   (syncthing--draw)
   (setq syncthing-start-collapsed nil)
   (switch-to-buffer syncthing-buffer))
