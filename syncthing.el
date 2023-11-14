@@ -326,18 +326,24 @@ Argument POS Incoming EVENT position."
 (defun syncthing--draw ()
   "Setup buffer and draw widgets."
   (syncthing--setup-buffer)
+  (syncthing--list)
   (save-window-excursion
     (switch-to-buffer (get-buffer-create syncthing-buffer))
-    (widget-setup))
-  (syncthing--list))
+    (widget-setup)
+    (setq header-line-format "Header")
+    ;; messes up with cursor position, reset to 0,0
+    (goto-char 0)))
 
-(defun syncthing ()
-  "Launch Syncthing client in the current window."
-  (interactive)
+(defun syncthing--init-state ()
+  "Reset all variables holding initial state."
   (setq syncthing--fold-folders (list))
   (setq syncthing--fold-devices (list))
   (setq syncthing--collapse-after-start
-        syncthing-start-collapsed)
+        syncthing-start-collapsed))
+
+(defun syncthing ()
+  "Launch Syncthing client in the current window."
+  (syncthing--init-state)
   (syncthing--draw)
   (setq syncthing-start-collapsed nil)
   (switch-to-buffer syncthing-buffer))
