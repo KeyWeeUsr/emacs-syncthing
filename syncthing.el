@@ -54,13 +54,11 @@ Optional argument DATA Data to send."
   (when (not syncthing-token)
     (setq syncthing-token (read-string "Synchting REST API token: ")))
 
-  (let ((network-security-level 'low)
-        (url-request-method method)
+  (let ((url-request-method method)
         (url-request-data data)
         (url-request-extra-headers
          `(("X-Api-Key" . ,syncthing-token))))
-    (ignore network-security-level
-            url-request-method method
+    (ignore url-request-method method
             url-request-data data
             url-request-extra-headers)
     (with-temp-buffer
