@@ -117,23 +117,23 @@ Argument POS Incoming EVENT position."
   (propertize text 'face 'italic))
 
 (defun syncthing--green (text)
-  "Format TEXT as green."
+  "Format TEXT as =green=."
   (propertize text 'face '(:foreground "green")))
 
 (defun syncthing--light-green (text)
-  "Format TEXT as light-green."
+  "Format TEXT as =lightgreen=."
   (propertize text 'face '(:foreground "lightgreen")))
 
 (defun syncthing--yellow (text)
-  "Format TEXT as yellow."
+  "Format TEXT as =yellow=."
   (propertize text 'face '(:foreground "yellow")))
 
 (defun syncthing--orange (text)
-  "Format TEXT as orange."
+  "Format TEXT as =orange=."
   (propertize text 'face '(:foreground "orange")))
 
 (defun syncthing--red (text)
-  "Format TEXT as red."
+  "Format TEXT as =red=."
   (propertize text 'face '(:foreground "red")))
 
 (defvar syncthing--fold-folders
