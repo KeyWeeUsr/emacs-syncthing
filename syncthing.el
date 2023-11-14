@@ -151,7 +151,7 @@ Argument POS Incoming EVENT position."
     (cond ((eq .version 37)
            (save-window-excursion
              (switch-to-buffer (get-buffer-create syncthing-buffer))
-             (widget-insert (syncthing--title "Folders\n")))
+             (widget-insert (syncthing--title " Folders\n")))
            (mapc
             #'syncthing--list-37-folder
             (sort .folders
@@ -168,7 +168,7 @@ Argument POS Incoming EVENT position."
            (save-window-excursion
              (switch-to-buffer (get-buffer-create syncthing-buffer))
              (widget-insert (syncthing--title "\n"))
-             (widget-insert (syncthing--title "Devices\n")))
+             (widget-insert (syncthing--title " Devices\n")))
            (mapc
             #'syncthing--list-37-device
             (sort .devices
