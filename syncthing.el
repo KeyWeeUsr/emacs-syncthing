@@ -136,6 +136,26 @@ Argument POS Incoming EVENT position."
   "Format TEXT as =red=."
   (propertize text 'face '(:foreground "red")))
 
+(defun syncthing--deep-sky-blue (text)
+  "Format TEXT as =deep sky blue=."
+  (propertize text 'face '(:foreground "deep sky blue")))
+
+(defun syncthing--white (text)
+  "Format TEXT as =white=."
+  (propertize text 'face '(:foreground "white")))
+
+(defun syncthing--light-sea-green (text)
+  "Format TEXT as =light sea green=."
+  (propertize text 'face '(:foreground "light sea green")))
+
+(defun syncthing--steel-blue (text)
+  "Format TEXT as =steel blue=."
+  (propertize text 'face '(:foreground "steel blue")))
+
+(defun syncthing--id-blue (text)
+  "Format TEXT as Syncthing ID blue (=#3498db=)."
+  (propertize text 'face '(:foreground "#3498db")))
+
 (defvar syncthing--fold-folders
   (list)
   "Tmp to hold IDs of folds.")
@@ -147,6 +167,18 @@ Argument POS Incoming EVENT position."
 (defvar syncthing--collapse-after-start
   nil
   "Tmp to hold collapse toggle.")
+
+(defvar syncthing--count-local-files
+  0
+  "Tmp to hold local state.")
+
+(defvar syncthing--count-local-folders
+  0
+  "Tmp to hold local state.")
+
+(defvar syncthing--count-local-bytes
+  0
+  "Tmp to hold local state.")
 
 (defun syncthing--list ()
   "List all resources."
@@ -216,6 +248,15 @@ Argument POS Incoming EVENT position."
              (setq path (cdr item)))
             ((string-equal "devices" (car item))
              (setq devices (cdr item)))))
+    (let-alist (syncthing--request
+                "GET" (syncthing--url
+                       (format "rest/db/status?folder=%s" id)))
+      (setq syncthing--count-local-files
+            (+ syncthing--count-local-files .localFiles))
+      (setq syncthing--count-local-bytes
+            (+ syncthing--count-local-bytes .localBytes))
+      (setq syncthing--count-local-folders
+            (+ syncthing--count-local-folders .localDirectories)))
     (dolist (item (syncthing--request
                    "GET" (syncthing--url
                           (format "rest/db/completion?folder=%s" id))))
@@ -330,7 +371,33 @@ Argument POS Incoming EVENT position."
   (save-window-excursion
     (switch-to-buffer (get-buffer-create syncthing-buffer))
     (widget-setup)
-    (setq header-line-format "Header")
+    (setq header-line-format
+          (concat
+           " "
+           (syncthing--deep-sky-blue " 0B/s")
+           " "
+           (syncthing--light-green " 0B/s")
+           " "
+           (syncthing--white
+            (format " %d" syncthing--count-local-files))
+           " "
+           (syncthing--yellow
+            (format " %d" syncthing--count-local-folders))
+           " "
+           (syncthing--light-sea-green
+            (format " ~%.1fGiB"
+                    (/ syncthing--count-local-bytes
+                       (* 1024.0 1024.0 1024.0))))
+           " "
+           (syncthing--green " 3/3")
+           " "
+           (syncthing--steel-blue " 4/5")
+           " "
+           "uptime"
+           " "  ;; bad glyph! :(
+           (syncthing--id-blue "id")
+           " "
+           " v0.0.0"))
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
 
