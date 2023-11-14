@@ -152,6 +152,10 @@ Argument POS Incoming EVENT position."
   "Format TEXT as =steel blue=."
   (propertize text 'face '(:foreground "steel blue")))
 
+(defun syncthing--orchid (text)
+  "Format TEXT as =orchid=."
+  (propertize text 'face '(:foreground "orchid")))
+
 (defun syncthing--id-blue (text)
   "Format TEXT as Syncthing ID blue (=#3498db=)."
   (propertize text 'face '(:foreground "#3498db")))
@@ -178,6 +182,14 @@ Argument POS Incoming EVENT position."
 
 (defvar syncthing--count-local-bytes
   0
+  "Tmp to hold local state.")
+
+(defvar syncthing--version
+  ""
+  "Tmp to hold local state.")
+
+(defvar syncthing--my-id
+  ""
   "Tmp to hold local state.")
 
 (defun syncthing--list ()
@@ -371,6 +383,14 @@ Argument POS Incoming EVENT position."
   (save-window-excursion
     (switch-to-buffer (get-buffer-create syncthing-buffer))
     (widget-setup)
+    (let-alist (syncthing--request
+                "GET" (syncthing--url "rest/system/version"))
+      (setq syncthing--version .version))
+    (let-alist (syncthing--request
+                "GET" (syncthing--url "rest/system/status"))
+      (setq syncthing--my-id
+            (substring .myID 0 6))
+      (setq syncthing--uptime .uptime))
     (setq header-line-format
           (concat
            " "
@@ -393,11 +413,16 @@ Argument POS Incoming EVENT position."
            " "
            (syncthing--steel-blue " 4/5")
            " "
-           "uptime"
+           (syncthing--orchid
+            (format " %dd %dh %dm"
+                    0
+                    (/ syncthing--uptime 3600)
+                    (* 60 (- (/ syncthing--uptime 3600.0)
+                             (/ syncthing--uptime 3600)))))
            " "  ;; bad glyph! :(
-           (syncthing--id-blue "id")
+           (syncthing--id-blue (format " %s" syncthing--my-id))
            " "
-           " v0.0.0"))
+           (format " %s" syncthing--version)))
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
 
