@@ -431,7 +431,13 @@ Argument POS Incoming EVENT position."
   (setq syncthing--fold-folders (list))
   (setq syncthing--fold-devices (list))
   (setq syncthing--collapse-after-start
-        syncthing-start-collapsed))
+        syncthing-start-collapsed)
+  (setq syncthing--count-local-files 0)
+  (setq syncthing--count-local-folders 0)
+  (setq syncthing--count-local-bytes 0)
+  (setq syncthing--version "")
+  (setq syncthing--uptime 0)
+  (setq syncthing--my-id ""))
 
 (defun syncthing ()
   "Launch Syncthing client in the current window."
