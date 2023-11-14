@@ -34,7 +34,7 @@
   "*syncthing*"
   "Syncthing output destination.")
 
-(defconst syncthing-token
+(defcustom syncthing-token
   nil
   "Syncthing REST API token.")
 
