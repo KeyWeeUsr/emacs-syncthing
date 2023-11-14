@@ -348,5 +348,10 @@ Argument POS Incoming EVENT position."
   (setq syncthing-start-collapsed nil)
   (switch-to-buffer syncthing-buffer))
 
+(defun syncthing--cleanup ()
+  "Clean resources, if any."
+  (remove-hook 'kill-buffer-hook 'syncthing--cleanup))
+
+(add-hook 'kill-buffer-hook 'syncthing--cleanup)
 (provide 'syncthing)
 ;;; syncthing.el ends here
