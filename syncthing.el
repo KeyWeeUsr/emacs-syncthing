@@ -192,6 +192,14 @@ Argument POS Incoming EVENT position."
   ""
   "Tmp to hold local state.")
 
+(defvar syncthing--auto-refresh
+  nil
+  "Tmp to hold local state.")
+
+(defvar syncthing--auto-refresh-timer
+  nil
+  "Tmp to hold local state.")
+
 (defun syncthing--list ()
   "List all resources."
   (let-alist (syncthing--request
@@ -199,6 +207,16 @@ Argument POS Incoming EVENT position."
     (cond ((eq .version 37)
            (save-window-excursion
              (switch-to-buffer (get-buffer-create syncthing-buffer))
+             (widget-create
+              'checkbox
+              :notify (lambda (&rest _ignore)
+                        (setq syncthing--auto-refresh
+                              (not syncthing--auto-refresh))
+                        (when (and (not syncthing--auto-refresh)
+                                   syncthing--auto-refresh-timer)
+                          (cancel-timer syncthing--auto-refresh-timer)))
+              syncthing--auto-refresh-timer)
+             (widget-insert " Auto-refresh\n\n")
              (widget-insert (syncthing--title " Folders\n")))
            (mapc
             #'syncthing--list-37-folder
@@ -426,7 +444,7 @@ Argument POS Incoming EVENT position."
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
 
-(defun syncthing--init-state ()
+(defun syncthing--init-state (&optional skip-cancel)
   "Reset all variables holding initial state."
   (setq syncthing--fold-folders (list))
   (setq syncthing--fold-devices (list))
@@ -437,18 +455,37 @@ Argument POS Incoming EVENT position."
   (setq syncthing--count-local-bytes 0)
   (setq syncthing--version "")
   (setq syncthing--uptime 0)
-  (setq syncthing--my-id ""))
+  (setq syncthing--my-id "")
+  (setq syncthing--auto-refresh nil)
+  (when (and syncthing--auto-refresh-timer
+             (not skip-cancel))
+    (cancel-timer syncthing--auto-refresh-timer)
 
-(defun syncthing ()
+    (setq syncthing--auto-refresh-timer nil)))
+
+(defun syncthing (&optional auto-refresh &rest skip-cancel)
   "Launch Syncthing client in the current window."
-  (syncthing--init-state)
+  (interactive "sAuto-refresh? (yes or no) ")
+  (syncthing--init-state skip-cancel)
   (syncthing--draw)
-  (setq syncthing-start-collapsed nil)
-  (switch-to-buffer syncthing-buffer))
+  (setq syncthing--collapse-after-start nil)
+  (switch-to-buffer syncthing-buffer)
+  (when (and (string-equal "yes" auto-refresh)
+             t);;syncthing--auto-refresh)
+    (setq syncthing--auto-refresh-timer
+          (run-at-time
+           t 10
+           (lambda (&rest _ignore)
+             (save-window-excursion
+               (switch-to-buffer syncthing-buffer)
+               (syncthing "no" t)))))))
 
 (defun syncthing--cleanup ()
-  "Clean resources, if any."
-  (remove-hook 'kill-buffer-hook 'syncthing--cleanup))
+  "Stop auto-refresh and clean resources, if any."
+  (remove-hook 'kill-buffer-hook 'syncthing--cleanup)
+  (when syncthing--auto-refresh-timer
+    (cancel-timer syncthing--auto-refresh-timer)
+    (setq syncthing--auto-refresh-timer nil)))
 
 (add-hook 'kill-buffer-hook 'syncthing--cleanup)
 (provide 'syncthing)
