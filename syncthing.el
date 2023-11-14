@@ -229,9 +229,8 @@ Argument POS Incoming EVENT position."
        :button-suffix
        (concat
         " "
-        (syncthing--bold "(")
         (syncthing--color-perc perc)
-        (syncthing--bold (format ") %s\n" name))
+        (syncthing--bold (format " %s\n" name))
         (when (not (member id syncthing--fold-folders))
           (syncthing--prop (format "\t%s\n\t%s\n\t%s\n\t%s\n"
                                    id type path devices))))
@@ -299,9 +298,8 @@ Argument POS Incoming EVENT position."
        :button-suffix
        (concat
         " "
-        (syncthing--bold "(")
         (syncthing--color-perc perc)
-        (syncthing--bold (format ") %s\n" name))
+        (syncthing--bold (format " %s\n" name))
         (when (not (member id syncthing--fold-devices))
           (syncthing--prop (format "\t%s\n\t%s\n\t%s\n"
                                    id paused addresses))))
