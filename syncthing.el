@@ -36,11 +36,15 @@
 
 (defcustom syncthing-token
   nil
-  "Syncthing REST API token.")
+  "Syncthing REST API token."
+  :group 'syncthing
+  :type '(string))
 
 (defcustom syncthing-start-collapsed
   t
-  "Start all items collapsed.")
+  "Start all items collapsed."
+  :group 'syncthing
+  :type '(boolean))
 
 (defconst syncthing-format-perc
   "%6.2f%%"
@@ -190,6 +194,10 @@ Argument POS Incoming EVENT position."
 
 (defvar syncthing--my-id
   ""
+  "Tmp to hold local state.")
+
+(defvar syncthing--uptime
+  0
   "Tmp to hold local state.")
 
 (defvar syncthing--auto-refresh
@@ -445,7 +453,8 @@ Argument POS Incoming EVENT position."
     (goto-char 0)))
 
 (defun syncthing--init-state (&optional skip-cancel)
-  "Reset all variables holding initial state."
+  "Reset all variables holding initial state.
+Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--fold-folders (list))
   (setq syncthing--fold-devices (list))
   (setq syncthing--collapse-after-start
@@ -464,8 +473,11 @@ Argument POS Incoming EVENT position."
     (setq syncthing--auto-refresh-timer nil)))
 
 (defun syncthing (&optional auto-refresh &rest skip-cancel)
-  "Launch Syncthing client in the current window."
+  "Launch Syncthing client in the current window.
+Optional argument AUTO-REFRESH Enable auto-refresh feature.
+Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
   (interactive "sAuto-refresh? (yes or no) ")
+  (add-hook 'kill-buffer-hook #'syncthing--cleanup)
   (syncthing--init-state skip-cancel)
   (syncthing--draw)
   (setq syncthing--collapse-after-start nil)
@@ -482,11 +494,10 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--cleanup ()
   "Stop auto-refresh and clean resources, if any."
-  (remove-hook 'kill-buffer-hook 'syncthing--cleanup)
+  (remove-hook 'kill-buffer-hook #'syncthing--cleanup)
   (when syncthing--auto-refresh-timer
     (cancel-timer syncthing--auto-refresh-timer)
     (setq syncthing--auto-refresh-timer nil)))
 
-(add-hook 'kill-buffer-hook 'syncthing--cleanup)
 (provide 'syncthing)
 ;;; syncthing.el ends here
