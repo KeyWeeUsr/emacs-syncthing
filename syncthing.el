@@ -30,6 +30,23 @@
 (require 'widget)
 (require 'wid-edit)
 
+(defgroup syncthing
+  nil
+  "Customization group for =syncthing=."
+  :group 'external
+  :group 'communication)
+
+(defgroup syncthing-startup
+  nil
+  "Customization sub-group for =syncthing= start-up stage."
+  :group 'syncthing)
+
+(defgroup syncthing-faces
+  nil
+  "Customization group for =syncthing= faces."
+  :group 'syncthing)
+
+;; constants
 (defconst syncthing-buffer
   "*syncthing*"
   "Syncthing output destination.")
@@ -43,7 +60,7 @@
 (defcustom syncthing-start-collapsed
   t
   "Start all items collapsed."
-  :group 'syncthing
+  :group 'syncthing-startup
   :type '(boolean))
 
 (defconst syncthing-format-perc
