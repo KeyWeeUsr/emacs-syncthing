@@ -299,13 +299,6 @@ Optional argument DATA Data to send."
       (url-insert-file-contents url)
       (json-parse-buffer :object-type 'alist))))
 
-(defun syncthing--setup-buffer ()
-  "Create a dedicated buffer for Syncthing client."
-  (save-window-excursion
-    (switch-to-buffer (get-buffer-create syncthing-buffer))
-    (syncthing--clean-buffer)
-    (local-set-key (kbd "RET") #'syncthing--newline)))
-
 (defun syncthing--get-widget (pos)
   "Try to find an Emacs Widget at POS."
   (let ((button (get-char-property pos 'button)))
@@ -321,12 +314,6 @@ Argument POS Incoming EVENT position."
     (if button
 	    (widget-apply-action button event)
       (error "You can't edit this part of the Syncthing buffer"))))
-
-(defun syncthing--clean-buffer ()
-  "Reset buffer to its default state."
-  (let ((inhibit-read-only t))
-    (erase-buffer))
-  (kill-all-local-variables))
 
 (defun syncthing--url (path)
   "Assemble full API url from PATH."
@@ -578,7 +565,6 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw ()
   "Setup buffer and draw widgets."
-  (syncthing--setup-buffer)
   (syncthing--list)
   (save-window-excursion
     (switch-to-buffer (get-buffer-create syncthing--session-buffer))
@@ -626,9 +612,10 @@ Argument POS Incoming EVENT position."
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
 
-(defun syncthing--init-state (&optional skip-cancel)
+(defun syncthing--init-state ()
   "Reset all variables holding initial state.
 Optional argument SKIP-CANCEL Skip removing auto-refresh."
+  ;; everything += or appendable has to reset in each update
   (setq syncthing--fold-folders (list))
   (setq syncthing--fold-devices (list))
   (setq syncthing--collapse-after-start
@@ -662,13 +649,12 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
         (setq id (1+ id))))
     id))
 
-(defun syncthing (&optional auto-refresh &rest skip-cancel)
-  "Launch Syncthing client in the current window.
-Optional argument AUTO-REFRESH Enable auto-refresh feature.
-Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
-  (interactive "sAuto-refresh? (yes or no) ")
-  (add-hook 'kill-buffer-hook #'syncthing--cleanup)
-  (syncthing--init-state skip-cancel)
+(defun syncthing--update ()
+  "Update function for every refresh iteration."
+  (let ((inhibit-read-only t))
+    (erase-buffer))
+
+  (syncthing--init-state)
   (syncthing--draw)
   (setq syncthing--collapse-after-start nil)
   (switch-to-buffer syncthing-buffer)
