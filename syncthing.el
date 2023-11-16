@@ -72,7 +72,7 @@
 Argument METHOD HTTP method/verb.
 Argument URL API to call.
 Optional argument DATA Data to send."
-  (when (not syncthing-token)
+  (unless syncthing-token
     (setq syncthing-token (read-string "Synchting REST API token: ")))
 
   (let ((url-request-method method)
@@ -327,7 +327,7 @@ Argument POS Incoming EVENT position."
         " "
         (syncthing--color-perc perc)
         (syncthing--bold (format " %s\n" name))
-        (when (not (member id syncthing--fold-folders))
+        (unless (member id syncthing--fold-folders)
           (syncthing--prop (format "\t%s\n\t%s\n\t%s\n\t%s\n"
                                    id type path devices))))
        :action
@@ -396,7 +396,7 @@ Argument POS Incoming EVENT position."
         " "
         (syncthing--color-perc perc)
         (syncthing--bold (format " %s\n" name))
-        (when (not (member id syncthing--fold-devices))
+        (unless (member id syncthing--fold-devices)
           (syncthing--prop (format "\t%s\n\t%s\n\t%s\n"
                                    id paused addresses))))
        :action
