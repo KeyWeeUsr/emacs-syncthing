@@ -57,43 +57,43 @@
   "https://127.0.0.1:8384"
   "Base URL for Syncthing REST API endpoint."
   :group 'syncthing
-  :type '(string))
+  :type 'string)
 
 (defcustom syncthing-format-perc
   "%6.2f%%"
   "Format for displaying process percentage."
   :group 'syncthing
-  :type '(string))
+  :type 'string)
 
 (defcustom syncthing-cleanup-priority
   0
   "`add-hook' priority."
   :group 'syncthing
-  :type '(number))
+  :type 'number)
 
 (defcustom syncthing-token
   nil
   "Syncthing REST API token."
   :group 'syncthing
-  :type '(string))
+  :type 'string)
 
 (defcustom syncthing-start-collapsed
   t
   "Start all items collapsed."
   :group 'syncthing-startup
-  :type '(boolean))
+  :type 'boolean)
 
 (defcustom syncthing-start-with-auto-refresh
   t
   "Start with auto-refresh enabled."
   :group 'syncthing-startup
-  :type '(boolean))
+  :type 'boolean)
 
 (defcustom syncthing-auto-refresh-interval-sec
   10
   "Refresh interval in seconds."
   :group 'syncthing
-  :type '(number))
+  :type 'number)
 
 ;; customization faces/colors/fonts
 (defface syncthing-title
