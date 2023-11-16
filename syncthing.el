@@ -212,6 +212,52 @@
   "Face for Syncthing id-blue."
   :group 'syncthing-faces)
 
+;; local/state variables
+(defvar-local syncthing--fold-folders
+  nil
+  "Tmp list to hold IDs of folds.")
+
+(defvar-local syncthing--fold-devices
+  nil
+  "Tmp list to hold IDs of folds.")
+
+(defvar-local syncthing--collapse-after-start
+  nil
+  "Tmp to hold collapse toggle.")
+
+(defvar-local syncthing--count-local-files
+  0
+  "Tmp to hold local state.")
+
+(defvar-local syncthing--count-local-folders
+  0
+  "Tmp to hold local state.")
+
+(defvar-local syncthing--count-local-bytes
+  0
+  "Tmp to hold local state.")
+
+(defvar-local syncthing--version
+  ""
+  "Tmp to hold local state.")
+
+(defvar-local syncthing--my-id
+  ""
+  "Tmp to hold local state.")
+
+(defvar-local syncthing--uptime
+  0
+  "Tmp to hold local state.")
+
+(defvar-local syncthing--auto-refresh
+  nil
+  "Tmp to hold local state.")
+
+(defvar-local syncthing--auto-refresh-timer
+  nil
+  "Tmp to hold local state.")
+
+;; private/helper funcs
 (defun syncthing--request (method url &rest data)
   "Send authenticated HTTP request to Syncthing REST API.
 Argument METHOD HTTP method/verb.
@@ -323,50 +369,6 @@ Argument POS Incoming EVENT position."
 (defun syncthing--id-blue (text)
   "Format TEXT as Syncthing ID blue (=#3498db=)."
   (propertize text 'face 'syncthing-id-blue))
-
-(defvar syncthing--fold-folders
-  (list)
-  "Tmp to hold IDs of folds.")
-
-(defvar syncthing--fold-devices
-  (list)
-  "Tmp to hold IDs of folds.")
-
-(defvar syncthing--collapse-after-start
-  nil
-  "Tmp to hold collapse toggle.")
-
-(defvar syncthing--count-local-files
-  0
-  "Tmp to hold local state.")
-
-(defvar syncthing--count-local-folders
-  0
-  "Tmp to hold local state.")
-
-(defvar syncthing--count-local-bytes
-  0
-  "Tmp to hold local state.")
-
-(defvar syncthing--version
-  ""
-  "Tmp to hold local state.")
-
-(defvar syncthing--my-id
-  ""
-  "Tmp to hold local state.")
-
-(defvar syncthing--uptime
-  0
-  "Tmp to hold local state.")
-
-(defvar syncthing--auto-refresh
-  nil
-  "Tmp to hold local state.")
-
-(defvar syncthing--auto-refresh-timer
-  nil
-  "Tmp to hold local state.")
 
 (defun syncthing--list ()
   "List all resources."
