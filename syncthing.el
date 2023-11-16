@@ -132,7 +132,7 @@
   "Face for italic."
   :group 'syncthing-faces)
 
-(defface syncthing-green
+(defface syncthing-progress-100
   '((((class color) (background dark))
      (:foreground "green"))
     (((class color) (background light))
@@ -141,7 +141,7 @@
   "Face for 100% progress."
   :group 'syncthing-faces)
 
-(defface syncthing-light-green
+(defface syncthing-progress-75
   '((((class color) (background dark))
      (:foreground "lightgreen"))
     (((class color) (background light))
@@ -150,7 +150,7 @@
   "Face for 75%-100% progress."
   :group 'syncthing-faces)
 
-(defface syncthing-yellow
+(defface syncthing-progress-50
   '((((class color) (background dark))
      (:foreground "yellow"))
     (((class color) (background light))
@@ -159,7 +159,7 @@
   "Face for 50%-75% progress."
   :group 'syncthing-faces)
 
-(defface syncthing-orange
+(defface syncthing-progress-25
   '((((class color) (background dark))
      (:foreground "orange"))
     (((class color) (background light))
@@ -168,7 +168,7 @@
   "Face for 25%-50% progress."
   :group 'syncthing-faces)
 
-(defface syncthing-red
+(defface syncthing-progress-0
   '((((class color) (background dark))
      (:foreground "red"))
     (((class color) (background light))
@@ -177,7 +177,7 @@
   "Face for 0%-25% progress."
   :group 'syncthing-faces)
 
-(defface syncthing-deep-sky-blue
+(defface syncthing-rate-download
   '((((class color) (background dark))
      (:foreground "deep sky blue"))
     (((class color) (background light))
@@ -186,7 +186,16 @@
   "Face for current download rate."
   :group 'syncthing-faces)
 
-(defface syncthing-white
+(defface syncthing-rate-upload
+  '((((class color) (background dark))
+     (:foreground "lightgreen"))
+    (((class color) (background light))
+     (:foreground "lightgreen"))
+    (t (:foreground "lightgreen")))
+  "Face for current upload rate."
+  :group 'syncthing-faces)
+
+(defface syncthing-count-local-files
   '((((class color) (background dark))
      (:foreground "white"))
     (((class color) (background light))
@@ -195,7 +204,16 @@
   "Face for local files counter."
   :group 'syncthing-faces)
 
-(defface syncthing-light-sea-green
+(defface syncthing-count-local-folders
+  '((((class color) (background dark))
+     (:foreground "yellow"))
+    (((class color) (background light))
+     (:foreground "yellow"))
+    (t (:foreground "yellow")))
+  "Face for local folder counter."
+  :group 'syncthing-faces)
+
+(defface syncthing-count-local-bytes
   '((((class color) (background dark))
      (:foreground "light sea green"))
     (((class color) (background light))
@@ -204,7 +222,16 @@
   "Face for local bytes counter."
   :group 'syncthing-faces)
 
-(defface syncthing-steel-blue
+(defface syncthing-count-listeners
+  '((((class color) (background dark))
+     (:foreground "green"))
+    (((class color) (background light))
+     (:foreground "green"))
+    (t (:foreground "green")))
+  "Face for listeners' counter."
+  :group 'syncthing-faces)
+
+(defface syncthing-count-discovery
   '((((class color) (background dark))
      (:foreground "steel blue"))
     (((class color) (background light))
@@ -213,7 +240,7 @@
   "Face for discovery counter."
   :group 'syncthing-faces)
 
-(defface syncthing-orchid
+(defface syncthing-uptime
   '((((class color) (background dark))
      (:foreground "orchid"))
     (((class color) (background light))
@@ -222,7 +249,7 @@
   "Face for uptime counter."
   :group 'syncthing-faces)
 
-(defface syncthing-id-blue
+(defface syncthing-my-id
   '((((class color) (background dark))
      (:foreground "#3498db"))
     (((class color) (background light))
@@ -232,51 +259,55 @@
   :group 'syncthing-faces)
 
 ;; local/state variables
-(defvar-local syncthing--session-buffer
+(defvar-local syncthing-session-base-url
+  ""
+  "Tmp to hold session's base URL.")
+
+(defvar-local syncthing--state-session-buffer
   ""
   "Tmp to hold session's buffer instance/object.")
 
-(defvar-local syncthing--fold-folders
+(defvar-local syncthing--state-fold-folders
   nil
   "Tmp list to hold IDs of folds.")
 
-(defvar-local syncthing--fold-devices
+(defvar-local syncthing--state-fold-devices
   nil
   "Tmp list to hold IDs of folds.")
 
-(defvar-local syncthing--collapse-after-start
+(defvar-local syncthing--state-collapse-after-start
   nil
   "Tmp to hold collapse toggle.")
 
-(defvar-local syncthing--count-local-files
+(defvar-local syncthing--state-count-local-files
   0
   "Tmp to hold local state.")
 
-(defvar-local syncthing--count-local-folders
+(defvar-local syncthing--state-count-local-folders
   0
   "Tmp to hold local state.")
 
-(defvar-local syncthing--count-local-bytes
+(defvar-local syncthing--state-count-local-bytes
   0
   "Tmp to hold local state.")
 
-(defvar-local syncthing--version
+(defvar-local syncthing--state-version
   ""
   "Tmp to hold local state.")
 
-(defvar-local syncthing--my-id
+(defvar-local syncthing--state-my-id
   ""
   "Tmp to hold local state.")
 
-(defvar-local syncthing--uptime
+(defvar-local syncthing--state-uptime
   0
   "Tmp to hold local state.")
 
-(defvar-local syncthing--auto-refresh
+(defvar-local syncthing--state-auto-refresh
   nil
   "Tmp to hold local state.")
 
-(defvar-local syncthing--auto-refresh-timer
+(defvar-local syncthing--state-auto-refresh-timer
   nil
   "Tmp to hold local state.")
 
@@ -344,49 +375,41 @@ Argument POS Incoming EVENT position."
   "Format TEXT as italic."
   (propertize text 'face 'syncthing-italic))
 
-(defun syncthing--green (text)
-  "Format TEXT as =green=."
-  (propertize text 'face 'syncthing-green))
+(defun syncthing--rate-download (text)
+  "Format TEXT as download rate."
+  (propertize text 'face 'syncthing-rate-download))
 
-(defun syncthing--light-green (text)
-  "Format TEXT as =lightgreen=."
-  (propertize text 'face 'syncthing-light-green))
+(defun syncthing--rate-upload (text)
+  "Format TEXT as upload rate."
+  (propertize text 'face 'syncthing-progress-75))
 
-(defun syncthing--yellow (text)
-  "Format TEXT as =yellow=."
-  (propertize text 'face 'syncthing-yellow))
+(defun syncthing--count-local-files (text)
+  "Format TEXT as local files count."
+  (propertize text 'face 'syncthing-count-local-files))
 
-(defun syncthing--orange (text)
-  "Format TEXT as =orange=."
-  (propertize text 'face 'syncthing-orange))
+(defun syncthing--count-local-folders (text)
+  "Format TEXT as local folders count."
+  (propertize text 'face 'syncthing-count-local-folders))
 
-(defun syncthing--red (text)
-  "Format TEXT as =red=."
-  (propertize text 'face 'syncthing-red))
+(defun syncthing--count-local-bytes (text)
+  "Format TEXT as local bytes count."
+  (propertize text 'face 'syncthing-count-local-bytes))
 
-(defun syncthing--deep-sky-blue (text)
-  "Format TEXT as =deep sky blue=."
-  (propertize text 'face 'syncthing-deep-sky-blue))
+(defun syncthing--count-listeners (text)
+  "Format TEXT as listeners count."
+  (propertize text 'face 'syncthing-count-listeners))
 
-(defun syncthing--white (text)
-  "Format TEXT as =white=."
-  (propertize text 'face 'syncthing-white))
+(defun syncthing--count-discovery (text)
+  "Format TEXT as discovery count."
+  (propertize text 'face 'syncthing-count-discovery))
 
-(defun syncthing--light-sea-green (text)
-  "Format TEXT as =light sea green=."
-  (propertize text 'face 'syncthing-light-sea-green))
+(defun syncthing--uptime (text)
+  "Format TEXT as uptime."
+  (propertize text 'face 'syncthing-uptime))
 
-(defun syncthing--steel-blue (text)
-  "Format TEXT as =steel blue=."
-  (propertize text 'face 'syncthing-steel-blue))
-
-(defun syncthing--orchid (text)
-  "Format TEXT as =orchid=."
-  (propertize text 'face 'syncthing-orchid))
-
-(defun syncthing--id-blue (text)
-  "Format TEXT as Syncthing ID blue (=#3498db=)."
-  (propertize text 'face 'syncthing-id-blue))
+(defun syncthing--my-id (text)
+  "Format TEXT as Syncthing ID."
+  (propertize text 'face 'syncthing-my-id))
 
 (defun syncthing--list ()
   "List all resources."
@@ -394,7 +417,7 @@ Argument POS Incoming EVENT position."
               "GET" (syncthing--url "rest/config"))
     (cond ((eq .version 37)
            (save-window-excursion
-             (switch-to-buffer (get-buffer-create syncthing--session-buffer))
+             (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
              (widget-insert (syncthing--title " Folders\n")))
            (mapc
             #'syncthing--list-37-folder
@@ -410,7 +433,7 @@ Argument POS Incoming EVENT position."
                           (setq rname (cdr ritem))))
                       (string< lname rname)))))
            (save-window-excursion
-             (switch-to-buffer (get-buffer-create syncthing--session-buffer))
+             (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
              (widget-insert (syncthing--title "\n"))
              (widget-insert (syncthing--title " Devices\n")))
            (mapc
@@ -448,8 +471,8 @@ Argument POS Incoming EVENT position."
              (setq name (cdr item)))
             ((string-equal "id" (car item))
              (setq id (cdr item))
-             (when syncthing--collapse-after-start
-               (push id syncthing--fold-folders)))
+             (when syncthing--state-collapse-after-start
+               (push id syncthing--state-fold-folders)))
             ((string-equal "type" (car item))
              (setq type (cdr item)))
             ((string-equal "path" (car item))
@@ -459,19 +482,19 @@ Argument POS Incoming EVENT position."
     (let-alist (syncthing--request
                 "GET" (syncthing--url
                        (format "rest/db/status?folder=%s" id)))
-      (setq syncthing--count-local-files
-            (+ syncthing--count-local-files .localFiles))
-      (setq syncthing--count-local-bytes
-            (+ syncthing--count-local-bytes .localBytes))
-      (setq syncthing--count-local-folders
-            (+ syncthing--count-local-folders .localDirectories)))
+      (setq syncthing--state-count-local-files
+            (+ syncthing--state-count-local-files .localFiles))
+      (setq syncthing--state-count-local-bytes
+            (+ syncthing--state-count-local-bytes .localBytes))
+      (setq syncthing--state-count-local-folders
+            (+ syncthing--state-count-local-folders .localDirectories)))
     (dolist (item (syncthing--request
                    "GET" (syncthing--url
                           (format "rest/db/completion?folder=%s" id))))
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
-      (switch-to-buffer (get-buffer-create syncthing--session-buffer))
+      (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
       (widget-create
        'push-button
        :button-face "menu"
@@ -480,41 +503,44 @@ Argument POS Incoming EVENT position."
         " "
         (syncthing--color-perc perc)
         (syncthing--bold (format " %s\n" name))
-        (unless (member id syncthing--fold-folders)
+        (unless (member id syncthing--state-fold-folders)
           (syncthing--prop (format "\t%s\n\t%s\n\t%s\n\t%s\n"
                                    id type path devices))))
        :action
        (lambda (&rest _event)
-         (if (member id syncthing--fold-folders)
+         (if (member id syncthing--state-fold-folders)
              (progn
-               (setq syncthing--fold-folders
-                     (delete id syncthing--fold-folders))
+               (setq syncthing--state-fold-folders
+                     (delete id syncthing--state-fold-folders))
                (save-excursion
                  (widget-delete (syncthing--get-widget (point)))
                  (syncthing--list-37-folder folder)))
            (progn
-             (if syncthing--fold-folders
-                 (push id syncthing--fold-folders)
-               (setq syncthing--fold-folders (list id)))
+             (if syncthing--state-fold-folders
+                 (push id syncthing--state-fold-folders)
+               (setq syncthing--state-fold-folders (list id)))
              (save-excursion
                (widget-delete (syncthing--get-widget (point)))
                (syncthing--list-37-folder folder)))))
-       (if (member id syncthing--fold-folders)
+       (if (member id syncthing--state-fold-folders)
            (syncthing--bold ">")
          (syncthing--bold "v"))))))
 
 (defun syncthing--color-perc (perc)
   "Colorize PERC float."
-  (cond ((< perc 25)
-         (syncthing--red (format syncthing-format-perc perc)))
-        ((and (>= perc 25) (< perc 50))
-         (syncthing--orange (format syncthing-format-perc perc)))
-        ((and (>= perc 50) (< perc 75))
-         (syncthing--yellow (format syncthing-format-perc perc)))
-        ((and (>= perc 75) (< perc 100))
-         (syncthing--light-green (format syncthing-format-perc perc)))
-        ((>= perc 100)
-         (syncthing--green (format syncthing-format-perc perc)))))
+  (propertize
+   (format syncthing-format-perc perc)
+   'face
+   (cond ((< perc 25)
+          'syncthing-progress-0)
+         ((and (>= perc 25) (< perc 50))
+          'syncthing-progress-25)
+         ((and (>= perc 50) (< perc 75))
+          'syncthing-progress-50)
+         ((and (>= perc 75) (< perc 100))
+          'syncthing-progress-75)
+         ((>= perc 100)
+          'syncthing-progress-100))))
 
 (defun syncthing--list-37-device (device)
   "Render single DEVICE item in a widget."
@@ -528,8 +554,8 @@ Argument POS Incoming EVENT position."
              (setq name (format "%s" (cdr item))))
             ((string-equal "deviceID" (car item))
              (setq id (format "%s" (cdr item)))
-             (when syncthing--collapse-after-start
-               (push id syncthing--fold-devices)))
+             (when syncthing--state-collapse-after-start
+               (push id syncthing--state-fold-devices)))
             ((string-equal "paused" (car item))
              (setq paused (if (eq (cdr item) :false) "active" "paused")))
             ((string-equal "addresses" (car item))
@@ -540,7 +566,7 @@ Argument POS Incoming EVENT position."
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
-      (switch-to-buffer (get-buffer-create syncthing--session-buffer))
+      (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
       (widget-create
        'push-button
        :button-face "menu"
@@ -549,26 +575,26 @@ Argument POS Incoming EVENT position."
         " "
         (syncthing--color-perc perc)
         (syncthing--bold (format " %s\n" name))
-        (unless (member id syncthing--fold-devices)
+        (unless (member id syncthing--state-fold-devices)
           (syncthing--prop (format "\t%s\n\t%s\n\t%s\n"
                                    id paused addresses))))
        :action
        (lambda (&rest _event)
-         (if (member id syncthing--fold-devices)
+         (if (member id syncthing--state-fold-devices)
              (progn
-               (setq syncthing--fold-devices
-                     (delete id syncthing--fold-devices))
+               (setq syncthing--state-fold-devices
+                     (delete id syncthing--state-fold-devices))
                (save-excursion
                  (widget-delete (syncthing--get-widget (point)))
                  (syncthing--list-37-device device)))
            (progn
-             (if syncthing--fold-devices
-                 (push id syncthing--fold-devices)
-               (setq syncthing--fold-devices (list id)))
+             (if syncthing--state-fold-devices
+                 (push id syncthing--state-fold-devices)
+               (setq syncthing--state-fold-devices (list id)))
              (save-excursion
                (widget-delete (syncthing--get-widget (point)))
                (syncthing--list-37-device device)))))
-       (if (member id syncthing--fold-devices)
+       (if (member id syncthing--state-fold-devices)
            (syncthing--bold ">")
          (syncthing--bold "v"))))))
 
@@ -576,48 +602,48 @@ Argument POS Incoming EVENT position."
   "Setup buffer and draw widgets."
   (syncthing--list)
   (save-window-excursion
-    (switch-to-buffer (get-buffer-create syncthing--session-buffer))
+    (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
     (widget-setup)
     (let-alist (syncthing--request
                 "GET" (syncthing--url "rest/system/version"))
-      (setq syncthing--version .version))
+      (setq syncthing--state-version .version))
     (let-alist (syncthing--request
                 "GET" (syncthing--url "rest/system/status"))
-      (setq syncthing--my-id
+      (setq syncthing--state-my-id
             (substring .myID 0 6))
-      (setq syncthing--uptime .uptime))
+      (setq syncthing--state-uptime .uptime))
     (setq header-line-format
           (concat
            " "
-           (syncthing--deep-sky-blue " 0B/s")
+           (syncthing--rate-download " 0B/s")
            " "
-           (syncthing--light-green " 0B/s")
+           (syncthing--rate-upload " 0B/s")
            " "
-           (syncthing--white
-            (format " %d" syncthing--count-local-files))
+           (syncthing--count-local-files
+            (format " %d" syncthing--state-count-local-files))
            " "
-           (syncthing--yellow
-            (format " %d" syncthing--count-local-folders))
+           (syncthing--count-local-folders
+            (format " %d" syncthing--state-count-local-folders))
            " "
-           (syncthing--light-sea-green
+           (syncthing--count-local-bytes
             (format " ~%.1fGiB"
-                    (/ syncthing--count-local-bytes
+                    (/ syncthing--state-count-local-bytes
                        (* 1024.0 1024.0 1024.0))))
            " "
-           (syncthing--green " 3/3")
+           (syncthing--count-listeners " 3/3")
            " "
-           (syncthing--steel-blue " 4/5")
+           (syncthing--count-discovery " 4/5")
            " "
-           (syncthing--orchid
+           (syncthing--uptime
             (format " %dd %dh %dm"
                     0
-                    (/ syncthing--uptime 3600)
-                    (* 60 (- (/ syncthing--uptime 3600.0)
-                             (/ syncthing--uptime 3600)))))
+                    (/ syncthing--state-uptime 3600)
+                    (* 60 (- (/ syncthing--state-uptime 3600.0)
+                             (/ syncthing--state-uptime 3600)))))
            " "  ;; bad glyph! :(
-           (syncthing--id-blue (format " %s" syncthing--my-id))
+           (syncthing--my-id (format " %s" syncthing--state-my-id))
            " "
-           (format " %s" syncthing--version)))
+           (format " %s" syncthing--state-version)))
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
 
@@ -625,22 +651,22 @@ Argument POS Incoming EVENT position."
   "Reset all variables holding initial state.
 Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;; everything += or appendable has to reset in each update
-  (setq syncthing--fold-folders (list))
-  (setq syncthing--fold-devices (list))
-  (setq syncthing--collapse-after-start
+  (setq syncthing--state-fold-folders (list))
+  (setq syncthing--state-fold-devices (list))
+  (setq syncthing--state-collapse-after-start
         syncthing-start-collapsed)
-  (setq syncthing--count-local-files 0)
-  (setq syncthing--count-local-folders 0)
-  (setq syncthing--count-local-bytes 0)
-  (setq syncthing--version "")
-  (setq syncthing--uptime 0))
+  (setq syncthing--state-count-local-files 0)
+  (setq syncthing--state-count-local-folders 0)
+  (setq syncthing--state-count-local-bytes 0)
+  (setq syncthing--state-version "")
+  (setq syncthing--state-uptime 0))
 
 (defun syncthing--cleanup (&rest _ignore)
   "Stop auto-refresh and clean resources, if any."
   ;; known timer
-  (when syncthing--auto-refresh-timer
-    (cancel-timer syncthing--auto-refresh-timer)
-    (setq syncthing--auto-refresh-timer nil))
+  (when syncthing--state-auto-refresh-timer
+    (cancel-timer syncthing--state-auto-refresh-timer)
+    (setq syncthing--state-auto-refresh-timer nil))
 
   ;; possible leak due to some strange behavior/bug
   (dolist (timer timer-list)
@@ -657,8 +683,8 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
 
   (syncthing--init-state)
   (syncthing--draw)
-  (setq syncthing--collapse-after-start nil)
-  (switch-to-buffer (get-buffer-create syncthing--session-buffer)))
+  (setq syncthing--state-collapse-after-start nil)
+  (switch-to-buffer (get-buffer-create syncthing--state-session-buffer)))
 
 (defun syncthing--buffer-with-timer (name)
   "Find out whether there's a timer associated with a buffer NAME."
@@ -688,8 +714,8 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;;
   ;; make sure it's initialized only once, otherwise (current-buffer) fetches
   ;; value from any other window currently in focus causing a bit of a mess
-  (when (string-equal "" syncthing--session-buffer)
-    (setq syncthing--session-buffer (current-buffer)))
+  (when (string-equal "" syncthing--state-session-buffer)
+    (setq syncthing--state-session-buffer (current-buffer)))
 
   ;; custom handler for RET / widget input handler
   ;; (keymap-local-set "RET" #'syncthing--newline)
@@ -699,34 +725,34 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (syncthing--update)
   ;; schedule only when configured and only once
   (when (and syncthing-start-with-auto-refresh
-             (not syncthing--auto-refresh-timer)
+             (not syncthing--state-auto-refresh-timer)
              (not (syncthing--buffer-with-timer
-                   (buffer-name syncthing--session-buffer))))
+                   (buffer-name syncthing--state-session-buffer))))
     (syncthing-auto-refresh-mode 1)))
 
 (define-minor-mode syncthing-auto-refresh-mode
   "Enable auto-refreshing state for `syncthing-mode'."
   :lighter " Auto-refresh"
   (if (not syncthing-auto-refresh-mode)
-      (when syncthing--auto-refresh-timer
-        (cancel-timer syncthing--auto-refresh-timer)
-        (setq syncthing--auto-refresh-timer nil))
-    (setq syncthing--auto-refresh-timer
+      (when syncthing--state-auto-refresh-timer
+        (cancel-timer syncthing--state-auto-refresh-timer)
+        (setq syncthing--state-auto-refresh-timer nil))
+    (setq syncthing--state-auto-refresh-timer
           (run-at-time
            t syncthing-auto-refresh-interval-sec
            ;; name is for filtering in timers to prevent duplicate scheduling,
            ;; object is to detectt a dangling buffer (killed) in (list-timers)
            (let ((baked-value "syncthing-timer")
-                 (buf-name (buffer-name syncthing--session-buffer))
-                 (buf-obj syncthing--session-buffer))
+                 (buf-name (buffer-name syncthing--state-session-buffer))
+                 (buf-obj syncthing--state-session-buffer))
              (ignore buf-name baked-value)  ;; do not remove
              (lambda (&rest _ignore)
                (save-window-excursion
                  (if (not (buffer-name buf-obj))
                      ;; killed buffer,  cancel timer
-                     (when syncthing--auto-refresh-timer
-                       (cancel-timer syncthing--auto-refresh-timer)
-                       (setq syncthing--auto-refresh-timer nil))
+                     (when syncthing--state-auto-refresh-timer
+                       (cancel-timer syncthing--state-auto-refresh-timer)
+                       (setq syncthing--state-auto-refresh-timer nil))
                    (switch-to-buffer (get-buffer-create buf-obj))
                    (syncthing--update)))))))))
 
