@@ -76,6 +76,12 @@
   :group 'syncthing-startup
   :type '(boolean))
 
+(defcustom syncthing-start-with-auto-refresh
+  t
+  "Start with auto-refresh enabled."
+  :group 'syncthing-startup
+  :type '(boolean))
+
 (defcustom syncthing-auto-refresh-interval-sec
   10
   "Refresh interval in seconds."
@@ -640,7 +646,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
   (setq syncthing--collapse-after-start nil)
   (switch-to-buffer syncthing-buffer)
   (when (and (string-equal "yes" auto-refresh)
-             t);;syncthing--auto-refresh)
+             syncthing-start-with-auto-refresh)
     (syncthing-auto-refresh-mode)))
 
 ;; modes for client's session buffer(s)
