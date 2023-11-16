@@ -632,9 +632,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--count-local-folders 0)
   (setq syncthing--count-local-bytes 0)
   (setq syncthing--version "")
-  (setq syncthing--uptime 0)
-  (setq syncthing--my-id "")
-  (setq syncthing--auto-refresh nil))
+  (setq syncthing--uptime 0))
 
 (defun syncthing--cleanup (&rest _ignore)
   "Stop auto-refresh and clean resources, if any."
