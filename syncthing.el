@@ -637,8 +637,15 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
              t);;syncthing--auto-refresh)
     (syncthing-auto-refresh-mode)))
 
+;; modes for client's session buffer(s)
+(define-derived-mode syncthing-mode
+  special-mode
+  "Syncthing"
+  "Launch Syncthing client in the current window."
+  :group 'syncthing)
+
 (define-minor-mode syncthing-auto-refresh-mode
-  "Enable auto-refreshing."
+  "Enable auto-refreshing state for =syncthing-mode=."
   :lighter " Auto-refresh"
   (if (not syncthing-auto-refresh-mode)
       (when syncthing--auto-refresh-timer
@@ -658,6 +665,13 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
   (when syncthing--auto-refresh-timer
     (cancel-timer syncthing--auto-refresh-timer)
     (setq syncthing--auto-refresh-timer nil)))
+
+(defun syncthing ()
+  "Launch Syncthing client's instance with auto-refresh in a new buffer."
+  (interactive)
+  (switch-to-buffer
+   (get-buffer-create syncthing-buffer))
+  (syncthing-mode))
 
 (provide 'syncthing)
 ;;; syncthing.el ends here
