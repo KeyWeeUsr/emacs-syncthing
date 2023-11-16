@@ -46,12 +46,13 @@
   "Customization group for `syncthing' faces."
   :group 'syncthing)
 
-;; constants
-(defconst syncthing-buffer
-  "*syncthing-ID*"
-  "Syncthing output destination.")
-
 ;; customization values
+(defcustom syncthing-buffer
+  "*syncthing(ADDR)*"
+  "Syncthing's buffer name with special =ADDR= placeholder."
+  :group 'syncthing-startup
+  :type 'string)
+
 (defcustom syncthing-base-url
   "https://127.0.0.1:8384"
   "Base URL for Syncthing REST API endpoint."
@@ -649,20 +650,6 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
         (message "Syncthing cleanup: Canceling dangling timer '%s'" timer)
         (cancel-timer timer)))))
 
-(defun syncthing--next-buffer-id ()
-  "Check all buffers and return next ID for multi-session Syncthing client."
-  (let ((id 1)
-        (buf-name ""))
-    (dolist (buf (buffer-list))
-      (setq buf-name (buffer-name buf))
-      (when (string-match
-             (replace-regexp-in-string
-              "ID" "\\\\([0-9]+\\\\)"
-              syncthing-buffer)
-             buf-name)
-        (setq id (1+ id))))
-    id))
-
 (defun syncthing--update ()
   "Update function for every refresh iteration."
   (let ((inhibit-read-only t))
@@ -743,15 +730,27 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
                    (switch-to-buffer (get-buffer-create buf-obj))
                    (syncthing--update)))))))))
 
+(defun syncthing--switch-to-new-buffer (base-url)
+  "Create buffer name from BASE-URL."
+  (switch-to-buffer
+   (get-buffer-create
+    (generate-new-buffer
+     (replace-regexp-in-string
+      "ADDR" base-url
+      syncthing-buffer
+      t)))))
+
+(defun syncthing-with-base (base-url)
+  "Launch Syncthing client's instance for BASE-URL in a new buffer."
+  (interactive "sSyncthing REST API base URL: ")
+  (syncthing--switch-to-new-buffer base-url)
+  (syncthing-mode))
+
 (defun syncthing ()
   "Launch Syncthing client's instance in a new buffer."
   (interactive)
   ;; switch first, assign later, buffer-local variable gets cleared otherwise
-  (switch-to-buffer
-   (get-buffer-create (replace-regexp-in-string
-                       "ID"
-                       (number-to-string (syncthing--next-buffer-id))
-                       syncthing-buffer)))
+  (syncthing--switch-to-new-buffer syncthing-base-url)
   (syncthing-mode))
 
 (provide 'syncthing)
