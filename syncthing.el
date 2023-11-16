@@ -376,17 +376,6 @@ Argument POS Incoming EVENT position."
               "GET" (syncthing--url "rest/config"))
     (cond ((eq .version 37)
            (save-window-excursion
-             (switch-to-buffer (get-buffer-create syncthing-buffer))
-             (widget-create
-              'checkbox
-              :notify (lambda (&rest _ignore)
-                        (setq syncthing--auto-refresh
-                              (not syncthing--auto-refresh))
-                        (when (and (not syncthing--auto-refresh)
-                                   syncthing--auto-refresh-timer)
-                          (cancel-timer syncthing--auto-refresh-timer)))
-              syncthing--auto-refresh-timer)
-             (widget-insert " Auto-refresh\n\n")
              (widget-insert (syncthing--title " Folders\n")))
            (mapc
             #'syncthing--list-37-folder
@@ -646,6 +635,15 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
   (switch-to-buffer syncthing-buffer)
   (when (and (string-equal "yes" auto-refresh)
              t);;syncthing--auto-refresh)
+    (syncthing-auto-refresh-mode)))
+
+(define-minor-mode syncthing-auto-refresh-mode
+  "Enable auto-refreshing."
+  :lighter " Auto-refresh"
+  (if (not syncthing-auto-refresh-mode)
+      (when syncthing--auto-refresh-timer
+        (cancel-timer syncthing--auto-refresh-timer)
+        (setq syncthing--auto-refresh-timer nil))
     (setq syncthing--auto-refresh-timer
           (run-at-time
            t 10
