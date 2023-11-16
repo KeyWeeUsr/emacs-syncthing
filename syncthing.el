@@ -32,18 +32,18 @@
 
 (defgroup syncthing
   nil
-  "Customization group for =syncthing=."
+  "Customization group for `syncthing'."
   :group 'external
   :group 'communication)
 
 (defgroup syncthing-startup
   nil
-  "Customization sub-group for =syncthing= start-up stage."
+  "Customization sub-group for `syncthing' start-up stage."
   :group 'syncthing)
 
 (defgroup syncthing-faces
   nil
-  "Customization group for =syncthing= faces."
+  "Customization group for `syncthing' faces."
   :group 'syncthing)
 
 ;; constants
@@ -66,7 +66,7 @@
 
 (defcustom syncthing-cleanup-priority
   0
-  "=add-hook= priority."
+  "`add-hook' priority."
   :group 'syncthing
   :type '(number))
 
@@ -101,7 +101,7 @@
     (((class color) (background light))
      (:inherit 'info-title-1))
     (t :inherit 'info-title-1))
-  "Face for Syncthing section titles."
+  "Face for section titles."
   :group 'syncthing-faces)
 
 (defface syncthing-prop
@@ -110,7 +110,7 @@
     (((class color) (background light))
      (:foreground "black" :height 0.75))
     (t (:height 0.75)))
-  "Face for Syncthing item properties."
+  "Face for item properties."
   :group 'syncthing-faces)
 
 (defface syncthing-bold
@@ -119,7 +119,7 @@
     (((class color) (background light))
      (:foreground "black" :bold t))
     (t (:bold t)))
-  "Face for Syncthing bold."
+  "Face for bold."
   :group 'syncthing-faces)
 
 (defface syncthing-italic
@@ -128,7 +128,7 @@
     (((class color) (background light))
      (:foreground "black" :italic t))
     (t (:italic t)))
-  "Face for Syncthing italic."
+  "Face for italic."
   :group 'syncthing-faces)
 
 (defface syncthing-green
@@ -137,7 +137,7 @@
     (((class color) (background light))
      (:foreground "green"))
     (t (:foreground "green")))
-  "Face for Syncthing green."
+  "Face for 100% progress."
   :group 'syncthing-faces)
 
 (defface syncthing-light-green
@@ -146,7 +146,7 @@
     (((class color) (background light))
      (:foreground "lightgreen"))
     (t (:foreground "lightgreen")))
-  "Face for Syncthing light-green."
+  "Face for 75%-100% progress."
   :group 'syncthing-faces)
 
 (defface syncthing-yellow
@@ -155,7 +155,7 @@
     (((class color) (background light))
      (:foreground "yellow"))
     (t (:foreground "yellow")))
-  "Face for Syncthing yellow."
+  "Face for 50%-75% progress."
   :group 'syncthing-faces)
 
 (defface syncthing-orange
@@ -164,7 +164,7 @@
     (((class color) (background light))
      (:foreground "orange"))
     (t (:foreground "orange")))
-  "Face for Syncthing orange."
+  "Face for 25%-50% progress."
   :group 'syncthing-faces)
 
 (defface syncthing-red
@@ -173,7 +173,7 @@
     (((class color) (background light))
      (:foreground "red"))
     (t (:foreground "red")))
-  "Face for Syncthing red."
+  "Face for 0%-25% progress."
   :group 'syncthing-faces)
 
 (defface syncthing-deep-sky-blue
@@ -182,7 +182,7 @@
     (((class color) (background light))
      (:foreground "deep sky blue"))
     (t (:foreground "deep sky blue")))
-  "Face for Syncthing deep-sky-blue."
+  "Face for current download rate."
   :group 'syncthing-faces)
 
 (defface syncthing-white
@@ -191,7 +191,7 @@
     (((class color) (background light))
      (:foreground "white"))
     (t (:foreground "white")))
-  "Face for Syncthing white."
+  "Face for local files counter."
   :group 'syncthing-faces)
 
 (defface syncthing-light-sea-green
@@ -200,7 +200,7 @@
     (((class color) (background light))
      (:foreground "light sea green"))
     (t (:foreground "light sea green")))
-  "Face for Syncthing light-sea-green."
+  "Face for local bytes counter."
   :group 'syncthing-faces)
 
 (defface syncthing-steel-blue
@@ -209,7 +209,7 @@
     (((class color) (background light))
      (:foreground "steel blue"))
     (t (:foreground "steel blue")))
-  "Face for Syncthing steel-blue."
+  "Face for discovery counter."
   :group 'syncthing-faces)
 
 (defface syncthing-orchid
@@ -218,7 +218,7 @@
     (((class color) (background light))
      (:foreground "orchid"))
     (t (:foreground "orchid")))
-  "Face for Syncthing orchid."
+  "Face for uptime counter."
   :group 'syncthing-faces)
 
 (defface syncthing-id-blue
@@ -227,7 +227,7 @@
     (((class color) (background light))
      (:foreground "#3498db"))
     (t (:foreground "#3498db")))
-  "Face for Syncthing id-blue."
+  "Face for this device's ID."
   :group 'syncthing-faces)
 
 ;; local/state variables
@@ -697,7 +697,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
             syncthing-cleanup-priority t)
   (syncthing--cleanup)
 
-  ;; current buffer, new one is created via =(syncthing)=
+  ;; current buffer, new one is created via `(syncthing)'
   ;;
   ;; make sure it's initialized only once, otherwise (current-buffer) fetches
   ;; value from any other window currently in focus causing a bit of a mess
@@ -718,7 +718,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
     (syncthing-auto-refresh-mode 1)))
 
 (define-minor-mode syncthing-auto-refresh-mode
-  "Enable auto-refreshing state for =syncthing-mode=."
+  "Enable auto-refreshing state for `syncthing-mode'."
   :lighter " Auto-refresh"
   (if (not syncthing-auto-refresh-mode)
       (when syncthing--auto-refresh-timer
@@ -744,7 +744,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
                    (syncthing--update)))))))))
 
 (defun syncthing ()
-  "Launch Syncthing client's instance with auto-refresh in a new buffer."
+  "Launch Syncthing client's instance in a new buffer."
   (interactive)
   ;; switch first, assign later, buffer-local variable gets cleared otherwise
   (switch-to-buffer
