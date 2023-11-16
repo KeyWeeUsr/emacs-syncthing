@@ -76,6 +76,141 @@
   :group 'syncthing-startup
   :type '(boolean))
 
+;; customization faces/colors/fonts
+(defface syncthing-title
+  '((((class color) (background dark))
+     (:inherit 'info-title-1))
+    (((class color) (background light))
+     (:inherit 'info-title-1))
+    (t :inherit 'info-title-1))
+  "Face for Syncthing section titles."
+  :group 'syncthing-faces)
+
+(defface syncthing-prop
+  '((((class color) (background dark))
+     (:foreground "white" :height 0.75))
+    (((class color) (background light))
+     (:foreground "black" :height 0.75))
+    (t (:height 0.75)))
+  "Face for Syncthing item properties."
+  :group 'syncthing-faces)
+
+(defface syncthing-bold
+  '((((class color) (background dark))
+     (:foreground "white" :bold t))
+    (((class color) (background light))
+     (:foreground "black" :bold t))
+    (t (:bold t)))
+  "Face for Syncthing bold."
+  :group 'syncthing-faces)
+
+(defface syncthing-italic
+  '((((class color) (background dark))
+     (:foreground "white" :italic t))
+    (((class color) (background light))
+     (:foreground "black" :italic t))
+    (t (:italic t)))
+  "Face for Syncthing italic."
+  :group 'syncthing-faces)
+
+(defface syncthing-green
+  '((((class color) (background dark))
+     (:foreground "green"))
+    (((class color) (background light))
+     (:foreground "green"))
+    (t (:foreground "green")))
+  "Face for Syncthing green."
+  :group 'syncthing-faces)
+
+(defface syncthing-light-green
+  '((((class color) (background dark))
+     (:foreground "lightgreen"))
+    (((class color) (background light))
+     (:foreground "lightgreen"))
+    (t (:foreground "lightgreen")))
+  "Face for Syncthing light-green."
+  :group 'syncthing-faces)
+
+(defface syncthing-yellow
+  '((((class color) (background dark))
+     (:foreground "yellow"))
+    (((class color) (background light))
+     (:foreground "yellow"))
+    (t (:foreground "yellow")))
+  "Face for Syncthing yellow."
+  :group 'syncthing-faces)
+
+(defface syncthing-orange
+  '((((class color) (background dark))
+     (:foreground "orange"))
+    (((class color) (background light))
+     (:foreground "orange"))
+    (t (:foreground "orange")))
+  "Face for Syncthing orange."
+  :group 'syncthing-faces)
+
+(defface syncthing-red
+  '((((class color) (background dark))
+     (:foreground "red"))
+    (((class color) (background light))
+     (:foreground "red"))
+    (t (:foreground "red")))
+  "Face for Syncthing red."
+  :group 'syncthing-faces)
+
+(defface syncthing-deep-sky-blue
+  '((((class color) (background dark))
+     (:foreground "deep sky blue"))
+    (((class color) (background light))
+     (:foreground "deep sky blue"))
+    (t (:foreground "deep sky blue")))
+  "Face for Syncthing deep-sky-blue."
+  :group 'syncthing-faces)
+
+(defface syncthing-white
+  '((((class color) (background dark))
+     (:foreground "white"))
+    (((class color) (background light))
+     (:foreground "white"))
+    (t (:foreground "white")))
+  "Face for Syncthing white."
+  :group 'syncthing-faces)
+
+(defface syncthing-light-sea-green
+  '((((class color) (background dark))
+     (:foreground "light sea green"))
+    (((class color) (background light))
+     (:foreground "light sea green"))
+    (t (:foreground "light sea green")))
+  "Face for Syncthing light-sea-green."
+  :group 'syncthing-faces)
+
+(defface syncthing-steel-blue
+  '((((class color) (background dark))
+     (:foreground "steel blue"))
+    (((class color) (background light))
+     (:foreground "steel blue"))
+    (t (:foreground "steel blue")))
+  "Face for Syncthing steel-blue."
+  :group 'syncthing-faces)
+
+(defface syncthing-orchid
+  '((((class color) (background dark))
+     (:foreground "orchid"))
+    (((class color) (background light))
+     (:foreground "orchid"))
+    (t (:foreground "orchid")))
+  "Face for Syncthing orchid."
+  :group 'syncthing-faces)
+
+(defface syncthing-id-blue
+  '((((class color) (background dark))
+     (:foreground "#3498db"))
+    (((class color) (background light))
+     (:foreground "#3498db"))
+    (t (:foreground "#3498db")))
+  "Face for Syncthing id-blue."
+  :group 'syncthing-faces)
 
 (defun syncthing--request (method url &rest data)
   "Send authenticated HTTP request to Syncthing REST API.
@@ -131,65 +266,63 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--title (text)
   "Format TEXT as title."
-  (propertize text
-              'face '("bold" :height 150)))
+  (propertize text 'face 'syncthing-title))
 
 (defun syncthing--prop (text)
   "Format TEXT as property."
-  (propertize text
-              'face '(:height 80)))
+  (propertize text 'face 'syncthing-prop))
 
 (defun syncthing--bold (text)
   "Format TEXT as bold."
-  (propertize text 'face 'bold))
+  (propertize text 'face 'syncthing-bold))
 
 (defun syncthing--italic (text)
   "Format TEXT as italic."
-  (propertize text 'face 'italic))
+  (propertize text 'face 'syncthing-italic))
 
 (defun syncthing--green (text)
   "Format TEXT as =green=."
-  (propertize text 'face '(:foreground "green")))
+  (propertize text 'face 'syncthing-green))
 
 (defun syncthing--light-green (text)
   "Format TEXT as =lightgreen=."
-  (propertize text 'face '(:foreground "lightgreen")))
+  (propertize text 'face 'syncthing-light-green))
 
 (defun syncthing--yellow (text)
   "Format TEXT as =yellow=."
-  (propertize text 'face '(:foreground "yellow")))
+  (propertize text 'face 'syncthing-yellow))
 
 (defun syncthing--orange (text)
   "Format TEXT as =orange=."
-  (propertize text 'face '(:foreground "orange")))
+  (propertize text 'face 'syncthing-orange))
 
 (defun syncthing--red (text)
   "Format TEXT as =red=."
-  (propertize text 'face '(:foreground "red")))
+  (propertize text 'face 'syncthing-red))
 
 (defun syncthing--deep-sky-blue (text)
   "Format TEXT as =deep sky blue=."
-  (propertize text 'face '(:foreground "deep sky blue")))
+  (propertize text 'face 'syncthing-deep-sky-blue))
 
 (defun syncthing--white (text)
   "Format TEXT as =white=."
-  (propertize text 'face '(:foreground "white")))
+  (propertize text 'face 'syncthing-white))
 
 (defun syncthing--light-sea-green (text)
   "Format TEXT as =light sea green=."
-  (propertize text 'face '(:foreground "light sea green")))
+  (propertize text 'face 'syncthing-light-sea-green))
 
 (defun syncthing--steel-blue (text)
   "Format TEXT as =steel blue=."
-  (propertize text 'face '(:foreground "steel blue")))
+  (propertize text 'face 'syncthing-steel-blue))
 
 (defun syncthing--orchid (text)
   "Format TEXT as =orchid=."
-  (propertize text 'face '(:foreground "orchid")))
+  (propertize text 'face 'syncthing-orchid))
 
 (defun syncthing--id-blue (text)
   "Format TEXT as Syncthing ID blue (=#3498db=)."
-  (propertize text 'face '(:foreground "#3498db")))
+  (propertize text 'face 'syncthing-id-blue))
 
 (defvar syncthing--fold-folders
   (list)
