@@ -48,7 +48,7 @@
 
 ;; constants
 (defconst syncthing-buffer
-  "*syncthing*"
+  "*syncthing-ID*"
   "Syncthing output destination.")
 
 ;; customization values
@@ -225,6 +225,10 @@
   :group 'syncthing-faces)
 
 ;; local/state variables
+(defvar-local syncthing--session-buffer
+  ""
+  "Tmp to hold session's buffer instance/object.")
+
 (defvar-local syncthing--fold-folders
   nil
   "Tmp list to hold IDs of folds.")
@@ -388,6 +392,7 @@ Argument POS Incoming EVENT position."
               "GET" (syncthing--url "rest/config"))
     (cond ((eq .version 37)
            (save-window-excursion
+             (switch-to-buffer (get-buffer-create syncthing--session-buffer))
              (widget-insert (syncthing--title " Folders\n")))
            (mapc
             #'syncthing--list-37-folder
@@ -403,7 +408,7 @@ Argument POS Incoming EVENT position."
                           (setq rname (cdr ritem))))
                       (string< lname rname)))))
            (save-window-excursion
-             (switch-to-buffer (get-buffer-create syncthing-buffer))
+             (switch-to-buffer (get-buffer-create syncthing--session-buffer))
              (widget-insert (syncthing--title "\n"))
              (widget-insert (syncthing--title " Devices\n")))
            (mapc
@@ -464,7 +469,7 @@ Argument POS Incoming EVENT position."
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
-      (switch-to-buffer (get-buffer-create syncthing-buffer))
+      (switch-to-buffer (get-buffer-create syncthing--session-buffer))
       (widget-create
        'push-button
        :button-face "menu"
@@ -533,7 +538,7 @@ Argument POS Incoming EVENT position."
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
-      (switch-to-buffer (get-buffer-create syncthing-buffer))
+      (switch-to-buffer (get-buffer-create syncthing--session-buffer))
       (widget-create
        'push-button
        :button-face "menu"
@@ -570,7 +575,7 @@ Argument POS Incoming EVENT position."
   (syncthing--setup-buffer)
   (syncthing--list)
   (save-window-excursion
-    (switch-to-buffer (get-buffer-create syncthing-buffer))
+    (switch-to-buffer (get-buffer-create syncthing--session-buffer))
     (widget-setup)
     (let-alist (syncthing--request
                 "GET" (syncthing--url "rest/system/version"))
@@ -635,6 +640,20 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
 
     (setq syncthing--auto-refresh-timer nil)))
 
+(defun syncthing--next-buffer-id ()
+  "Check all buffers and return next ID for multi-session Syncthing client."
+  (let ((id 1)
+        (buf-name ""))
+    (dolist (buf (buffer-list))
+      (setq buf-name (buffer-name buf))
+      (when (string-match
+             (replace-regexp-in-string
+              "ID" "\\\\([0-9]+\\\\)"
+              syncthing-buffer)
+             buf-name)
+        (setq id (1+ id))))
+    id))
+
 (defun syncthing (&optional auto-refresh &rest skip-cancel)
   "Launch Syncthing client in the current window.
 Optional argument AUTO-REFRESH Enable auto-refresh feature.
@@ -654,7 +673,13 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
   special-mode
   "Syncthing"
   "Launch Syncthing client in the current window."
-  :group 'syncthing)
+  :group 'syncthing
+  ;; current buffer, new one is created via =(syncthing)=
+  ;;
+  ;; make sure it's initialized only once, otherwise (current-buffer) fetches
+  ;; value from any other window currently in focus causing a bit of a mess
+  (when (string-equal "" syncthing--session-buffer)
+    (setq syncthing--session-buffer (current-buffer))))
 
 (define-minor-mode syncthing-auto-refresh-mode
   "Enable auto-refreshing state for =syncthing-mode=."
@@ -668,7 +693,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
            t syncthing-auto-refresh-interval-sec
            (lambda (&rest _ignore)
              (save-window-excursion
-               (switch-to-buffer syncthing-buffer)
+               (switch-to-buffer (get-buffer-create syncthing--session-buffer))
                (syncthing "no" t)))))))
 
 (defun syncthing--cleanup ()
@@ -681,8 +706,12 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
 (defun syncthing ()
   "Launch Syncthing client's instance with auto-refresh in a new buffer."
   (interactive)
+  ;; switch first, assign later, buffer-local variable gets cleared otherwise
   (switch-to-buffer
-   (get-buffer-create syncthing-buffer))
+   (get-buffer-create (replace-regexp-in-string
+                       "ID"
+                       (number-to-string (syncthing--next-buffer-id))
+                       syncthing-buffer)))
   (syncthing-mode))
 
 (provide 'syncthing)
