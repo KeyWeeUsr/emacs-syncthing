@@ -64,6 +64,12 @@
   :group 'syncthing
   :type '(string))
 
+(defcustom syncthing-cleanup-priority
+  0
+  "=add-hook= priority."
+  :group 'syncthing
+  :type '(number))
+
 (defcustom syncthing-token
   nil
   "Syncthing REST API token."
@@ -633,11 +639,13 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--version "")
   (setq syncthing--uptime 0)
   (setq syncthing--my-id "")
-  (setq syncthing--auto-refresh nil)
-  (when (and syncthing--auto-refresh-timer
-             (not skip-cancel))
-    (cancel-timer syncthing--auto-refresh-timer)
+  (setq syncthing--auto-refresh nil))
 
+(defun syncthing--cleanup (&rest _ignore)
+  "Stop auto-refresh and clean resources, if any."
+  ;; known timer
+  (when syncthing--auto-refresh-timer
+    (cancel-timer syncthing--auto-refresh-timer)
     (setq syncthing--auto-refresh-timer nil)))
 
 (defun syncthing--next-buffer-id ()
@@ -674,6 +682,11 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
   "Syncthing"
   "Launch Syncthing client in the current window."
   :group 'syncthing
+  (add-hook 'kill-buffer-hook
+            #'syncthing--cleanup
+            syncthing-cleanup-priority t)
+  (syncthing--cleanup)
+
   ;; current buffer, new one is created via =(syncthing)=
   ;;
   ;; make sure it's initialized only once, otherwise (current-buffer) fetches
@@ -695,13 +708,6 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
              (save-window-excursion
                (switch-to-buffer (get-buffer-create syncthing--session-buffer))
                (syncthing "no" t)))))))
-
-(defun syncthing--cleanup ()
-  "Stop auto-refresh and clean resources, if any."
-  (remove-hook 'kill-buffer-hook #'syncthing--cleanup)
-  (when syncthing--auto-refresh-timer
-    (cancel-timer syncthing--auto-refresh-timer)
-    (setq syncthing--auto-refresh-timer nil)))
 
 (defun syncthing ()
   "Launch Syncthing client's instance with auto-refresh in a new buffer."
