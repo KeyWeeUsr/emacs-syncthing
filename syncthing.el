@@ -51,6 +51,13 @@
   "*syncthing*"
   "Syncthing output destination.")
 
+;; customization values
+(defcustom syncthing-base-url
+  "https://127.0.0.1:8384"
+  "Base URL for Syncthing REST API endpoint."
+  :group 'syncthing
+  :type '(string))
+
 (defcustom syncthing-token
   nil
   "Syncthing REST API token."
@@ -117,7 +124,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--url (path)
   "Assemble full API url from PATH."
-  (format "https://127.0.0.1:8384/%s" path))
+  (format "%s/%s" syncthing-base-url path))
 
 (defun syncthing--title (text)
   "Format TEXT as title."
