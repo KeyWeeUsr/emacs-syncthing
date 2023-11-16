@@ -58,6 +58,12 @@
   :group 'syncthing
   :type '(string))
 
+(defcustom syncthing-format-perc
+  "%6.2f%%"
+  "Format for displaying process percentage."
+  :group 'syncthing
+  :type '(string))
+
 (defcustom syncthing-token
   nil
   "Syncthing REST API token."
@@ -70,9 +76,6 @@
   :group 'syncthing-startup
   :type '(boolean))
 
-(defconst syncthing-format-perc
-  "%6.2f%%"
-  "Format for displaying process percentage.")
 
 (defun syncthing--request (method url &rest data)
   "Send authenticated HTTP request to Syncthing REST API.
