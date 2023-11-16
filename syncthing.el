@@ -76,6 +76,12 @@
   :group 'syncthing-startup
   :type '(boolean))
 
+(defcustom syncthing-auto-refresh-interval-sec
+  10
+  "Refresh interval in seconds."
+  :group 'syncthing
+  :type '(number))
+
 ;; customization faces/colors/fonts
 (defface syncthing-title
   '((((class color) (background dark))
@@ -653,7 +659,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh in timer calls."
         (setq syncthing--auto-refresh-timer nil))
     (setq syncthing--auto-refresh-timer
           (run-at-time
-           t 10
+           t syncthing-auto-refresh-interval-sec
            (lambda (&rest _ignore)
              (save-window-excursion
                (switch-to-buffer syncthing-buffer)
