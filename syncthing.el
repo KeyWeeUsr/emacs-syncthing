@@ -279,6 +279,14 @@
   nil
   "Tmp to hold local state.")
 
+;; keyboard
+(defvar-local syncthing-mode-map
+  (let ((map (make-keymap)))
+    ;; (set-keymap-parent map special-mode-map)
+    (define-key map (kbd "RET") #'syncthing--newline)
+    (define-key map (kbd "?") #'describe-bindings)
+    map))
+
 ;; private/helper funcs
 (defun syncthing--request (method url &rest data)
   "Send authenticated HTTP request to Syncthing REST API.
@@ -678,7 +686,14 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;; make sure it's initialized only once, otherwise (current-buffer) fetches
   ;; value from any other window currently in focus causing a bit of a mess
   (when (string-equal "" syncthing--session-buffer)
-    (setq syncthing--session-buffer (current-buffer))))
+    (setq syncthing--session-buffer (current-buffer)))
+
+  ;; custom handler for RET / widget input handler
+  ;; (keymap-local-set "RET" #'syncthing--newline)
+  ;; (keymap-local-set "?" #'describe-bindings)
+  (use-local-map syncthing-mode-map)
+
+  (syncthing--update))
 
 (define-minor-mode syncthing-auto-refresh-mode
   "Enable auto-refreshing state for =syncthing-mode=."
