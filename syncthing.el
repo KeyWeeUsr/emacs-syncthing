@@ -639,7 +639,15 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;; known timer
   (when syncthing--auto-refresh-timer
     (cancel-timer syncthing--auto-refresh-timer)
-    (setq syncthing--auto-refresh-timer nil)))
+    (setq syncthing--auto-refresh-timer nil))
+
+  ;; possible leak due to some strange behavior/bug
+  (dolist (timer timer-list)
+    (let ((text (format "%s" timer)))
+      (when (and (string-match "syncthing-timer" text)
+                 (string-match "killed buffer" text))
+        (message "Syncthing cleanup: Canceling dangling timer '%s'" timer)
+        (cancel-timer timer)))))
 
 (defun syncthing--next-buffer-id ()
   "Check all buffers and return next ID for multi-session Syncthing client."
