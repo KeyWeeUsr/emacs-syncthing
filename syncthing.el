@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 1.0.0
+;; Version: 1.1.0
 ;; Package-Requires: ((emacs "25.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -89,9 +89,9 @@
   :group 'syncthing-startup
   :type 'boolean)
 
-(defcustom syncthing-auto-refresh-interval-sec
+(defcustom syncthing-auto-refresh-interval
   10
-  "Refresh interval in seconds."
+  "Number of seconds to wait before refreshing client buffer."
   :group 'syncthing
   :type 'number)
 
@@ -304,10 +304,6 @@
   "Tmp to hold local state.")
 
 (defvar-local syncthing--state-auto-refresh
-  nil
-  "Tmp to hold local state.")
-
-(defvar-local syncthing--state-auto-refresh-timer
   nil
   "Tmp to hold local state.")
 
@@ -661,22 +657,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--state-version "")
   (setq syncthing--state-uptime 0))
 
-(defun syncthing--cleanup (&rest _ignore)
-  "Stop auto-refresh and clean resources, if any."
-  ;; known timer
-  (when syncthing--state-auto-refresh-timer
-    (cancel-timer syncthing--state-auto-refresh-timer)
-    (setq syncthing--state-auto-refresh-timer nil))
-
-  ;; possible leak due to some strange behavior/bug
-  (dolist (timer timer-list)
-    (let ((text (format "%s" timer)))
-      (when (and (string-match "syncthing-timer" text)
-                 (string-match "killed buffer" text))
-        (message "Syncthing cleanup: Canceling dangling timer '%s'" timer)
-        (cancel-timer timer)))))
-
-(defun syncthing--update ()
+(defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
   (let ((inhibit-read-only t))
     (erase-buffer))
@@ -686,30 +667,10 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--state-collapse-after-start nil)
   (switch-to-buffer (get-buffer-create syncthing--state-session-buffer)))
 
-(defun syncthing--buffer-with-timer (name)
-  "Find out whether there's a timer associated with a buffer NAME."
-  ;; Necessary with major mode killing local variables of which one holds the
-  ;; timer reference. Global var would prevent multiple sessions or would be
-  ;; overall annoying.
-  (let ((any nil))
-    (dolist (timer timer-list)
-      (let ((text (format "%s" timer)))
-        (when (and (string-match "syncthing-timer" text)
-                   (string-match (regexp-quote name) text))
-          (setq any t))))
-    any))
-
 ;; modes for client's session buffer(s)
-(define-derived-mode syncthing-mode
-  special-mode
-  "Syncthing"
+(define-derived-mode syncthing-mode special-mode "Syncthing"
   "Launch Syncthing client in the current window."
   :group 'syncthing
-  (add-hook 'kill-buffer-hook
-            #'syncthing--cleanup
-            syncthing-cleanup-priority t)
-  (syncthing--cleanup)
-
   ;; current buffer, new one is created via `(syncthing)'
   ;;
   ;; make sure it's initialized only once, otherwise (current-buffer) fetches
@@ -722,39 +683,24 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;; (keymap-local-set "?" #'describe-bindings)
   (use-local-map syncthing-mode-map)
 
+  ;; Hook to auto-revert mode for refreshing
+  (setq-local revert-buffer-function #'syncthing--update)
+
   (syncthing--update)
-  ;; schedule only when configured and only once
-  (when (and syncthing-start-with-auto-refresh
-             (not syncthing--state-auto-refresh-timer)
-             (not (syncthing--buffer-with-timer
-                   (buffer-name syncthing--state-session-buffer))))
+  (when syncthing-start-with-auto-refresh
     (syncthing-auto-refresh-mode 1)))
 
 (define-minor-mode syncthing-auto-refresh-mode
-  "Enable auto-refreshing state for `syncthing-mode'."
+  "Refresh client view every `syncthing-auto-refresh-interval' seconds."
   :lighter " Auto-refresh"
-  (if (not syncthing-auto-refresh-mode)
-      (when syncthing--state-auto-refresh-timer
-        (cancel-timer syncthing--state-auto-refresh-timer)
-        (setq syncthing--state-auto-refresh-timer nil))
-    (setq syncthing--state-auto-refresh-timer
-          (run-at-time
-           t syncthing-auto-refresh-interval-sec
-           ;; name is for filtering in timers to prevent duplicate scheduling,
-           ;; object is to detectt a dangling buffer (killed) in (list-timers)
-           (let ((baked-value "syncthing-timer")
-                 (buf-name (buffer-name syncthing--state-session-buffer))
-                 (buf-obj syncthing--state-session-buffer))
-             (ignore buf-name baked-value)  ;; do not remove
-             (lambda (&rest _ignore)
-               (save-window-excursion
-                 (if (not (buffer-name buf-obj))
-                     ;; killed buffer,  cancel timer
-                     (when syncthing--state-auto-refresh-timer
-                       (cancel-timer syncthing--state-auto-refresh-timer)
-                       (setq syncthing--state-auto-refresh-timer nil))
-                   (switch-to-buffer (get-buffer-create buf-obj))
-                   (syncthing--update)))))))))
+  (unless (derived-mode-p 'syncthing-mode)
+    (user-error "Buffer not in `syncthing-mode'"))
+  (setq-local
+   buffer-stale-function
+   (when syncthing-auto-refresh-mode #'(lambda (&rest _) t))
+   auto-revert-interval
+   (when syncthing-auto-refresh-mode syncthing-auto-refresh-interval))
+  (auto-revert-mode (if syncthing-auto-refresh-mode 1 -1)))
 
 (defun syncthing--switch-to-new-buffer (base-url)
   "Create buffer name from BASE-URL."
