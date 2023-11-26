@@ -679,6 +679,15 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
     (syncthing--draw)
     (setq syncthing--state-collapse-after-start nil)))
 
+(defun syncthing--interactive-common (url)
+  (with-current-buffer (get-buffer-create
+                        (generate-new-buffer
+                         (format syncthing-buffer url)))
+    (unless (derived-mode-p 'syncthing-mode)
+      (syncthing-mode))
+    (pop-to-buffer (current-buffer)
+                   '((display-buffer-reuse-window display-buffer-same-window)))))
+
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
   "Return SERVER response for METHOD at ENDPOINT for request with DATA."
@@ -727,24 +736,16 @@ Activating this mode will launch Syncthing client in the current window.
    (when syncthing-auto-refresh-mode syncthing-auto-refresh-interval))
   (auto-revert-mode (if syncthing-auto-refresh-mode 1 -1)))
 
-(defun syncthing--switch-to-new-buffer (base-url)
-  "Create buffer name from BASE-URL."
-  (switch-to-buffer
-   (get-buffer-create
-    (generate-new-buffer (format syncthing-buffer base-url)))))
-
 (defun syncthing-with-base (base-url)
   "Launch Syncthing client's instance for BASE-URL in a new buffer."
   (interactive "sSyncthing REST API base URL: ")
-  (syncthing--switch-to-new-buffer base-url)
-  (syncthing-mode))
+  (syncthing--interactive-common base-url))
 
 (defun syncthing ()
   "Launch Syncthing client's instance in a new buffer."
   (interactive)
   ;; switch first, assign later, buffer-local variable gets cleared otherwise
-  (syncthing--switch-to-new-buffer syncthing-base-url)
-  (syncthing-mode))
+  (syncthing--interactive-common syncthing-base-url))
 
 (provide 'syncthing)
 ;;; syncthing.el ends here
