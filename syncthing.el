@@ -71,7 +71,7 @@
   :group 'syncthing
   :type 'number)
 
-(defcustom syncthing-token
+(defcustom syncthing-server-token
   nil
   "Syncthing REST API token."
   :group 'syncthing
@@ -316,18 +316,15 @@
     map))
 
 ;; private/helper funcs
-(defun syncthing--request (method url &rest data)
+(defun syncthing--request (method url token &rest data)
   "Send authenticated HTTP request to Syncthing REST API.
 Argument METHOD HTTP method/verb.
 Argument URL API to call.
 Optional argument DATA Data to send."
-  (unless syncthing-token
-    (setq syncthing-token (read-string "Synchting REST API token: ")))
-
   (let ((url-request-method method)
         (url-request-data data)
         (url-request-extra-headers
-         `(("X-Api-Key" . ,syncthing-token))))
+         `(("X-Api-Key" . ,token))))
     (ignore url-request-method method
             url-request-data data
             url-request-extra-headers)
@@ -409,8 +406,8 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--list ()
   "List all resources."
-  (let-alist (syncthing--request
-              "GET" (syncthing--url "rest/config"))
+  (let-alist (syncthing-request
+              syncthing-base-url "GET" "rest/config")
     (cond ((eq .version 37)
            (save-window-excursion
              (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
@@ -448,10 +445,10 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--progress (device-id folder-id)
   "Get progress for DEVICE-ID and FOLDER-ID."
-  (let-alist (syncthing--request
-              "GET" (syncthing--url
-                     (format "rest/db/completion?device=%s&folder=%s"
-                             device-id folder-id)))
+  (let-alist (syncthing-request
+              syncthing-base-url "GET"
+              (format "rest/db/completion?device=%s&folder=%s"
+                      device-id folder-id))
     .completion))
 
 (defun syncthing--list-37-folder (folder)
@@ -475,18 +472,18 @@ Argument POS Incoming EVENT position."
              (setq path (cdr item)))
             ((string-equal "devices" (car item))
              (setq devices (cdr item)))))
-    (let-alist (syncthing--request
-                "GET" (syncthing--url
-                       (format "rest/db/status?folder=%s" id)))
+    (let-alist (syncthing-request
+                syncthing-base-url "GET"
+                (format "rest/db/status?folder=%s" id))
       (setq syncthing--state-count-local-files
             (+ syncthing--state-count-local-files .localFiles))
       (setq syncthing--state-count-local-bytes
             (+ syncthing--state-count-local-bytes .localBytes))
       (setq syncthing--state-count-local-folders
             (+ syncthing--state-count-local-folders .localDirectories)))
-    (dolist (item (syncthing--request
-                   "GET" (syncthing--url
-                          (format "rest/db/completion?folder=%s" id))))
+    (dolist (item (syncthing-request
+                   syncthing-base-url "GET"
+                   (format "rest/db/completion?folder=%s" id)))
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
@@ -556,9 +553,9 @@ Argument POS Incoming EVENT position."
              (setq paused (if (eq (cdr item) :false) "active" "paused")))
             ((string-equal "addresses" (car item))
              (setq addresses (format "%s" (cdr item))))))
-    (dolist (item (syncthing--request
-                   "GET" (syncthing--url
-                          (format "rest/db/completion?device=%s" id))))
+    (dolist (item (syncthing-request
+                   syncthing-base-url "GET"
+                   (format "rest/db/completion?device=%s" id)))
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
@@ -600,11 +597,11 @@ Argument POS Incoming EVENT position."
   (save-window-excursion
     (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
     (widget-setup)
-    (let-alist (syncthing--request
-                "GET" (syncthing--url "rest/system/version"))
+    (let-alist (syncthing-request
+                syncthing-base-url "GET" "rest/system/version")
       (setq syncthing--state-version .version))
-    (let-alist (syncthing--request
-                "GET" (syncthing--url "rest/system/status"))
+    (let-alist (syncthing-request
+                syncthing-base-url "GET" "rest/system/status")
       (setq syncthing--state-my-id
             (substring .myID 0 6))
       (setq syncthing--state-uptime .uptime))
@@ -666,6 +663,17 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (syncthing--draw)
   (setq syncthing--state-collapse-after-start nil)
   (switch-to-buffer (get-buffer-create syncthing--state-session-buffer)))
+
+;; public funcs
+(defun syncthing-request (server method endpoint &rest data)
+  "Return SERVER response for METHOD at ENDPOINT for request with DATA."
+  (unless syncthing-server-token
+    (setq syncthing-server-token (read-string "Synchting REST API token: ")))
+  (apply #'syncthing--request
+         (append (list method
+                       (format "%s/%s" server endpoint)
+                       syncthing-server-token)
+                 data)))
 
 ;; modes for client's session buffer(s)
 (define-derived-mode syncthing-mode special-mode "Syncthing"
