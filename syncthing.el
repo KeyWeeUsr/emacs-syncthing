@@ -258,6 +258,9 @@
   "Face for this device's ID."
   :group 'syncthing-faces)
 
+;; constants
+(defconst syncthing-gibibyte (expt 1024 3))
+
 ;; local/state variables
 (defvar-local syncthing-session-base-url
   ""
@@ -621,7 +624,7 @@ Argument POS Incoming EVENT position."
            (syncthing--count-local-bytes
             (format " ~%.1fGiB"
                     (/ syncthing--state-count-local-bytes
-                       (* 1024.0 1024.0 1024.0))))
+                       syncthing-gibibyte)))
            " "
            (syncthing--count-listeners " 3/3")
            " "
