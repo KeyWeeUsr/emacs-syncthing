@@ -336,14 +336,18 @@ Argument URL API to call.
 Optional argument DATA Data to send."
   (let ((url-request-method method)
         (url-request-data data)
-        (url-request-extra-headers
-         `(("X-Api-Key" . ,token))))
+        (url-request-extra-headers `(("X-Api-Key" . ,token))))
     (ignore url-request-method method
             url-request-data data
             url-request-extra-headers)
-    (with-temp-buffer
-      (url-insert-file-contents url)
-      (json-parse-buffer :object-type 'alist))))
+    (condition-case-unless-debug nil
+        (with-temp-buffer
+          (url-insert-file-contents url)
+          (json-parse-buffer :object-type 'alist
+                             :array-type 'list
+                             :null-object nil
+                             :false-object nil))
+      (file-error (error "Failed to handle response for %s" url)))))
 
 (defun syncthing--get-widget (pos)
   "Try to find an Emacs Widget at POS."
