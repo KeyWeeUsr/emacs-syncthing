@@ -48,8 +48,8 @@
 
 ;; customization values
 (defcustom syncthing-buffer
-  "*syncthing(ADDR)*"
-  "Syncthing's buffer name with special =ADDR= placeholder."
+  "*syncthing(%s)*"
+  "Syncthing's buffer name with a =%s= placeholder for address."
   :group 'syncthing-startup
   :type 'string)
 
@@ -731,11 +731,7 @@ Activating this mode will launch Syncthing client in the current window.
   "Create buffer name from BASE-URL."
   (switch-to-buffer
    (get-buffer-create
-    (generate-new-buffer
-     (replace-regexp-in-string
-      "ADDR" base-url
-      syncthing-buffer
-      t)))))
+    (generate-new-buffer (format syncthing-buffer base-url)))))
 
 (defun syncthing-with-base (base-url)
   "Launch Syncthing client's instance for BASE-URL in a new buffer."
