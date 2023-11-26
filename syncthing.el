@@ -319,6 +319,16 @@
     map))
 
 ;; private/helper funcs
+(defun syncthing--ping (server token)
+  "Check whether we can use the API at SERVER with TOKEN."
+  (let ((url-request-method "GET")
+        (url-request-extra-headers `(("X-Api-Key" . ,token))))
+    (ignore url-request-method url-request-extra-headers)
+    (condition-case-unless-debug nil
+        (with-temp-buffer
+          (url-insert-file-contents (format "%s/rest/system/ping" server)))
+      (file-error (error "Failed to authenticate, check the token!")))))
+
 (defun syncthing--request (method url token &rest data)
   "Send authenticated HTTP request to Syncthing REST API.
 Argument METHOD HTTP method/verb.
@@ -596,6 +606,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw ()
   "Setup buffer and draw widgets."
+  (syncthing--ping syncthing-base-url syncthing-server-token)
   (syncthing--list)
   (save-window-excursion
     (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
@@ -647,6 +658,8 @@ Argument POS Incoming EVENT position."
   "Reset all variables holding initial state.
 Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;; everything += or appendable has to reset in each update
+  (unless syncthing-server-token
+    (setq syncthing-server-token (read-string "Synchting REST API token: ")))
   (setq syncthing--state-fold-folders (list))
   (setq syncthing--state-fold-devices (list))
   (setq syncthing--state-collapse-after-start
@@ -670,8 +683,6 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
   "Return SERVER response for METHOD at ENDPOINT for request with DATA."
-  (unless syncthing-server-token
-    (setq syncthing-server-token (read-string "Synchting REST API token: ")))
   (apply #'syncthing--request
          (append (list method
                        (format "%s/%s" server endpoint)
