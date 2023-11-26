@@ -604,6 +604,32 @@ Argument POS Incoming EVENT position."
            (syncthing--bold ">")
          (syncthing--bold "v"))))))
 
+(defun syncthing--header-line (server)
+  "Return SERVER `header-line-format' string."
+  (string-join
+   (list
+    (syncthing--rate-download " 0B/s")
+    (syncthing--rate-upload " 0B/s")
+    (syncthing--count-local-files
+     (format " %d" syncthing--state-count-local-files))
+    (syncthing--count-local-folders
+     (format " %d" syncthing--state-count-local-folders))
+    (syncthing--count-local-bytes
+     (format " ~%.1fGiB"
+             (/ syncthing--state-count-local-bytes
+                syncthing-gibibyte)))
+    (syncthing--count-listeners " 3/3")
+    (syncthing--count-discovery " 4/5")
+    (syncthing--uptime
+     (format " %dd %dh %dm"
+             0
+             (/ syncthing--state-uptime 3600)
+             (* 60 (- (/ syncthing--state-uptime 3600.0)
+                      (/ syncthing--state-uptime 3600)))))
+    ""  ;; bad glyph! :(
+    (syncthing--my-id (format " %s" syncthing--state-my-id))
+    (format " %s" syncthing--state-version)) " "))
+
 (defun syncthing--draw ()
   "Setup buffer and draw widgets."
   (syncthing--ping syncthing-base-url syncthing-server-token)
@@ -619,38 +645,7 @@ Argument POS Incoming EVENT position."
       (setq syncthing--state-my-id
             (substring .myID 0 6))
       (setq syncthing--state-uptime .uptime))
-    (setq header-line-format
-          (concat
-           " "
-           (syncthing--rate-download " 0B/s")
-           " "
-           (syncthing--rate-upload " 0B/s")
-           " "
-           (syncthing--count-local-files
-            (format " %d" syncthing--state-count-local-files))
-           " "
-           (syncthing--count-local-folders
-            (format " %d" syncthing--state-count-local-folders))
-           " "
-           (syncthing--count-local-bytes
-            (format " ~%.1fGiB"
-                    (/ syncthing--state-count-local-bytes
-                       syncthing-gibibyte)))
-           " "
-           (syncthing--count-listeners " 3/3")
-           " "
-           (syncthing--count-discovery " 4/5")
-           " "
-           (syncthing--uptime
-            (format " %dd %dh %dm"
-                    0
-                    (/ syncthing--state-uptime 3600)
-                    (* 60 (- (/ syncthing--state-uptime 3600.0)
-                             (/ syncthing--state-uptime 3600)))))
-           " "  ;; bad glyph! :(
-           (syncthing--my-id (format " %s" syncthing--state-my-id))
-           " "
-           (format " %s" syncthing--state-version)))
+    (setq header-line-format (syncthing--header-line syncthing-base-url))
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
 
