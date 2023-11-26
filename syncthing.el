@@ -680,7 +680,11 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
 
 ;; modes for client's session buffer(s)
 (define-derived-mode syncthing-mode special-mode "Syncthing"
-  "Launch Syncthing client in the current window."
+  "Major mode for Syncthing client.
+
+Activating this mode will launch Syncthing client in the current window.
+
+\\{syncthing-mode-map}"
   :group 'syncthing
   ;; current buffer, new one is created via `(syncthing)'
   ;;
