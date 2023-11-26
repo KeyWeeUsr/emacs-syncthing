@@ -671,13 +671,13 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
 
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
-  (let ((inhibit-read-only t))
-    (erase-buffer))
-
-  (syncthing--init-state)
-  (syncthing--draw)
-  (setq syncthing--state-collapse-after-start nil)
-  (switch-to-buffer (get-buffer-create syncthing--state-session-buffer)))
+  (save-window-excursion
+    (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
+    (let ((inhibit-read-only t))
+      (erase-buffer))
+    (syncthing--init-state)
+    (syncthing--draw)
+    (setq syncthing--state-collapse-after-start nil)))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
