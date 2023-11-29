@@ -53,6 +53,12 @@
   :group 'syncthing-startup
   :type 'string)
 
+(defcustom syncthing-default-name
+  "Default Localhost"
+  "Base URL for Syncthing REST API endpoint."
+  :group 'syncthing
+  :type 'string)
+
 (defcustom syncthing-base-url
   "https://127.0.0.1:8384"
   "Base URL for Syncthing REST API endpoint."
@@ -262,6 +268,17 @@
 (defconst syncthing-gibibyte (expt 1024 3))
 
 ;; local/state variables
+(defvar syncthing--servers nil
+  "List of currently active Syncthing servers.")
+
+(defvar-local syncthing-server nil
+  "Buffer-local instance of Syncthing server.")
+
+(cl-defstruct (syncthing-server
+               (:copier nil) (:named nil) (:constructor syncthing--server))
+  "Local state holder for Syncthing buffer client."
+  name url)
+
 (defvar-local syncthing-session-base-url
   ""
   "Tmp to hold session's base URL.")
@@ -679,14 +696,20 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
     (syncthing--draw)
     (setq syncthing--state-collapse-after-start nil)))
 
-(defun syncthing--interactive-common (url)
-  (with-current-buffer (get-buffer-create
-                        (generate-new-buffer
-                         (format syncthing-buffer url)))
-    (unless (derived-mode-p 'syncthing-mode)
-      (syncthing-mode))
-    (pop-to-buffer (current-buffer)
-                   '((display-buffer-reuse-window display-buffer-same-window)))))
+(defun syncthing--interactive-common (name url)
+  (let ((server (car (or syncthing--servers
+                         (push (syncthing--server :name name :url url)
+                               syncthing--servers)))))
+    (with-current-buffer (get-buffer-create
+                          (generate-new-buffer
+                           (format syncthing-buffer name)))
+      (setq-local syncthing-server server)
+      (put 'syncthing-server 'permanent-local t)
+      (unless (derived-mode-p 'syncthing-mode)
+        (syncthing-mode))
+      (pop-to-buffer (current-buffer)
+                     '((display-buffer-reuse-window
+                        display-buffer-same-window))))))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
@@ -736,16 +759,17 @@ Activating this mode will launch Syncthing client in the current window.
    (when syncthing-auto-refresh-mode syncthing-auto-refresh-interval))
   (auto-revert-mode (if syncthing-auto-refresh-mode 1 -1)))
 
-(defun syncthing-with-base (base-url)
+(defun syncthing-with-base (name base-url)
   "Launch Syncthing client's instance for BASE-URL in a new buffer."
-  (interactive "sSyncthing REST API base URL: ")
-  (syncthing--interactive-common base-url))
+  (interactive "sName: \nsSyncthing REST API base URL: ")
+  (syncthing--interactive-common name base-url))
 
 (defun syncthing ()
   "Launch Syncthing client's instance in a new buffer."
   (interactive)
   ;; switch first, assign later, buffer-local variable gets cleared otherwise
-  (syncthing--interactive-common syncthing-base-url))
+  (syncthing--interactive-common syncthing-default-name syncthing-base-url))
 
 (provide 'syncthing)
+;; TODO keep drawing in --draw, move update/fetch to --update
 ;;; syncthing.el ends here
