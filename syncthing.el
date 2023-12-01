@@ -279,10 +279,6 @@
   "Local state holder for Syncthing buffer client."
   name url)
 
-(defvar-local syncthing-session-base-url
-  ""
-  "Tmp to hold session's base URL.")
-
 (defvar-local syncthing--state-session-buffer
   ""
   "Tmp to hold session's buffer instance/object.")
