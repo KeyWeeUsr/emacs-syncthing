@@ -328,6 +328,9 @@
 (defconst syncthing-gibibyte (expt 1024 3))
 (defconst syncthing-mibibyte (expt 1024 2))
 (defconst syncthing-kibibyte (expt 1024 1))
+(defconst syncthing-day-seconds (* 1 60 60 24))
+(defconst syncthing-hour-seconds (* 1 60 60))
+(defconst syncthing-min-seconds (* 1 60))
 
 ;; local/state variables
 (defvar syncthing--servers nil
@@ -705,10 +708,18 @@ Argument POS Incoming EVENT position."
               (alist-get 'system-version data "n/a"))) " ")))
 
 (defun syncthing--sec-to-uptime (sec)
-  (let* ((days  (/ sec (* 1 60 60 24)))
-         (hours (/ (- sec (* days 1 60 60 24)) (* 1 60 60)))
-         (minutes (/ (- sec (* days 1 60 60 24) (* hours 1 60 60)) (* 1 60)))
-         (seconds (- sec (* days 1 60 60 24) (* hours 1 60 60) (* minutes 1 60)))
+  (let* ((days  (/ sec syncthing-day-seconds))
+         (hours (/ (- sec
+                      (* days syncthing-day-seconds))
+                   syncthing-hour-seconds))
+         (minutes (/ (- sec
+                        (* days syncthing-day-seconds)
+                        (* hours syncthing-hour-seconds))
+                     syncthing-min-seconds))
+         (seconds (- sec
+                     (* days syncthing-day-seconds)
+                     (* hours syncthing-hour-seconds)
+                     (* minutes syncthing-min-seconds)))
          (out ""))
     (when (< 0 days)
       (setq out (if (eq 0 (length out))
