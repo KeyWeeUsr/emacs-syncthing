@@ -137,8 +137,8 @@
   :group 'syncthing
   :type 'number)
 
-(defcustom syncthing-server-token
-  nil
+(defcustom syncthing-default-server-token
+  ""
   "Syncthing REST API token."
   :group 'syncthing
   :type 'string)
@@ -342,7 +342,7 @@
   ;; on slot order change or on new slot basically restart Emacs because
   ;; "args-out-of-range" even though it's present and cl-defstruct is called
   ;; via e.g. eval-buffer
-  name url data connections-total last-speed-date)
+  name url token data connections-total last-speed-date)
 
 (defvar-local syncthing--state-session-buffer
   ""
@@ -369,14 +369,16 @@
     map))
 
 ;; private/helper funcs
-(defun syncthing--ping (server token)
+(defun syncthing--ping (server)
   "Check whether we can use the API at SERVER with TOKEN."
   (let ((url-request-method "GET")
-        (url-request-extra-headers `(("X-Api-Key" . ,token))))
+        (url-request-extra-headers
+         `(("X-Api-Key" . ,(syncthing-server-token server)))))
     (ignore url-request-method url-request-extra-headers)
     (condition-case-unless-debug nil
         (with-temp-buffer
-          (url-insert-file-contents (format "%s/rest/system/ping" server)))
+          (url-insert-file-contents
+           (format "%s/rest/system/ping" (syncthing-server-url server))))
       (file-error (error "Failed to authenticate, check the token!")))))
 
 (defun syncthing--request (method url token &rest data)
@@ -543,7 +545,7 @@ Argument POS Incoming EVENT position."
                 syncthing-server "GET"
                 (format "rest/db/status?folder=%s" id)))
     (dolist (item (syncthing-request
-                   syncthing-base-url "GET"
+                   syncthing-server "GET"
                    (format "rest/db/completion?folder=%s" id)))
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
@@ -744,7 +746,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw ()
   "Setup buffer and draw widgets."
-  (syncthing--ping syncthing-base-url syncthing-server-token)
+  (syncthing--ping syncthing-server)
   (syncthing--list)
   (save-window-excursion
     (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
@@ -757,8 +759,6 @@ Argument POS Incoming EVENT position."
   "Reset all variables holding initial state.
 Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;; everything += or appendable has to reset in each update
-  (unless syncthing-server-token
-    (setq syncthing-server-token (read-string "Synchting REST API token: ")))
   (setq syncthing--state-fold-folders (list))
   (setq syncthing--state-fold-devices (list))
   (setq syncthing--state-collapse-after-start
@@ -775,9 +775,12 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
     (syncthing--draw)
     (setq syncthing--state-collapse-after-start nil)))
 
-(defun syncthing--interactive-common (name url)
+(defun syncthing--interactive-common (name url token)
+  (unless token
+    (user-error "Syncthing REST API token not configured"))
   (let ((server (car (or syncthing--servers
-                         (push (syncthing--server :name name :url url)
+                         (push (syncthing--server
+                                :name name :url url :token token)
                                syncthing--servers)))))
     (with-current-buffer (get-buffer-create
                           (generate-new-buffer
@@ -887,16 +890,28 @@ Activating this mode will launch Syncthing client in the current window.
    (when syncthing-auto-refresh-mode syncthing-auto-refresh-interval))
   (auto-revert-mode (if syncthing-auto-refresh-mode 1 -1)))
 
-(defun syncthing-with-base (name base-url)
+(defun syncthing-with-base (name base-url token)
   "Launch Syncthing client's instance for BASE-URL in a new buffer."
-  (interactive "sName: \nsSyncthing REST API base URL: ")
-  (syncthing--interactive-common name base-url))
+  (interactive
+   (string-join
+    (list
+     "sName: "
+     "sSyncthing REST API base URL: "
+     "sSynchting REST API token: ")
+    "\n")
+  (syncthing--interactive-common name base-url token)))
 
 (defun syncthing ()
   "Launch Syncthing client's instance in a new buffer."
   (interactive)
   ;; switch first, assign later, buffer-local variable gets cleared otherwise
-  (syncthing--interactive-common syncthing-default-name syncthing-base-url))
+  (syncthing--interactive-common
+   syncthing-default-name
+   syncthing-base-url
+   (if syncthing-default-server-token
+       syncthing-default-server-token
+     (customize-variable 'syncthing-default-server-token)
+     syncthing-default-server-token)))
 
 (provide 'syncthing)
 ;; TODO keep drawing in --draw, move update/fetch to --update
