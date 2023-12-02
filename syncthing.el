@@ -71,6 +71,66 @@
   :group 'syncthing
   :type 'string)
 
+(defcustom syncthing-format-rate-download
+  " %s"
+  "Format for displaying download rate in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-rate-upload
+  " %s"
+  "Format for displaying upload rate in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-count-local-files
+  " %d"
+  "Format for displaying local files count in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-count-local-folders
+  " %d"
+  "Format for displaying local folders count in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-count-local-bytes
+  " ~%s"
+  "Format for displaying local size in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-count-listeners
+  " %s"
+  "Format for displaying listeners count in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-count-discovery
+  " %s"
+  "Format for displaying discovery count in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-uptime
+  " %s"
+  "Format for displaying Syncthing server uptime in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-my-id
+  " %s"
+  "Format for displaying current device's ID in header line."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-format-version
+  " %s"
+  "Format for displaying version in header line."
+  :group 'syncthing
+  :type 'string)
+
 (defcustom syncthing-cleanup-priority
   0
   "`add-hook' priority."
@@ -606,37 +666,41 @@ Argument POS Incoming EVENT position."
     (string-join
      (list
       (syncthing--rate-download
-       (format " %s"
+       (format syncthing-format-rate-download
                (syncthing--bytes-to-rate
                 (or (alist-get 'rate-download data) -1))))
       (syncthing--rate-upload
-       (format " %s"
+       (format syncthing-format-rate-upload
                (syncthing--bytes-to-rate
                 (or (alist-get 'rate-upload data) -1))))
       (syncthing--count-local-files
        (format
-        " %d"
+        syncthing-format-count-local-files
         (cl-reduce
          #'+ (alist-get 'folders data)
          :key (lambda (folder)
                 (alist-get 'localFiles (alist-get 'status folder) 0)))))
       (syncthing--count-local-folders
        (format
-        " %d"
+        syncthing-format-count-local-folders
         (cl-reduce
          #'+ (alist-get 'folders data)
          :key (lambda (folder)
                 (alist-get 'localDirectories (alist-get 'status folder) 0)))))
       (syncthing--count-local-bytes
-       (format " ~%.1fGiB"
-               (/ syncthing--state-count-local-bytes
-                  syncthing-gibibyte)))
-      (syncthing--count-listeners " 3/3")
-      (syncthing--count-discovery " 4/5")
-      (syncthing--uptime (syncthing--sec-to-uptime uptime))
-      ""  ;; bad glyph! :(
-      (substring (alist-get 'myID (alist-get 'system-status data) "n/a") 0 6)
-      (format " %s"
+       (format syncthing-format-count-local-bytes
+               (syncthing--scale-bytes
+                syncthing--state-count-local-bytes 1)))
+      (syncthing--count-listeners
+       (format syncthing-format-count-listeners "3/3"))
+      (syncthing--count-discovery
+       (format syncthing-format-count-discovery "4/5"))
+      (syncthing--uptime
+       (format syncthing-format-uptime (syncthing--sec-to-uptime uptime)))
+      (format syncthing-format-my-id
+              (substring
+               (alist-get 'myID (alist-get 'system-status data) "n/a") 0 6))
+      (format syncthing-format-version
               (alist-get 'system-version data "n/a"))) " ")))
 
 (defun syncthing--sec-to-uptime (sec)
@@ -644,7 +708,7 @@ Argument POS Incoming EVENT position."
          (hours (/ (- sec (* days 1 60 60 24)) (* 1 60 60)))
          (minutes (/ (- sec (* days 1 60 60 24) (* hours 1 60 60)) (* 1 60)))
          (seconds (- sec (* days 1 60 60 24) (* hours 1 60 60) (* minutes 1 60)))
-         (out ""))
+         (out ""))
     (when (< 0 days)
       (setq out (format "%s %dd" out days)))
     (when (< 0 hours)
@@ -655,20 +719,29 @@ Argument POS Incoming EVENT position."
       (setq out (format "%s %ds" out seconds)))
     out))
 
-(defun syncthing--bytes-to-rate (bytes)
-  (let* ((gigs  (/ bytes syncthing-gibibyte))
-         (megs (/ bytes syncthing-mibibyte))
-         (kilos (/ bytes syncthing-kibibyte))
+(defun syncthing--maybe-float (num places)
+  (if (> places 0) (float num) num))
+
+(defun syncthing--scale-bytes (bytes places)
+  (let* ((gigs  (/ bytes (syncthing--maybe-float
+                          syncthing-gibibyte places)))
+         (megs (/ bytes (syncthing--maybe-float
+                         syncthing-mibibyte places)))
+         (kilos (/ bytes (syncthing--maybe-float
+                          syncthing-kibibyte places)))
          (out ""))
     (when (and (eq 0 (length out)) (< 0 gigs))
-      (setq out (format "%dGiB/s" gigs)))
+      (setq out (format (format "%%.%dfGiB" places) gigs)))
     (when (and (eq 0 (length out)) (< 0 megs))
-      (setq out (format "%dMiB/s" megs)))
+      (setq out (format (format "%%.%dfMiB" places) megs)))
     (when (and (eq 0 (length out)) (< 0 kilos))
-      (setq out (format "%dKiB/s" kilos)))
+      (setq out (format (format "%%.%dfKiB" places) kilos)))
     (when (eq 0 (length out))
-      (setq out (format "%dB/s" bytes)))
+      (setq out (format (format "%%.%dfB" places) bytes)))
     out))
+
+(defun syncthing--bytes-to-rate (bytes)
+  (format "%s/s" (syncthing--scale-bytes bytes 0)))
 
 (defun syncthing--draw ()
   "Setup buffer and draw widgets."
