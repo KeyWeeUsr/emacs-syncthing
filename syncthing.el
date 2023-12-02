@@ -47,7 +47,7 @@
   :group 'syncthing)
 
 ;; customization values
-(defcustom syncthing-buffer
+(defcustom syncthing-format-buffer
   "*syncthing(%s)*"
   "Syncthing's buffer name with a =%s= placeholder for address."
   :group 'syncthing-startup
@@ -344,9 +344,13 @@
   ;; via e.g. eval-buffer
   name url token data connections-total last-speed-date)
 
-(defvar-local syncthing--state-session-buffer
-  ""
-  "Tmp to hold session's buffer instance/object.")
+(defvar-local syncthing-buffer nil
+  "Buffer-local instance for all drawables and other buffer states.")
+
+(cl-defstruct (syncthing-buffer
+               (:copier nil) (:named nil) (:constructor syncthing--buffer))
+  "Local state holder for Syncthing buffer drawables and state."
+  name)
 
 (defvar-local syncthing--state-fold-folders
   nil
@@ -479,7 +483,8 @@ Argument POS Incoming EVENT position."
               syncthing-server "GET" "rest/config")
     (cond ((eq .version 37)
            (save-window-excursion
-             (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
+             (switch-to-buffer
+              (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
              (widget-insert (syncthing--title " Folders\n")))
            (mapc
             #'syncthing--list-37-folder
@@ -495,7 +500,8 @@ Argument POS Incoming EVENT position."
                           (setq rname (cdr ritem))))
                       (string< lname rname)))))
            (save-window-excursion
-             (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
+             (switch-to-buffer
+              (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
              (widget-insert (syncthing--title "\n"))
              (widget-insert (syncthing--title " Devices\n")))
            (mapc
@@ -550,7 +556,8 @@ Argument POS Incoming EVENT position."
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
-      (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
+      (switch-to-buffer
+       (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
       (widget-create
        'push-button
        :button-face "menu"
@@ -610,7 +617,7 @@ Argument POS Incoming EVENT position."
              (setq name (format "%s" (cdr item))))
             ((string-equal "deviceID" (car item))
              (setq id (format "%s" (cdr item)))
-             (when syncthing--state-collapse-after-start
+             (when (syncthing-buffer-collapse-after-start syncthing-buffer)
                (push id syncthing--state-fold-devices)))
             ((string-equal "paused" (car item))
              (setq paused (if (eq (cdr item) :false) "active" "paused")))
@@ -622,7 +629,8 @@ Argument POS Incoming EVENT position."
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
-      (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
+      (switch-to-buffer
+       (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
       (widget-create
        'push-button
        :button-face "menu"
@@ -757,7 +765,8 @@ Argument POS Incoming EVENT position."
   (syncthing--ping syncthing-server)
   (syncthing--list)
   (save-window-excursion
-    (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
+    (switch-to-buffer
+     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
     (widget-setup)
     (setq header-line-format (syncthing--header-line syncthing-server))
     ;; messes up with cursor position, reset to 0,0
@@ -775,24 +784,27 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
   (save-window-excursion
-    (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
+    (switch-to-buffer
+     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
     (let ((inhibit-read-only t))
       (erase-buffer))
     (syncthing--server-update syncthing-server)
     (syncthing--init-state)
     (syncthing--draw)
-    (setq syncthing--state-collapse-after-start nil)))
+    (setf (syncthing-buffer-collapse-after-start syncthing-buffer) nil)))
 
 (defun syncthing--interactive-common (name url token)
   (unless token
     (user-error "Syncthing REST API token not configured"))
-  (let ((server (car (or syncthing--servers
+  (let ((buff (syncthing--buffer
+              :name (generate-new-buffer (format syncthing-format-buffer name))))
+        (server (car (or syncthing--servers
                          (push (syncthing--server
                                 :name name :url url :token token)
                                syncthing--servers)))))
-    (with-current-buffer (get-buffer-create
-                          (generate-new-buffer
-                           (format syncthing-buffer name)))
+    (with-current-buffer (get-buffer-create (syncthing-buffer-name buff))
+      (setq-local syncthing-buffer buff)
+      (put 'syncthing-buffer 'permanent-local t)
       (setq-local syncthing-server server)
       (put 'syncthing-server 'permanent-local t)
       (unless (derived-mode-p 'syncthing-mode)
@@ -867,13 +879,6 @@ Activating this mode will launch Syncthing client in the current window.
 
 \\{syncthing-mode-map}"
   :group 'syncthing
-  ;; current buffer, new one is created via `(syncthing)'
-  ;;
-  ;; make sure it's initialized only once, otherwise (current-buffer) fetches
-  ;; value from any other window currently in focus causing a bit of a mess
-  (when (string-equal "" syncthing--state-session-buffer)
-    (setq syncthing--state-session-buffer (current-buffer)))
-
   ;; custom handler for RET / widget input handler
   ;; (keymap-local-set "RET" #'syncthing--newline)
   ;; (keymap-local-set "?" #'describe-bindings)
