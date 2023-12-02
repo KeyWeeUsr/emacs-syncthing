@@ -350,7 +350,7 @@
 (cl-defstruct (syncthing-buffer
                (:copier nil) (:named nil) (:constructor syncthing--buffer))
   "Local state holder for Syncthing buffer drawables and state."
-  name)
+  name collapse-after-start)
 
 (defvar-local syncthing--state-fold-folders
   nil
@@ -359,10 +359,6 @@
 (defvar-local syncthing--state-fold-devices
   nil
   "Tmp list to hold IDs of folds.")
-
-(defvar-local syncthing--state-collapse-after-start
-  nil
-  "Tmp to hold collapse toggle.")
 
 ;; keyboard
 (defvar-local syncthing-mode-map
@@ -539,7 +535,7 @@ Argument POS Incoming EVENT position."
              (setq name (cdr item)))
             ((string-equal "id" (car item))
              (setq id (cdr item))
-             (when syncthing--state-collapse-after-start
+             (when (syncthing-buffer-collapse-after-start syncthing-buffer)
                (push id syncthing--state-fold-folders)))
             ((string-equal "type" (car item))
              (setq type (cdr item)))
@@ -776,10 +772,10 @@ Argument POS Incoming EVENT position."
   "Reset all variables holding initial state.
 Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;; everything += or appendable has to reset in each update
+  (setf (syncthing-buffer-collapse-after-start syncthing-buffer)
+        syncthing-start-collapsed)
   (setq syncthing--state-fold-folders (list))
-  (setq syncthing--state-fold-devices (list))
-  (setq syncthing--state-collapse-after-start
-        syncthing-start-collapsed))
+  (setq syncthing--state-fold-devices (list)))
 
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
@@ -797,7 +793,8 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (unless token
     (user-error "Syncthing REST API token not configured"))
   (let ((buff (syncthing--buffer
-              :name (generate-new-buffer (format syncthing-format-buffer name))))
+              :name (generate-new-buffer (format syncthing-format-buffer name))
+              :collapse-after-start syncthing-start-collapsed))
         (server (car (or syncthing--servers
                          (push (syncthing--server
                                 :name name :url url :token token)
