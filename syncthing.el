@@ -304,10 +304,6 @@
   0
   "Tmp to hold local state.")
 
-(defvar-local syncthing--state-count-local-folders
-  0
-  "Tmp to hold local state.")
-
 (defvar-local syncthing--state-count-local-bytes
   0
   "Tmp to hold local state.")
@@ -497,9 +493,7 @@ Argument POS Incoming EVENT position."
       (setq syncthing--state-count-local-files
             (+ syncthing--state-count-local-files .localFiles))
       (setq syncthing--state-count-local-bytes
-            (+ syncthing--state-count-local-bytes .localBytes))
-      (setq syncthing--state-count-local-folders
-            (+ syncthing--state-count-local-folders .localDirectories)))
+            (+ syncthing--state-count-local-bytes .localBytes)))
     (dolist (item (syncthing-request
                    syncthing-base-url "GET"
                    (format "rest/db/completion?folder=%s" id)))
@@ -628,7 +622,12 @@ Argument POS Incoming EVENT position."
       (syncthing--count-local-files
        (format " %d" syncthing--state-count-local-files))
       (syncthing--count-local-folders
-       (format " %d" syncthing--state-count-local-folders))
+       (format
+        " %d"
+        (cl-reduce
+         #'+ (alist-get 'folders data)
+         :key (lambda (folder)
+                (alist-get 'localDirectories (alist-get 'status folder) 0)))))
       (syncthing--count-local-bytes
        (format " ~%.1fGiB"
                (/ syncthing--state-count-local-bytes
@@ -757,7 +756,23 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
                      (syncthing-server-connections-total server)
                      now-total))
 
-             return (setf (syncthing-server-data server) data))))
+             with folders = (alist-get 'folders data)
+             for idx below (length folders)
+             for folder = (nth idx folders)
+             for folder-id = (alist-get 'id folder)
+             do (setf (alist-get 'completion folder)
+                      (syncthing-request
+                       url "GET" (format "rest/db/completion?folder=%s"
+                                         folder-id))
+
+                      (alist-get 'status folder)
+                      (syncthing-request
+                       url "GET" (format "rest/db/status?folder=%s"
+                                         folder-id))
+
+                      (nth idx folders) folder)
+
+             finally return (setf (syncthing-server-data server) data))))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
