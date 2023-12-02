@@ -360,10 +360,6 @@
   nil
   "Tmp to hold collapse toggle.")
 
-(defvar-local syncthing--state-count-local-bytes
-  0
-  "Tmp to hold local state.")
-
 ;; keyboard
 (defvar-local syncthing-mode-map
   (let ((map (make-keymap)))
@@ -545,9 +541,7 @@ Argument POS Incoming EVENT position."
              (setq devices (cdr item)))))
     (let-alist (syncthing-request
                 syncthing-base-url "GET"
-                (format "rest/db/status?folder=%s" id))
-      (setq syncthing--state-count-local-bytes
-            (+ syncthing--state-count-local-bytes .localBytes)))
+                (format "rest/db/status?folder=%s" id)))
     (dolist (item (syncthing-request
                    syncthing-base-url "GET"
                    (format "rest/db/completion?folder=%s" id)))
@@ -688,9 +682,14 @@ Argument POS Incoming EVENT position."
          :key (lambda (folder)
                 (alist-get 'localDirectories (alist-get 'status folder) 0)))))
       (syncthing--count-local-bytes
-       (format syncthing-format-count-local-bytes
-               (syncthing--scale-bytes
-                syncthing--state-count-local-bytes 1)))
+       (format
+        syncthing-format-count-local-bytes
+        (syncthing--scale-bytes
+         (cl-reduce
+          #'+ (alist-get 'folders data)
+          :key (lambda (folder)
+                 (alist-get 'localBytes (alist-get 'status folder) 0)))
+         1)))
       (syncthing--count-listeners
        (format syncthing-format-count-listeners "3/3"))
       (syncthing--count-discovery
@@ -763,8 +762,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--state-fold-folders (list))
   (setq syncthing--state-fold-devices (list))
   (setq syncthing--state-collapse-after-start
-        syncthing-start-collapsed)
-  (setq syncthing--state-count-local-bytes 0))
+        syncthing-start-collapsed))
 
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
