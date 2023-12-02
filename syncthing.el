@@ -266,6 +266,8 @@
 
 ;; constants
 (defconst syncthing-gibibyte (expt 1024 3))
+(defconst syncthing-mibibyte (expt 1024 2))
+(defconst syncthing-kibibyte (expt 1024 1))
 
 ;; local/state variables
 (defvar syncthing--servers nil
@@ -280,7 +282,7 @@
   ;; on slot order change or on new slot basically restart Emacs because
   ;; "args-out-of-range" even though it's present and cl-defstruct is called
   ;; via e.g. eval-buffer
-  name url data)
+  name url data connections-total last-speed-date)
 
 (defvar-local syncthing--state-session-buffer
   ""
@@ -619,8 +621,14 @@ Argument POS Incoming EVENT position."
           (alist-get 'uptime (alist-get 'system-status data))))
     (string-join
      (list
-      (syncthing--rate-download " 0B/s")
-      (syncthing--rate-upload " 0B/s")
+      (syncthing--rate-download
+       (format " %s"
+               (syncthing--bytes-to-rate
+                (or (alist-get 'rate-download data) -1))))
+      (syncthing--rate-upload
+       (format " %s"
+               (syncthing--bytes-to-rate
+                (or (alist-get 'rate-upload data) -1))))
       (syncthing--count-local-files
        (format " %d" syncthing--state-count-local-files))
       (syncthing--count-local-folders
@@ -651,6 +659,21 @@ Argument POS Incoming EVENT position."
       (setq out (format "%s %dm" out minutes)))
     (when (< 0 seconds)
       (setq out (format "%s %ds" out seconds)))
+    out))
+
+(defun syncthing--bytes-to-rate (bytes)
+  (let* ((gigs  (/ bytes syncthing-gibibyte))
+         (megs (/ bytes syncthing-mibibyte))
+         (kilos (/ bytes syncthing-kibibyte))
+         (out ""))
+    (when (and (eq 0 (length out)) (< 0 gigs))
+      (setq out (format "%dGiB/s" gigs)))
+    (when (and (eq 0 (length out)) (< 0 megs))
+      (setq out (format "%dMiB/s" megs)))
+    (when (and (eq 0 (length out)) (< 0 kilos))
+      (setq out (format "%dKiB/s" kilos)))
+    (when (eq 0 (length out))
+      (setq out (format "%dB/s" bytes)))
     out))
 
 (defun syncthing--draw ()
@@ -715,6 +738,29 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
                               url "GET" "rest/system/version"))
                    (alist-get 'system-status data)
                    (syncthing-request url "GET" "rest/system/status"))
+
+             with conns = (syncthing-request
+                           url "GET" "rest/system/connections")
+             initially do
+             (let* ((last-speed-date
+                     (or (syncthing-server-last-speed-date server) 0))
+                    (now (time-convert nil 'integer))
+                    (now-total (alist-get 'total conns))
+                    (conns-total (syncthing-server-connections-total server))
+                    (td (- now last-speed-date)))
+               (setf (syncthing-server-last-speed-date server)
+                     now
+                     (alist-get 'rate-download data)
+                     (max 0 (/ (- (alist-get 'inBytesTotal now-total)
+                                  (or (alist-get 'inBytesTotal conns-total) 0))
+                               td))
+                     (alist-get 'rate-upload data)
+                     (max 0 (/ (- (alist-get 'outBytesTotal now-total)
+                                  (or (alist-get 'outBytesTotal conns-total) 0))
+                               td))
+                     (syncthing-server-connections-total server)
+                     now-total))
+
              return (setf (syncthing-server-data server) data))))
 
 ;; public funcs
