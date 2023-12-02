@@ -764,7 +764,6 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--state-fold-devices (list))
   (setq syncthing--state-collapse-after-start
         syncthing-start-collapsed)
-  (setq syncthing--state-count-local-folders 0)
   (setq syncthing--state-count-local-bytes 0))
 
 (defun syncthing--update (&rest _)
