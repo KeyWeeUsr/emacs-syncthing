@@ -474,7 +474,7 @@ Argument POS Incoming EVENT position."
 (defun syncthing--list ()
   "List all resources."
   (let-alist (syncthing-request
-              syncthing-base-url "GET" "rest/config")
+              syncthing-server "GET" "rest/config")
     (cond ((eq .version 37)
            (save-window-excursion
              (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
@@ -513,7 +513,7 @@ Argument POS Incoming EVENT position."
 (defun syncthing--progress (device-id folder-id)
   "Get progress for DEVICE-ID and FOLDER-ID."
   (let-alist (syncthing-request
-              syncthing-base-url "GET"
+              syncthing-server "GET"
               (format "rest/db/completion?device=%s&folder=%s"
                       device-id folder-id))
     .completion))
@@ -540,7 +540,7 @@ Argument POS Incoming EVENT position."
             ((string-equal "devices" (car item))
              (setq devices (cdr item)))))
     (let-alist (syncthing-request
-                syncthing-base-url "GET"
+                syncthing-server "GET"
                 (format "rest/db/status?folder=%s" id)))
     (dolist (item (syncthing-request
                    syncthing-base-url "GET"
@@ -615,7 +615,7 @@ Argument POS Incoming EVENT position."
             ((string-equal "addresses" (car item))
              (setq addresses (format "%s" (cdr item))))))
     (dolist (item (syncthing-request
-                   syncthing-base-url "GET"
+                   syncthing-server "GET"
                    (format "rest/db/completion?device=%s" id)))
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
@@ -792,63 +792,60 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
 
 (defun syncthing--server-update (server)
   "Update SERVER data."
-  (let ((url (syncthing-server-url server)))
-    (cl-loop with data = (syncthing-request url "GET" "rest/config")
-             initially do
-             (setf (alist-get 'system-version data)
-                   (alist-get
-                    'version (syncthing-request
-                              url "GET" "rest/system/version"))
-                   (alist-get 'system-status data)
-                   (syncthing-request url "GET" "rest/system/status"))
+  (cl-loop with data = (syncthing-request server "GET" "rest/config")
+           initially do
+           (setf (alist-get 'system-version data)
+                 (alist-get
+                  'version (syncthing-request
+                            server "GET" "rest/system/version"))
+                 (alist-get 'system-status data)
+                 (syncthing-request server "GET" "rest/system/status"))
 
-             with conns = (syncthing-request
-                           url "GET" "rest/system/connections")
-             initially do
-             (let* ((last-speed-date
-                     (or (syncthing-server-last-speed-date server) 0))
-                    (now (time-convert nil 'integer))
-                    (now-total (alist-get 'total conns))
-                    (conns-total (syncthing-server-connections-total server))
-                    (td (- now last-speed-date)))
-               (setf (syncthing-server-last-speed-date server)
-                     now
-                     (alist-get 'rate-download data)
-                     (max 0 (/ (- (alist-get 'inBytesTotal now-total)
-                                  (or (alist-get 'inBytesTotal conns-total) 0))
-                               td))
-                     (alist-get 'rate-upload data)
-                     (max 0 (/ (- (alist-get 'outBytesTotal now-total)
-                                  (or (alist-get 'outBytesTotal conns-total) 0))
-                               td))
-                     (syncthing-server-connections-total server)
-                     now-total))
+           with conns = (syncthing-request
+                         server "GET" "rest/system/connections")
+           initially do
+           (let* ((last-speed-date
+                   (or (syncthing-server-last-speed-date server) 0))
+                  (now (time-convert nil 'integer))
+                  (now-total (alist-get 'total conns))
+                  (conns-total (syncthing-server-connections-total server))
+                  (td (- now last-speed-date)))
+             (setf (syncthing-server-last-speed-date server)
+                   now
+                   (alist-get 'rate-download data)
+                   (max 0 (/ (- (alist-get 'inBytesTotal now-total)
+                                (or (alist-get 'inBytesTotal conns-total) 0))
+                             td))
+                   (alist-get 'rate-upload data)
+                   (max 0 (/ (- (alist-get 'outBytesTotal now-total)
+                                (or (alist-get 'outBytesTotal conns-total) 0))
+                             td))
+                   (syncthing-server-connections-total server)
+                   now-total))
 
-             with folders = (alist-get 'folders data)
-             for idx below (length folders)
-             for folder = (nth idx folders)
-             for folder-id = (alist-get 'id folder)
-             do (setf (alist-get 'completion folder)
-                      (syncthing-request
-                       url "GET" (format "rest/db/completion?folder=%s"
-                                         folder-id))
+           with folders = (alist-get 'folders data)
+           for idx below (length folders)
+           for folder = (nth idx folders)
+           for folder-id = (alist-get 'id folder)
+           do (setf (alist-get 'completion folder)
+                    (syncthing-request
+                     server "GET" (format "rest/db/completion?folder=%s"
+                                          folder-id))
+                    (alist-get 'status folder)
+                    (syncthing-request
+                     server "GET" (format "rest/db/status?folder=%s"
+                                          folder-id))
+                    (nth idx folders) folder)
 
-                      (alist-get 'status folder)
-                      (syncthing-request
-                       url "GET" (format "rest/db/status?folder=%s"
-                                         folder-id))
-
-                      (nth idx folders) folder)
-
-             finally return (setf (syncthing-server-data server) data))))
+           finally return (setf (syncthing-server-data server) data)))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
   "Return SERVER response for METHOD at ENDPOINT for request with DATA."
   (apply #'syncthing--request
          (append (list method
-                       (format "%s/%s" server endpoint)
-                       syncthing-server-token)
+                       (format "%s/%s" (syncthing-server-url server) endpoint)
+                       (syncthing-server-token server))
                  data)))
 
 ;; modes for client's session buffer(s)
