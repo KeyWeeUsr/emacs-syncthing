@@ -310,14 +310,6 @@
   0
   "Tmp to hold local state.")
 
-(defvar-local syncthing--state-my-id
-  ""
-  "Tmp to hold local state.")
-
-(defvar-local syncthing--state-uptime
-  0
-  "Tmp to hold local state.")
-
 (defvar-local syncthing--state-auto-refresh
   nil
   "Tmp to hold local state.")
@@ -622,7 +614,9 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--header-line (server)
   "Return SERVER `header-line-format' string."
-  (let* ((data (syncthing-server-data server)))
+  (let* ((data (syncthing-server-data server))
+         (uptime
+          (alist-get 'uptime (alist-get 'system-status data))))
     (string-join
      (list
       (syncthing--rate-download " 0B/s")
@@ -637,15 +631,27 @@ Argument POS Incoming EVENT position."
                   syncthing-gibibyte)))
       (syncthing--count-listeners " 3/3")
       (syncthing--count-discovery " 4/5")
-      (syncthing--uptime
-       (format " %dd %dh %dm"
-               0
-               (/ syncthing--state-uptime 3600)
-               (* 60 (- (/ syncthing--state-uptime 3600.0)
-                        (/ syncthing--state-uptime 3600)))))
+      (syncthing--uptime (syncthing--sec-to-uptime uptime))
       ""  ;; bad glyph! :(
-      (syncthing--my-id (format " %s" syncthing--state-my-id))
-      (format " %s" (alist-get 'system-version data)) " "))))
+      (substring (alist-get 'myID (alist-get 'system-status data) "n/a") 0 6)
+      (format " %s"
+              (alist-get 'system-version data "n/a"))) " ")))
+
+(defun syncthing--sec-to-uptime (sec)
+  (let* ((days  (/ sec (* 1 60 60 24)))
+         (hours (/ (- sec (* days 1 60 60 24)) (* 1 60 60)))
+         (minutes (/ (- sec (* days 1 60 60 24) (* hours 1 60 60)) (* 1 60)))
+         (seconds (- sec (* days 1 60 60 24) (* hours 1 60 60) (* minutes 1 60)))
+         (out ""))
+    (when (< 0 days)
+      (setq out (format "%s %dd" out days)))
+    (when (< 0 hours)
+      (setq out (format "%s %dh" out hours)))
+    (when (< 0 minutes)
+      (setq out (format "%s %dm" out minutes)))
+    (when (< 0 seconds)
+      (setq out (format "%s %ds" out seconds)))
+    out))
 
 (defun syncthing--draw ()
   "Setup buffer and draw widgets."
@@ -654,11 +660,6 @@ Argument POS Incoming EVENT position."
   (save-window-excursion
     (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
     (widget-setup)
-    (let-alist (syncthing-request
-                syncthing-base-url "GET" "rest/system/status")
-      (setq syncthing--state-my-id
-            (substring .myID 0 6))
-      (setq syncthing--state-uptime .uptime))
     (setq header-line-format (syncthing--header-line syncthing-server))
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
@@ -675,8 +676,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
         syncthing-start-collapsed)
   (setq syncthing--state-count-local-files 0)
   (setq syncthing--state-count-local-folders 0)
-  (setq syncthing--state-count-local-bytes 0)
-  (setq syncthing--state-uptime 0))
+  (setq syncthing--state-count-local-bytes 0))
 
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
@@ -712,7 +712,9 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
              (setf (alist-get 'system-version data)
                    (alist-get
                     'version (syncthing-request
-                              url "GET" "rest/system/version")))
+                              url "GET" "rest/system/version"))
+                   (alist-get 'system-status data)
+                   (syncthing-request url "GET" "rest/system/status"))
              return (setf (syncthing-server-data server) data))))
 
 ;; public funcs
