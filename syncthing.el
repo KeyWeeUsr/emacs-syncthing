@@ -300,10 +300,6 @@
   nil
   "Tmp to hold collapse toggle.")
 
-(defvar-local syncthing--state-count-local-files
-  0
-  "Tmp to hold local state.")
-
 (defvar-local syncthing--state-count-local-bytes
   0
   "Tmp to hold local state.")
@@ -490,8 +486,6 @@ Argument POS Incoming EVENT position."
     (let-alist (syncthing-request
                 syncthing-base-url "GET"
                 (format "rest/db/status?folder=%s" id))
-      (setq syncthing--state-count-local-files
-            (+ syncthing--state-count-local-files .localFiles))
       (setq syncthing--state-count-local-bytes
             (+ syncthing--state-count-local-bytes .localBytes)))
     (dolist (item (syncthing-request
@@ -620,7 +614,12 @@ Argument POS Incoming EVENT position."
                (syncthing--bytes-to-rate
                 (or (alist-get 'rate-upload data) -1))))
       (syncthing--count-local-files
-       (format " %d" syncthing--state-count-local-files))
+       (format
+        " %d"
+        (cl-reduce
+         #'+ (alist-get 'folders data)
+         :key (lambda (folder)
+                (alist-get 'localFiles (alist-get 'status folder) 0)))))
       (syncthing--count-local-folders
        (format
         " %d"
@@ -692,7 +691,6 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--state-fold-devices (list))
   (setq syncthing--state-collapse-after-start
         syncthing-start-collapsed)
-  (setq syncthing--state-count-local-files 0)
   (setq syncthing--state-count-local-folders 0)
   (setq syncthing--state-count-local-bytes 0))
 
