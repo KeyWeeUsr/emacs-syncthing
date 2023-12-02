@@ -350,11 +350,7 @@
 (cl-defstruct (syncthing-buffer
                (:copier nil) (:named nil) (:constructor syncthing--buffer))
   "Local state holder for Syncthing buffer drawables and state."
-  name collapse-after-start)
-
-(defvar-local syncthing--state-fold-folders
-  nil
-  "Tmp list to hold IDs of folds.")
+  name collapse-after-start fold-folders fold-devices)
 
 (defvar-local syncthing--state-fold-devices
   nil
@@ -536,7 +532,7 @@ Argument POS Incoming EVENT position."
             ((string-equal "id" (car item))
              (setq id (cdr item))
              (when (syncthing-buffer-collapse-after-start syncthing-buffer)
-               (push id syncthing--state-fold-folders)))
+               (push id (syncthing-buffer-fold-folders syncthing-buffer))))
             ((string-equal "type" (car item))
              (setq type (cdr item)))
             ((string-equal "path" (car item))
@@ -562,26 +558,28 @@ Argument POS Incoming EVENT position."
         " "
         (syncthing--color-perc perc)
         (syncthing--bold (format " %s\n" name))
-        (unless (member id syncthing--state-fold-folders)
+        (unless (member id (syncthing-buffer-fold-folders syncthing-buffer))
           (syncthing--prop (format "\t%s\n\t%s\n\t%s\n\t%s\n"
                                    id type path devices))))
        :action
        (lambda (&rest _event)
-         (if (member id syncthing--state-fold-folders)
+         (if (member id (syncthing-buffer-fold-folders syncthing-buffer))
              (progn
-               (setq syncthing--state-fold-folders
-                     (delete id syncthing--state-fold-folders))
+               (setf (syncthing-buffer-fold-folders syncthing-buffer)
+                     (delete id
+                             (syncthing-buffer-fold-folders syncthing-buffer)))
                (save-excursion
                  (widget-delete (syncthing--get-widget (point)))
                  (syncthing--list-37-folder folder)))
            (progn
-             (if syncthing--state-fold-folders
-                 (push id syncthing--state-fold-folders)
-               (setq syncthing--state-fold-folders (list id)))
+             (if (syncthing-buffer-fold-folders syncthing-buffer)
+                 (push id (syncthing-buffer-fold-folders syncthing-buffer))
+               (setf (syncthing-buffer-fold-folders syncthing-buffer)
+                     (list id)))
              (save-excursion
                (widget-delete (syncthing--get-widget (point)))
                (syncthing--list-37-folder folder)))))
-       (if (member id syncthing--state-fold-folders)
+       (if (member id (syncthing-buffer-fold-folders syncthing-buffer))
            (syncthing--bold ">")
          (syncthing--bold "v"))))))
 
@@ -773,8 +771,8 @@ Argument POS Incoming EVENT position."
 Optional argument SKIP-CANCEL Skip removing auto-refresh."
   ;; everything += or appendable has to reset in each update
   (setf (syncthing-buffer-collapse-after-start syncthing-buffer)
-        syncthing-start-collapsed)
-  (setq syncthing--state-fold-folders (list))
+        syncthing-start-collapsed
+        (syncthing-buffer-fold-folders syncthing-buffer) (list))
   (setq syncthing--state-fold-devices (list)))
 
 (defun syncthing--update (&rest _)
