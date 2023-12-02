@@ -4,8 +4,8 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 1.1.0
-;; Package-Requires: ((emacs "25.1"))
+;; Version: 1.2.0
+;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,7 @@
 
 (require 'widget)
 (require 'wid-edit)
+(require 'subr-x)
 
 (defgroup syncthing
   nil
@@ -380,7 +381,8 @@
   "Send authenticated HTTP request to Syncthing REST API.
 Argument METHOD HTTP method/verb.
 Argument URL API to call.
-Optional argument DATA Data to send."
+Optional argument DATA Data to send.
+Argument TOKEN API token."
   (let ((url-request-method method)
         (url-request-data data)
         (url-request-extra-headers `(("X-Api-Key" . ,token))))
@@ -538,9 +540,6 @@ Argument POS Incoming EVENT position."
              (setq path (cdr item)))
             ((string-equal "devices" (car item))
              (setq devices (cdr item)))))
-    (let-alist (syncthing-request
-                syncthing-server "GET"
-                (format "rest/db/status?folder=%s" id)))
     (dolist (item (syncthing-request
                    syncthing-server "GET"
                    (format "rest/db/completion?folder=%s" id)))
@@ -708,6 +707,7 @@ Argument POS Incoming EVENT position."
               (alist-get 'system-version data "n/a"))) " ")))
 
 (defun syncthing--sec-to-uptime (sec)
+  "Convert SEC number to DDd HHh MMm SSs uptime string."
   (let* ((days  (/ sec syncthing-day-seconds))
          (hours (/ (- sec
                       (* days syncthing-day-seconds))
@@ -740,9 +740,11 @@ Argument POS Incoming EVENT position."
     out))
 
 (defun syncthing--maybe-float (num places)
+  "Convert NUM to float if decimal PLACES are > 0."
   (if (> places 0) (float num) num))
 
 (defun syncthing--scale-bytes (bytes places)
+  "Convert BYTES to highest reached 1024 exponent with decimal PLACES."
   (let* ((gigs  (/ bytes (syncthing--maybe-float
                           syncthing-gibibyte places)))
          (megs (/ bytes (syncthing--maybe-float
@@ -761,6 +763,7 @@ Argument POS Incoming EVENT position."
     out))
 
 (defun syncthing--bytes-to-rate (bytes)
+  "Format BYTES to speed rate string."
   (format "%s/s" (syncthing--scale-bytes bytes 0)))
 
 (defun syncthing--draw ()
@@ -797,6 +800,10 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
     (setf (syncthing-buffer-collapse-after-start syncthing-buffer) nil)))
 
 (defun syncthing--interactive-common (name url token)
+  "Shared behavior for `syncthing' and `syncthing-with-base'.
+Argument NAME Display name for Syncthing buffer.
+Argument URL API server URL.
+Argument TOKEN API server token."
   (unless token
     (user-error "Syncthing REST API token not configured"))
   (let ((buff (syncthing--buffer
@@ -901,21 +908,20 @@ Activating this mode will launch Syncthing client in the current window.
     (user-error "Buffer not in `syncthing-mode'"))
   (setq-local
    buffer-stale-function
-   (when syncthing-auto-refresh-mode #'(lambda (&rest _) t))
+   (when syncthing-auto-refresh-mode (lambda (&rest _) t))
    auto-revert-interval
    (when syncthing-auto-refresh-mode syncthing-auto-refresh-interval))
   (auto-revert-mode (if syncthing-auto-refresh-mode 1 -1)))
 
 (defun syncthing-with-base (name base-url token)
-  "Launch Syncthing client's instance for BASE-URL in a new buffer."
+  "Launch Syncthing instance NAME for BASE-URL and TOKEN in a new buffer."
   (interactive
    (string-join
     (list
      "sName: "
      "sSyncthing REST API base URL: "
-     "sSynchting REST API token: ")
-    "\n")
-  (syncthing--interactive-common name base-url token)))
+     "sSynchting REST API token: ") "\n"))
+  (syncthing--interactive-common name base-url token))
 
 (defun syncthing ()
   "Launch Syncthing client's instance in a new buffer."
