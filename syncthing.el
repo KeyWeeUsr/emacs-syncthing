@@ -891,7 +891,6 @@ Activating this mode will launch Syncthing client in the current window.
   ;; Hook to auto-revert mode for refreshing
   (setq-local revert-buffer-function #'syncthing--update)
 
-  (syncthing--update)
   (when syncthing-start-with-auto-refresh
     (syncthing-auto-refresh-mode 1)))
 
