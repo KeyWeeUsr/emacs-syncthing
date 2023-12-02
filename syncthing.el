@@ -312,10 +312,6 @@
   0
   "Tmp to hold local state.")
 
-(defvar-local syncthing--state-auto-refresh
-  nil
-  "Tmp to hold local state.")
-
 ;; keyboard
 (defvar-local syncthing-mode-map
   (let ((map (make-keymap)))
