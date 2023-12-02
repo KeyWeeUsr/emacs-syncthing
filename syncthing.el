@@ -352,10 +352,6 @@
   "Local state holder for Syncthing buffer drawables and state."
   name collapse-after-start fold-folders fold-devices)
 
-(defvar-local syncthing--state-fold-devices
-  nil
-  "Tmp list to hold IDs of folds.")
-
 ;; keyboard
 (defvar-local syncthing-mode-map
   (let ((map (make-keymap)))
@@ -612,7 +608,7 @@ Argument POS Incoming EVENT position."
             ((string-equal "deviceID" (car item))
              (setq id (format "%s" (cdr item)))
              (when (syncthing-buffer-collapse-after-start syncthing-buffer)
-               (push id syncthing--state-fold-devices)))
+               (push id (syncthing-buffer-fold-devices syncthing-buffer))))
             ((string-equal "paused" (car item))
              (setq paused (if (eq (cdr item) :false) "active" "paused")))
             ((string-equal "addresses" (car item))
@@ -633,26 +629,28 @@ Argument POS Incoming EVENT position."
         " "
         (syncthing--color-perc perc)
         (syncthing--bold (format " %s\n" name))
-        (unless (member id syncthing--state-fold-devices)
+        (unless (member id (syncthing-buffer-fold-devices syncthing-buffer))
           (syncthing--prop (format "\t%s\n\t%s\n\t%s\n"
                                    id paused addresses))))
        :action
        (lambda (&rest _event)
-         (if (member id syncthing--state-fold-devices)
+         (if (member id (syncthing-buffer-fold-devices syncthing-buffer))
              (progn
-               (setq syncthing--state-fold-devices
-                     (delete id syncthing--state-fold-devices))
+               (setf (syncthing-buffer-fold-devices syncthing-buffer)
+                     (delete id
+                             (syncthing-buffer-fold-devices syncthing-buffer)))
                (save-excursion
                  (widget-delete (syncthing--get-widget (point)))
                  (syncthing--list-37-device device)))
            (progn
-             (if syncthing--state-fold-devices
-                 (push id syncthing--state-fold-devices)
-               (setq syncthing--state-fold-devices (list id)))
+             (if (syncthing-buffer-fold-devices syncthing-buffer)
+                 (push id (syncthing-buffer-fold-devices syncthing-buffer))
+               (setf (syncthing-buffer-fold-devices syncthing-buffer)
+                     (list id)))
              (save-excursion
                (widget-delete (syncthing--get-widget (point)))
                (syncthing--list-37-device device)))))
-       (if (member id syncthing--state-fold-devices)
+       (if (member id (syncthing-buffer-fold-devices syncthing-buffer))
            (syncthing--bold ">")
          (syncthing--bold "v"))))))
 
@@ -773,7 +771,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setf (syncthing-buffer-collapse-after-start syncthing-buffer)
         syncthing-start-collapsed
         (syncthing-buffer-fold-folders syncthing-buffer) (list))
-  (setq syncthing--state-fold-devices (list)))
+  (setf (syncthing-buffer-fold-devices syncthing-buffer) (list)))
 
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
