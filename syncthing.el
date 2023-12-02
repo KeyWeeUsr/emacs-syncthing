@@ -277,7 +277,10 @@
 (cl-defstruct (syncthing-server
                (:copier nil) (:named nil) (:constructor syncthing--server))
   "Local state holder for Syncthing buffer client."
-  name url)
+  ;; on slot order change or on new slot basically restart Emacs because
+  ;; "args-out-of-range" even though it's present and cl-defstruct is called
+  ;; via e.g. eval-buffer
+  name url data)
 
 (defvar-local syncthing--state-session-buffer
   ""
@@ -305,10 +308,6 @@
 
 (defvar-local syncthing--state-count-local-bytes
   0
-  "Tmp to hold local state.")
-
-(defvar-local syncthing--state-version
-  ""
   "Tmp to hold local state.")
 
 (defvar-local syncthing--state-my-id
@@ -623,29 +622,30 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--header-line (server)
   "Return SERVER `header-line-format' string."
-  (string-join
-   (list
-    (syncthing--rate-download " 0B/s")
-    (syncthing--rate-upload " 0B/s")
-    (syncthing--count-local-files
-     (format " %d" syncthing--state-count-local-files))
-    (syncthing--count-local-folders
-     (format " %d" syncthing--state-count-local-folders))
-    (syncthing--count-local-bytes
-     (format " ~%.1fGiB"
-             (/ syncthing--state-count-local-bytes
-                syncthing-gibibyte)))
-    (syncthing--count-listeners " 3/3")
-    (syncthing--count-discovery " 4/5")
-    (syncthing--uptime
-     (format " %dd %dh %dm"
-             0
-             (/ syncthing--state-uptime 3600)
-             (* 60 (- (/ syncthing--state-uptime 3600.0)
-                      (/ syncthing--state-uptime 3600)))))
-    ""  ;; bad glyph! :(
-    (syncthing--my-id (format " %s" syncthing--state-my-id))
-    (format " %s" syncthing--state-version)) " "))
+  (let* ((data (syncthing-server-data server)))
+    (string-join
+     (list
+      (syncthing--rate-download " 0B/s")
+      (syncthing--rate-upload " 0B/s")
+      (syncthing--count-local-files
+       (format " %d" syncthing--state-count-local-files))
+      (syncthing--count-local-folders
+       (format " %d" syncthing--state-count-local-folders))
+      (syncthing--count-local-bytes
+       (format " ~%.1fGiB"
+               (/ syncthing--state-count-local-bytes
+                  syncthing-gibibyte)))
+      (syncthing--count-listeners " 3/3")
+      (syncthing--count-discovery " 4/5")
+      (syncthing--uptime
+       (format " %dd %dh %dm"
+               0
+               (/ syncthing--state-uptime 3600)
+               (* 60 (- (/ syncthing--state-uptime 3600.0)
+                        (/ syncthing--state-uptime 3600)))))
+      ""  ;; bad glyph! :(
+      (syncthing--my-id (format " %s" syncthing--state-my-id))
+      (format " %s" (alist-get 'system-version data)) " "))))
 
 (defun syncthing--draw ()
   "Setup buffer and draw widgets."
@@ -655,14 +655,11 @@ Argument POS Incoming EVENT position."
     (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
     (widget-setup)
     (let-alist (syncthing-request
-                syncthing-base-url "GET" "rest/system/version")
-      (setq syncthing--state-version .version))
-    (let-alist (syncthing-request
                 syncthing-base-url "GET" "rest/system/status")
       (setq syncthing--state-my-id
             (substring .myID 0 6))
       (setq syncthing--state-uptime .uptime))
-    (setq header-line-format (syncthing--header-line syncthing-base-url))
+    (setq header-line-format (syncthing--header-line syncthing-server))
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
 
@@ -679,7 +676,6 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setq syncthing--state-count-local-files 0)
   (setq syncthing--state-count-local-folders 0)
   (setq syncthing--state-count-local-bytes 0)
-  (setq syncthing--state-version "")
   (setq syncthing--state-uptime 0))
 
 (defun syncthing--update (&rest _)
@@ -688,6 +684,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
     (switch-to-buffer (get-buffer-create syncthing--state-session-buffer))
     (let ((inhibit-read-only t))
       (erase-buffer))
+    (syncthing--server-update syncthing-server)
     (syncthing--init-state)
     (syncthing--draw)
     (setq syncthing--state-collapse-after-start nil)))
@@ -706,6 +703,17 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
       (pop-to-buffer (current-buffer)
                      '((display-buffer-reuse-window
                         display-buffer-same-window))))))
+
+(defun syncthing--server-update (server)
+  "Update SERVER data."
+  (let ((url (syncthing-server-url server)))
+    (cl-loop with data = (syncthing-request url "GET" "rest/config")
+             initially do
+             (setf (alist-get 'system-version data)
+                   (alist-get
+                    'version (syncthing-request
+                              url "GET" "rest/system/version")))
+             return (setf (syncthing-server-data server) data))))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
