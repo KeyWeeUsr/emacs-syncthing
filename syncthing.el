@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 1.2.0
+;; Version: 1.2.1
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -361,7 +361,10 @@
   (let ((map (make-keymap)))
     ;; (set-keymap-parent map special-mode-map)
     (define-key map (kbd "RET") #'syncthing--newline)
+    (define-key map (kbd "SPC") #'syncthing--newline)
     (define-key map (kbd "?") #'describe-bindings)
+    (define-key map (kbd "n") #'next-line)
+    (define-key map (kbd "p") #'previous-line)
     map))
 
 ;; private/helper funcs
