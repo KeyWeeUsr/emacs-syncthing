@@ -930,7 +930,8 @@ Activating this mode will launch Syncthing client in the current window.
   (syncthing--interactive-common
    syncthing-default-name
    syncthing-base-url
-   (if syncthing-default-server-token
+   (if (and syncthing-default-server-token
+            (not (string= "" syncthing-default-server-token)))
        syncthing-default-server-token
      (customize-variable 'syncthing-default-server-token)
      syncthing-default-server-token)))
