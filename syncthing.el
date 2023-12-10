@@ -1,10 +1,10 @@
-;;; syncthing.el --- Emacs client for Syncthing -*- lexical-binding: t; -*-
+;;; syncthing.el --- Client for Syncthing -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023 Peter Badida
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 1.2.1
+;; Version: 1.2.2
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -24,6 +24,7 @@
 ;;; Commentary:
 
 ;; This package attempts to port the browser client functionality into Emacs.
+;; The client requires Syncthing (server) obtainable from https://syncthing.net
 
 ;;; Code:
 
