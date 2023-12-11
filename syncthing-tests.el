@@ -5,9 +5,16 @@
 (require 'ert)
 (require 'syncthing)
 
+
+(defun syncthing-cleanup ()
+  (dolist (buf (buffer-list))
+    (unless (or (string-match-p (regexp-quote "*Messages*") (buffer-name buf)))
+      (kill-buffer buf))))
+
 (ert-deftest syncthing-run-customize ()
   "Run `customize-variable' on missing API token."
   (let (called args)
+    (syncthing-cleanup)
     (advice-add 'syncthing--interactive-common
                 :override
                 (lambda (&rest rest) (setq args rest)))
@@ -29,6 +36,7 @@
   (let* ((dummy "meow")
          (syncthing-default-server-token dummy)
          called args)
+    (syncthing-cleanup)
     (advice-add 'syncthing--interactive-common
                 :override
                 (lambda (&rest rest) (setq args rest)))
