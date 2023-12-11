@@ -360,7 +360,7 @@
 ;; keyboard
 (defvar-local syncthing-mode-map
   (let ((map (make-keymap)))
-    ;; (set-keymap-parent map special-mode-map)
+    ;; custom handler for RET / widget input handler
     (define-key map (kbd "RET") #'syncthing--newline)
     (define-key map (kbd "SPC") #'syncthing--newline)
     (define-key map (kbd "?") #'describe-bindings)
@@ -894,9 +894,6 @@ Activating this mode will launch Syncthing client in the current window.
 
 \\{syncthing-mode-map}"
   :group 'syncthing
-  ;; custom handler for RET / widget input handler
-  ;; (keymap-local-set "RET" #'syncthing--newline)
-  ;; (keymap-local-set "?" #'describe-bindings)
   (use-local-map syncthing-mode-map)
 
   ;; Hook to auto-revert mode for refreshing
