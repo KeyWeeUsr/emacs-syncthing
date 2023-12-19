@@ -657,9 +657,7 @@ Argument POS Incoming EVENT position."
              (setq paused (if (eq (cdr item) :false) "active" "paused")))
             ((string-equal "addresses" (car item))
              (setq addresses (format "%s" (cdr item))))))
-    (dolist (item (syncthing-request
-                   syncthing-server "GET"
-                   (format "rest/db/completion?device=%s" id)))
+    (dolist (item (alist-get 'completion device))
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
@@ -944,8 +942,15 @@ Argument TOKEN API server token."
                      server "GET" (format "rest/db/status?folder=%s"
                                           folder-id))
                     (nth idx folders) folder)
-
-           finally return (setf (syncthing-server-data server) data)))
+           finally return (setf (syncthing-server-data server) data))
+  (let* ((data (syncthing-server-data server))
+         (devices (alist-get 'devices data))
+         (nums (number-sequence 0 (1- (length devices)))))
+    (dolist (idx nums)
+      (setf (alist-get 'completion (nth idx devices))
+            (syncthing-request
+             server "GET" (format "rest/db/completion?device=%s"
+                                  (alist-get 'deviceID (nth idx devices))))))))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
