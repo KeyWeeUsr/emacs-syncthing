@@ -474,46 +474,65 @@ Argument POS Incoming EVENT position."
   "Format TEXT as Syncthing ID."
   (propertize text 'face 'syncthing-my-id))
 
-(defun syncthing--list ()
-  "List all resources."
-  (let-alist (syncthing-request
-              syncthing-server "GET" "rest/config")
-    (cond ((eq .version 37)
-           (save-window-excursion
-             (switch-to-buffer
-              (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-             (widget-insert (syncthing--title " Folders\n")))
-           (mapc
-            #'syncthing--list-37-folder
-            (sort .folders
-                  (lambda (left right)
-                    (let ((lname "")
-                          (rname ""))
-                      (dolist (litem left)
-                        (when (string-equal "label" (car litem))
-                          (setq lname (cdr litem))))
-                      (dolist (ritem right)
-                        (when (string-equal "label" (car ritem))
-                          (setq rname (cdr ritem))))
-                      (string< lname rname)))))
-           (save-window-excursion
-             (switch-to-buffer
-              (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-             (widget-insert (syncthing--title "\n"))
-             (widget-insert (syncthing--title " Devices\n")))
-           (mapc
-            #'syncthing--list-37-device
-            (sort .devices
-                  (lambda (left right)
-                    (let ((lname "")
-                          (rname ""))
-                      (dolist (litem left)
-                        (when (string-equal "name" (car litem))
-                          (setq lname (cdr litem))))
-                      (dolist (ritem right)
-                        (when (string-equal "name" (car ritem))
-                          (setq rname (cdr ritem))))
-                      (string< lname rname)))))))))
+(defun syncthing--draw-folders-header (&optional &key before after)
+  "Draw folder header with optional BEFORE and AFTER separator."
+  (save-window-excursion
+    (switch-to-buffer
+     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
+    (when before
+      (widget-insert (syncthing--title "\n")))
+    (widget-insert (syncthing--title " Folders\n"))
+    (when after
+      (widget-insert (syncthing--title "\n")))))
+
+(defun syncthing--draw-devices-header (&optional &key before after)
+  "Draw device header with optional BEFORE and AFTER separator."
+  (save-window-excursion
+    (switch-to-buffer
+     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
+    (when before
+      (widget-insert (syncthing--title "\n")))
+    (widget-insert (syncthing--title " Devices\n"))
+    (when after
+      (widget-insert (syncthing--title "\n")))))
+
+(defun syncthing--draw-folders (server)
+  "Draw folder widget in buffer from `syncthing-server'."
+  (let-alist (syncthing-server-data server)
+    (syncthing--draw-folders-header)
+    (cond ((>= .version 37)
+           (mapc #'syncthing--list-37-folder
+                 (sort .folders #'syncthing--sort-folders))))))
+
+(defun syncthing--draw-devices (server)
+  "Draw device widget in buffer from `syncthing-server'."
+  (let-alist (syncthing-server-data server)
+    (syncthing--draw-devices-header :before t)
+    (cond ((>= .version 37)
+           (mapc #'syncthing--list-37-device
+                 (sort .devices #'syncthing--sort-devices))))))
+
+(defun syncthing--flat-string-sort (key left right)
+  "Generic value sort func for flat Syncthing data.
+
+[{\"key\": value9}, {\"key\": value5}] -> [value5, value9]"
+  (let ((lname "")
+        (rname ""))
+    (dolist (litem left)
+      (when (string-equal key (car litem))
+        (setq lname (cdr litem))))
+    (dolist (ritem right)
+      (when (string-equal key (car ritem))
+        (setq rname (cdr ritem))))
+    (string< lname rname)))
+
+(defun syncthing--sort-folders (left right)
+  "Sort folders by `label' value."
+  (syncthing--flat-string-sort "label" left right))
+
+(defun syncthing--sort-devices (left right)
+  "Sort devices by `name' value."
+  (syncthing--flat-string-sort "name" left right))
 
 (defun syncthing--progress (device-id folder-id)
   "Get progress for DEVICE-ID and FOLDER-ID."
@@ -770,17 +789,20 @@ Argument POS Incoming EVENT position."
   "Format BYTES to speed rate string."
   (format "%s/s" (syncthing--scale-bytes bytes 0)))
 
-(defun syncthing--draw ()
-  "Setup buffer and draw widgets."
-  (syncthing--ping syncthing-server)
-  (syncthing--list)
+(defun syncthing--draw-buffer (server)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
     (widget-setup)
-    (setq header-line-format (syncthing--header-line syncthing-server))
+    (setq header-line-format (syncthing--header-line server))
     ;; messes up with cursor position, reset to 0,0
     (goto-char 0)))
+
+(defun syncthing--draw (server)
+  "Setup buffer and draw widgets."
+  (syncthing--draw-folders server)
+  (syncthing--draw-devices server)
+  (syncthing--draw-buffer server))
 
 (defun syncthing--init-state ()
   "Reset all variables holding initial state.
@@ -798,9 +820,10 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
     (let ((inhibit-read-only t))
       (erase-buffer))
+    (syncthing--ping syncthing-server)
     (syncthing--server-update syncthing-server)
     (syncthing--init-state)
-    (syncthing--draw)
+    (syncthing--draw syncthing-server)
     (setf (syncthing-buffer-collapse-after-start syncthing-buffer) nil)))
 
 (defun syncthing--interactive-common (name url token)
@@ -830,6 +853,8 @@ Argument TOKEN API server token."
 
 (defun syncthing--server-update (server)
   "Update SERVER data."
+  ;; TODO: handle version change: >= current + branches for each <
+  ;;       via rest/config's '{"version": 37}' key
   (cl-loop with data = (syncthing-request server "GET" "rest/config")
            initially do
            (setf (alist-get 'system-version data)
