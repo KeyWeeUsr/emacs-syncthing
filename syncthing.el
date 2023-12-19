@@ -894,38 +894,42 @@ Argument TOKEN API server token."
                      '((display-buffer-reuse-window
                         display-buffer-same-window))))))
 
+(defun syncthing--calc-speed (server)
+  "Calculate upload and download rate for SERVER."
+  (let* ((data (syncthing-server-data server))
+         (conns (syncthing-request server "GET" "rest/system/connections"))
+         (last-speed-date
+          (or (syncthing-server-last-speed-date server) 0))
+         (now (time-convert nil 'integer))
+         (now-total (alist-get 'total conns))
+         (conns-total (syncthing-server-connections-total server))
+         (td (- now last-speed-date)))
+    (setf (syncthing-server-last-speed-date server)
+          now
+          (alist-get 'rate-download data)
+          (max 0 (/ (- (alist-get 'inBytesTotal now-total)
+                       (or (alist-get 'inBytesTotal conns-total) 0))
+                    td))
+          (alist-get 'rate-upload data)
+          (max 0 (/ (- (alist-get 'outBytesTotal now-total)
+                       (or (alist-get 'outBytesTotal conns-total) 0))
+                    td))
+          (syncthing-server-connections-total server)
+          now-total
+          (syncthing-server-data server) data)))
+
 (defun syncthing--server-update (server)
   "Update SERVER data."
   ;; TODO: handle version change: >= current + branches for each <
   ;;       via rest/config's '{"version": 37}' key
   (let* ((data (syncthing-request server "GET" "rest/config"))
          (folders (alist-get 'folders data))
-         (devices (alist-get 'devices data))
-         (conns (syncthing-request server "GET" "rest/system/connections")))
+         (devices (alist-get 'devices data)))
     (setf (alist-get 'system-version data)
           (alist-get 'version
                      (syncthing-request server "GET" "rest/system/version"))
           (alist-get 'system-status data)
           (syncthing-request server "GET" "rest/system/status"))
-
-    (let* ((last-speed-date
-            (or (syncthing-server-last-speed-date server) 0))
-           (now (time-convert nil 'integer))
-           (now-total (alist-get 'total conns))
-           (conns-total (syncthing-server-connections-total server))
-           (td (- now last-speed-date)))
-      (setf (syncthing-server-last-speed-date server)
-            now
-            (alist-get 'rate-download data)
-            (max 0 (/ (- (alist-get 'inBytesTotal now-total)
-                         (or (alist-get 'inBytesTotal conns-total) 0))
-                      td))
-            (alist-get 'rate-upload data)
-            (max 0 (/ (- (alist-get 'outBytesTotal now-total)
-                         (or (alist-get 'outBytesTotal conns-total) 0))
-                      td))
-            (syncthing-server-connections-total server)
-            now-total))
 
     (dolist (idx (number-sequence 0 (1- (length folders))))
       (setf (alist-get 'completion (nth idx folders))
@@ -943,7 +947,8 @@ Argument TOKEN API server token."
              server "GET" (format "rest/db/completion?device=%s"
                                   (alist-get 'deviceID (nth idx devices))))))
 
-    (setf (syncthing-server-data server) data)))
+    (setf (syncthing-server-data server) data)
+    (syncthing--calc-speed server)))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
