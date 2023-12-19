@@ -163,6 +163,27 @@
   :group 'syncthing
   :type 'number)
 
+(defcustom syncthing-header-items
+  '("rate-download" "rate-upload" "count-local-files" "count-local-folders"
+    "count-local-bytes" "count-listeners" "count-discovery" "uptime" "my-id"
+    "version")
+  "Items to render at `header-line-format'.
+
+Special meaning for empty list / `nil' to skip rendering the header line."
+  :group 'syncthing
+  :type '(repeat
+          (choice :tag "Item"
+                  (const :tag "Download rate" "rate-download")
+                  (const :tag "Upload rate" "rate-upload")
+                  (const :tag "Files" "count-local-files")
+                  (const :tag "Folders" "count-local-folders")
+                  (const :tag "Size" "count-local-bytes")
+                  (const :tag "Listeners" "count-listeners")
+                  (const :tag "Discovery" "count-discovery")
+                  (const :tag "Uptime" "uptime")
+                  (const :tag "ID" "my-id")
+                  (const :tag "Version" "version"))))
+
 ;; customization faces/colors/fonts
 (defface syncthing-title
   '((((class color) (background dark))
@@ -683,51 +704,77 @@ Argument POS Incoming EVENT position."
   "Return SERVER `header-line-format' string."
   (let* ((data (syncthing-server-data server))
          (uptime
-          (alist-get 'uptime (alist-get 'system-status data))))
-    (string-join
-     (list
-      (syncthing--rate-download
-       (format syncthing-format-rate-download
-               (syncthing--bytes-to-rate
-                (or (alist-get 'rate-download data) -1))))
-      (syncthing--rate-upload
-       (format syncthing-format-rate-upload
-               (syncthing--bytes-to-rate
-                (or (alist-get 'rate-upload data) -1))))
-      (syncthing--count-local-files
-       (format
-        syncthing-format-count-local-files
-        (cl-reduce
-         #'+ (alist-get 'folders data)
-         :key (lambda (folder)
-                (alist-get 'localFiles (alist-get 'status folder) 0)))))
-      (syncthing--count-local-folders
-       (format
-        syncthing-format-count-local-folders
-        (cl-reduce
-         #'+ (alist-get 'folders data)
-         :key (lambda (folder)
-                (alist-get 'localDirectories (alist-get 'status folder) 0)))))
-      (syncthing--count-local-bytes
-       (format
-        syncthing-format-count-local-bytes
-        (syncthing--scale-bytes
-         (cl-reduce
-          #'+ (alist-get 'folders data)
-          :key (lambda (folder)
-                 (alist-get 'localBytes (alist-get 'status folder) 0)))
-         1)))
-      (syncthing--count-listeners
-       (format syncthing-format-count-listeners "3/3"))
-      (syncthing--count-discovery
-       (format syncthing-format-count-discovery "4/5"))
-      (syncthing--uptime
-       (format syncthing-format-uptime (syncthing--sec-to-uptime uptime)))
-      (format syncthing-format-my-id
-              (substring
-               (alist-get 'myID (alist-get 'system-status data) "n/a") 0 6))
-      (format syncthing-format-version
-              (alist-get 'system-version data "n/a"))) " ")))
+          (alist-get 'uptime (alist-get 'system-status data)))
+         line)
+    (dolist (item syncthing-header-items)
+      (when (string= item "rate-download")
+        (push (syncthing--rate-download
+               (format syncthing-format-rate-download
+                       (syncthing--bytes-to-rate
+                        (or (alist-get 'rate-download data) -1))))
+              line))
+      (when (string= item "rate-upload")
+        (push (syncthing--rate-upload
+               (format syncthing-format-rate-upload
+                       (syncthing--bytes-to-rate
+                        (or (alist-get 'rate-upload data) -1))))
+              line))
+      (when (string= item "count-local-files")
+        (push (syncthing--count-local-files
+               (format
+                syncthing-format-count-local-files
+                (cl-reduce
+                 #'+ (alist-get 'folders data)
+                 :key (lambda (folder)
+                        (alist-get 'localFiles
+                                   (alist-get 'status folder) 0)))))
+              line))
+      (when (string= item "count-local-folders")
+        (push (syncthing--count-local-folders
+               (format
+                syncthing-format-count-local-folders
+                (cl-reduce
+                 #'+ (alist-get 'folders data)
+                 :key (lambda (folder)
+                        (alist-get 'localDirectories
+                                   (alist-get 'status folder) 0)))))
+              line))
+      (when (string= item "count-local-bytes")
+        (push (syncthing--count-local-bytes
+               (format
+                syncthing-format-count-local-bytes
+                (syncthing--scale-bytes
+                 (cl-reduce
+                  #'+ (alist-get 'folders data)
+                  :key (lambda (folder)
+                         (alist-get 'localBytes
+                                    (alist-get 'status folder) 0)))
+                 1)))
+              line))
+      (when (string= item "count-listeners")
+        (push (syncthing--count-listeners
+               (format syncthing-format-count-listeners "3/3"))
+              line))
+      (when (string= item "count-discovery")
+        (push (syncthing--count-discovery
+               (format syncthing-format-count-discovery "4/5"))
+              line))
+      (when (string= item "uptime")
+        (push (syncthing--uptime
+               (format syncthing-format-uptime
+                       (syncthing--sec-to-uptime uptime)))
+              line))
+      (when (string= item "my-id")
+        (push (format syncthing-format-my-id
+                      (substring
+                       (alist-get 'myID (alist-get 'system-status data)
+                                  "n/a") 0 6))
+              line))
+      (when (string= item "version")
+        (push (format syncthing-format-version
+                      (alist-get 'system-version data "n/a"))
+              line)))
+    (if line (string-join (reverse line) " ") nil)))
 
 (defun syncthing--sec-to-uptime (sec)
   "Convert SEC number to DDd HHh MMm SSs uptime string."
