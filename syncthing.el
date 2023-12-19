@@ -918,19 +918,9 @@ Argument TOKEN API server token."
           now-total
           (syncthing-server-data server) data)))
 
-(defun syncthing--server-update (server)
-  "Update SERVER data."
-  ;; TODO: handle version change: >= current + branches for each <
-  ;;       via rest/config's '{"version": 37}' key
-  (let* ((data (syncthing-request server "GET" "rest/config"))
-         (folders (alist-get 'folders data))
-         (devices (alist-get 'devices data)))
-    (setf (alist-get 'system-version data)
-          (alist-get 'version
-                     (syncthing-request server "GET" "rest/system/version"))
-          (alist-get 'system-status data)
-          (syncthing-request server "GET" "rest/system/status"))
-
+(defun syncthing--server-update-folder-completion (server data)
+  "Update folder completion DATA for SERVER."
+  (let* ((folders (alist-get 'folders data)))
     (dolist (idx (number-sequence 0 (1- (length folders))))
       (setf (alist-get 'completion (nth idx folders))
             (syncthing-request
@@ -939,13 +929,31 @@ Argument TOKEN API server token."
             (alist-get 'status (nth idx folders))
             (syncthing-request
              server "GET" (format "rest/db/status?folder=%s"
-                                  (alist-get 'id (nth idx folders))))))
+                                  (alist-get 'id (nth idx folders))))))))
 
+(defun syncthing--server-update-device-completion (server data)
+  "Update device completion DATA for SERVER."
+  (let* ((devices (alist-get 'devices data)))
     (dolist (idx (number-sequence 0 (1- (length devices))))
       (setf (alist-get 'completion (nth idx devices))
             (syncthing-request
              server "GET" (format "rest/db/completion?device=%s"
-                                  (alist-get 'deviceID (nth idx devices))))))
+                                  (alist-get 'deviceID (nth idx devices))))))))
+
+(defun syncthing--server-update (server)
+  "Update SERVER data."
+  ;; TODO: handle version change: >= current + branches for each <
+  ;;       via rest/config's '{"version": 37}' key
+  (let* ((data (syncthing-request server "GET" "rest/config"))
+         (devices (alist-get 'devices data)))
+    (setf (alist-get 'system-version data)
+          (alist-get 'version
+                     (syncthing-request server "GET" "rest/system/version"))
+          (alist-get 'system-status data)
+          (syncthing-request server "GET" "rest/system/status"))
+
+    (syncthing--server-update-folder-completion server data)
+    (syncthing--server-update-device-completion server data)
 
     (setf (syncthing-server-data server) data)
     (syncthing--calc-speed server)))
@@ -1011,5 +1019,4 @@ Activating this mode will launch Syncthing client in the current window.
      syncthing-default-server-token)))
 
 (provide 'syncthing)
-;; TODO keep drawing in --draw, move update/fetch to --update
 ;;; syncthing.el ends here
