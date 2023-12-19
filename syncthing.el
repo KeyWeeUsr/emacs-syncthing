@@ -584,9 +584,7 @@ Argument POS Incoming EVENT position."
              (setq path (cdr item)))
             ((string-equal "devices" (car item))
              (setq devices (cdr item)))))
-    (dolist (item (syncthing-request
-                   syncthing-server "GET"
-                   (format "rest/db/completion?folder=%s" id)))
+    (dolist (item (alist-get 'completion folder))
       (cond ((string-equal "completion" (car item))
              (setq perc (cdr item)))))
     (save-window-excursion
