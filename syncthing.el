@@ -184,6 +184,12 @@ Special meaning for empty list / `nil' to skip rendering the header line."
                   (const :tag "ID" "my-id")
                   (const :tag "Version" "version"))))
 
+(defcustom syncthing-display-logs
+  nil
+  "Display logs in `syncthing-buffer'."
+  :group 'syncthing
+  :type 'boolean)
+
 ;; customization faces/colors/fonts
 (defface syncthing-title
   '((((class color) (background dark))
@@ -517,6 +523,17 @@ Argument POS Incoming EVENT position."
     (when after
       (widget-insert (syncthing--title "\n")))))
 
+(defun syncthing--draw-logs-header (&optional &key before after)
+  "Draw log header with optional BEFORE and AFTER separator."
+  (save-window-excursion
+    (switch-to-buffer
+     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
+    (when before
+      (widget-insert (syncthing--title "\n")))
+    (widget-insert (syncthing--title "✉ Logs\n"))
+    (when after
+      (widget-insert (syncthing--title "\n")))))
+
 (defun syncthing--draw-folders (server)
   "Draw folder widget in buffer from `syncthing-server'."
   (let-alist (syncthing-server-data server)
@@ -532,6 +549,24 @@ Argument POS Incoming EVENT position."
     (cond ((>= .version 37)
            (mapc #'syncthing--list-37-device
                  (sort .devices #'syncthing--sort-devices))))))
+
+(defun syncthing--draw-logs (server)
+  "Draw logs widget in buffer from `syncthing-server'."
+  (let-alist (syncthing-server-data server)
+    (syncthing--draw-logs-header :before t)
+    (cond ((>= .version 37)
+           (syncthing--list-logs .logs)))))
+
+(defun syncthing--list-logs (logs)
+  "Render LOGS as a widget."
+  (save-window-excursion
+    (switch-to-buffer
+     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
+    (let (text)
+      (dolist (item (alist-get 'messages logs))
+        (let-alist item
+          (push (format "%s\t%s" .when .message) text)))
+      (widget-insert (string-join (reverse text) "\n")))))
 
 (defun syncthing--flat-string-sort (key left right)
   "Generic value sort func for flat Syncthing data.
@@ -845,6 +880,8 @@ Argument POS Incoming EVENT position."
   "Setup buffer and draw widgets."
   (syncthing--draw-folders server)
   (syncthing--draw-devices server)
+  (when syncthing-display-logs
+    (syncthing--draw-logs server))
   (syncthing--draw-buffer server))
 
 (defun syncthing--init-state ()
@@ -944,13 +981,14 @@ Argument TOKEN API server token."
   "Update SERVER data."
   ;; TODO: handle version change: >= current + branches for each <
   ;;       via rest/config's '{"version": 37}' key
-  (let* ((data (syncthing-request server "GET" "rest/config"))
-         (devices (alist-get 'devices data)))
+  (let* ((data (syncthing-request server "GET" "rest/config")))
     (setf (alist-get 'system-version data)
           (alist-get 'version
                      (syncthing-request server "GET" "rest/system/version"))
           (alist-get 'system-status data)
-          (syncthing-request server "GET" "rest/system/status"))
+          (syncthing-request server "GET" "rest/system/status")
+          (alist-get 'logs data)
+          (syncthing-request server "GET" "rest/system/log"))
 
     (syncthing--server-update-folder-completion server data)
     (syncthing--server-update-device-completion server data)
