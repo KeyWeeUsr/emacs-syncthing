@@ -558,7 +558,7 @@ Argument POS Incoming EVENT position."
     (syncthing--draw-folders-header)
     (cond ((>= .version 37)
            (mapc #'syncthing--list-37-folder
-                 (sort .folders #'syncthing--sort-folders))))))
+                 (sort (copy-alist .folders) #'syncthing--sort-folders))))))
 
 (defun syncthing--draw-devices (server)
   "Draw device widget in buffer from SERVER."
@@ -566,7 +566,7 @@ Argument POS Incoming EVENT position."
     (syncthing--draw-devices-header :before t)
     (cond ((>= .version 37)
            (mapc #'syncthing--list-37-device
-                 (sort .devices #'syncthing--sort-devices))))))
+                 (sort (copy-alist .devices) #'syncthing--sort-devices))))))
 
 (defun syncthing--draw-logs (server)
   "Draw logs widget in buffer from SERVER."
