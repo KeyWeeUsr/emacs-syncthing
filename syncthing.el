@@ -679,8 +679,86 @@ Argument RIGHT second object to compare."
         (syncthing--color-perc perc)
         (syncthing--bold (format " %s\n" name))
         (unless (member id (syncthing-buffer-fold-folders syncthing-buffer))
-          (syncthing--prop (format "\t%s\n\t%s\n\t%s\n\t%s\n"
-                                   id type path devices))))
+          (syncthing--prop
+           (format (concat
+                    (string-join
+                     (list " \tFolder ID\t\t\t%s"
+                           " \tFolder Path\t\t\t%s"
+                           " \tGlobal State\t\t%s"
+                           " \tLocal State\t\t\t%s"
+                           " \tFolder Type\t\t\t%s"
+                           " \tRescans\t\t\t\t%s"
+                           " \tFile Pull Order\t\t%s"
+                           " \tShared With\t\t\t%s"
+                           " \tLast Scan\t\t\t%s"
+                           " ⇄\tLatest Change\t\t%s"
+                           ) "\n") "\n")
+                   id path
+                   (format "%s %s %s"
+                           (format
+                            syncthing-format-count-local-files
+                            (alist-get 'globalFiles (alist-get 'status folder)))
+                           (format
+                            syncthing-format-count-local-folders
+                            (alist-get 'globalDirectories
+                                       (alist-get 'status folder)))
+                           (format
+                            syncthing-format-count-local-bytes
+                            (syncthing--scale-bytes
+                             (alist-get 'globalBytes
+                                        (alist-get 'status folder)) 2)))
+                   (format "%s %s %s"
+                           (format
+                            syncthing-format-count-local-files
+                            (alist-get 'localFiles (alist-get 'status folder)))
+                           (format
+                            syncthing-format-count-local-folders
+                            (alist-get 'localDirectories
+                                       (alist-get 'status folder)))
+                           (format
+                            syncthing-format-count-local-bytes
+                            (syncthing--scale-bytes
+                             (alist-get 'localBytes
+                                        (alist-get 'status folder)) 2)))
+                   (cond ((string= type "sendreceive") "Send & Receive")
+                         ((string= type "sendonly") "Send Only")
+                         ((string= type "receiveonly") "Receive Only")
+                         ((string= type "receiveencrypted") "Receive Encrypted"))
+                   (format " %s  %s"
+                           (format (syncthing--sec-to-uptime
+                                    (alist-get 'rescanIntervalS folder)))
+                           (if (alist-get 'fsWatcherEnabled folder)
+                               "Enabled" "Disabled"))
+                   (cond ((string= order "random") "Random")
+                         ((string= order "alphabetic") "Alphabetic")
+                         ((string= order "smallestFirst") "Smallest First")
+                         ((string= order "largestFirst") "Largest First")
+                         ((string= order "oldestFirst") "Oldest First")
+                         ((string= order "newestFirst") "Newest First"))
+                   (string-join
+                    (mapcar (lambda (dev) (alist-get 'name dev)) devices)
+                    ", ")
+                   ;; TODO: proper date parse + trim
+                   (replace-regexp-in-string
+                    "T" " "
+                    (substring
+                     (alist-get 'stateChanged (alist-get 'status folder)) 0 19))
+                   (concat
+                    (if (alist-get 'deleted (alist-get 'lastFile stats))
+                        "Deleted " "Updated ")
+                    (if (file-name-extension
+                         (alist-get 'filename
+                                    (alist-get 'lastFile stats)))
+                        (file-name-with-extension
+                         (file-name-base
+                          (alist-get 'filename
+                                     (alist-get 'lastFile stats)))
+                         (file-name-extension
+                          (alist-get 'filename
+                                     (alist-get 'lastFile stats))))
+                      (file-name-base
+                       (alist-get 'filename
+                                  (alist-get 'lastFile stats)))))))))
        :action
        (lambda (&rest _event)
          (if (member id (syncthing-buffer-fold-folders syncthing-buffer))
@@ -1015,6 +1093,16 @@ Argument TOKEN API server token."
              server "GET" (format "rest/db/status?folder=%s"
                                   (alist-get 'id (nth idx folders))))))))
 
+(defun syncthing--server-update-folder-stats (server data)
+  "Update folder stats DATA for SERVER."
+  (let* ((folders (alist-get 'folders data))
+         (stats (syncthing-request server "GET" "rest/stats/folder")))
+    (dolist (idx (number-sequence 0 (1- (length folders))))
+      (dolist (stat stats)
+        (when (string= (car stat) (alist-get 'id (nth idx folders)))
+          (setf (alist-get 'stats (nth idx folders))
+                (cdr stat)))))))
+
 (defun syncthing--server-update-device-completion (server data)
   "Update device completion DATA for SERVER."
   (let* ((devices (alist-get 'devices data)))
@@ -1023,6 +1111,23 @@ Argument TOKEN API server token."
             (syncthing-request
              server "GET" (format "rest/db/completion?device=%s"
                                   (alist-get 'deviceID (nth idx devices))))))))
+
+(defun syncthing--server-update-device-map (server data)
+  "Update device completion DATA for SERVER."
+  ;; TODO: (const (alist-get 'deviceID item) (alist-get 'device-map data))
+  ;;       except it fails with raw key access by always being nil
+  ;;       probably something with bad (quote) / ' / `, / etc
+  (dolist (folder (alist-get 'folders data))
+    (dolist (foldev-idx
+             (number-sequence 0 (1- (length (alist-get 'devices folder)))))
+      (dolist (dev-idx
+               (number-sequence 0 (1- (length (alist-get 'devices data)))))
+        (when (string= (alist-get 'deviceID (nth foldev-idx
+                                                 (alist-get 'devices folder)))
+                       (alist-get 'deviceID (nth dev-idx
+                                                 (alist-get 'devices data))))
+          (setf (alist-get 'name (nth foldev-idx (alist-get 'devices folder)))
+                (alist-get 'name (nth dev-idx (alist-get 'devices data)))))))))
 
 (defun syncthing--server-update (server)
   "Update SERVER data."
@@ -1041,7 +1146,9 @@ Argument TOKEN API server token."
                                                   syncthing-limit-changes)))
 
     (syncthing--server-update-folder-completion server data)
+    (syncthing--server-update-folder-stats server data)
     (syncthing--server-update-device-completion server data)
+    (syncthing--server-update-device-map server data)
 
     (setf (syncthing-server-data server) data)
     (syncthing--calc-speed server)))
