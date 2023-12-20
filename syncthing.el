@@ -608,7 +608,9 @@ Argument POS Incoming EVENT position."
              (push (format "|%s|%s|%s|%s|%s|%s|"
                            .modifiedBy .action .type .label .path
                            ;; TODO: proper date parse + trim
-                           (substring (alist-get 'time item) 0 19))
+                           (replace-regexp-in-string
+                            "T" " "
+                            (substring (alist-get 'time item) 0 19)))
                    text)))
          (insert (string-join (reverse text) "\n")))
        (org-mode)
