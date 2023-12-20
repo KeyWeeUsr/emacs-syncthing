@@ -190,6 +190,12 @@ Special meaning for empty list / `nil' to skip rendering the header line."
   :group 'syncthing
   :type 'boolean)
 
+(defcustom syncthing-limit-changes
+  25
+  "Limit of items for recent changes."
+  :group 'syncthing
+  :type 'number)
+
 ;; customization faces/colors/fonts
 (defface syncthing-title
   '((((class color) (background dark))
@@ -534,6 +540,17 @@ Argument POS Incoming EVENT position."
     (when after
       (widget-insert (syncthing--title "\n")))))
 
+(defun syncthing--draw-changes-header (&optional &key before after)
+  "Draw log header with optional BEFORE and AFTER separator."
+  (save-window-excursion
+    (switch-to-buffer
+     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
+    (when before
+      (widget-insert (syncthing--title "\n")))
+    (widget-insert (syncthing--title "⌛ Recent Changes\n"))
+    (when after
+      (widget-insert (syncthing--title "\n")))))
+
 (defun syncthing--draw-folders (server)
   "Draw folder widget in buffer from `syncthing-server'."
   (let-alist (syncthing-server-data server)
@@ -557,6 +574,13 @@ Argument POS Incoming EVENT position."
     (cond ((>= .version 37)
            (syncthing--list-logs .logs)))))
 
+(defun syncthing--draw-changes (server)
+  "Draw recent changes widget in buffer from `syncthing-server'."
+  (let-alist (syncthing-server-data server)
+    (syncthing--draw-changes-header :before t)
+    (cond ((>= .version 37)
+           (syncthing--list-changes .changes)))))
+
 (defun syncthing--list-logs (logs)
   "Render LOGS as a widget."
   (save-window-excursion
@@ -567,6 +591,28 @@ Argument POS Incoming EVENT position."
         (let-alist item
           (push (format "%s\t%s" .when .message) text)))
       (widget-insert (string-join (reverse text) "\n")))))
+
+(defun syncthing--list-changes (changes)
+  "Render CHANGES as a widget."
+  (save-window-excursion
+    (switch-to-buffer
+     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
+    (widget-insert
+     (with-temp-buffer
+       (let (text)
+         (push "|Device|Action|Type|Folder|Path|Time|" text)
+         (push "|-|-|-|-|-|-|" text)
+         (dolist (item changes)
+           (let-alist (alist-get 'data item)
+             (push (format "|%s|%s|%s|%s|%s|%s|"
+                           .modifiedBy .action .type .label .path
+                           ;; TODO: proper date parse + trim
+                           (substring (alist-get 'time item) 0 19))
+                   text)))
+         (insert (string-join (reverse text) "\n")))
+       (org-mode)
+       (org-table-align)
+       (substring-no-properties (buffer-string))))))
 
 (defun syncthing--flat-string-sort (key left right)
   "Generic value sort func for flat Syncthing data.
@@ -880,6 +926,7 @@ Argument POS Incoming EVENT position."
   "Setup buffer and draw widgets."
   (syncthing--draw-folders server)
   (syncthing--draw-devices server)
+  (syncthing--draw-changes server)
   (when syncthing-display-logs
     (syncthing--draw-logs server))
   (syncthing--draw-buffer server))
@@ -988,7 +1035,10 @@ Argument TOKEN API server token."
           (alist-get 'system-status data)
           (syncthing-request server "GET" "rest/system/status")
           (alist-get 'logs data)
-          (syncthing-request server "GET" "rest/system/log"))
+          (syncthing-request server "GET" "rest/system/log")
+          (alist-get 'changes data)
+          (syncthing-request server "GET" (format "rest/events/disk?limit=%s"
+                                                  syncthing-limit-changes)))
 
     (syncthing--server-update-folder-completion server data)
     (syncthing--server-update-device-completion server data)
