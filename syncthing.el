@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 1.2.2
+;; Version: 1.3.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -31,6 +31,7 @@
 (require 'widget)
 (require 'wid-edit)
 (require 'subr-x)
+(require 'org-table)
 
 (defgroup syncthing
   nil
@@ -169,7 +170,7 @@
     "version")
   "Items to render at `header-line-format'.
 
-Special meaning for empty list / `nil' to skip rendering the header line."
+Special meaning for empty list / nil to skip rendering the header line."
   :group 'syncthing
   :type '(repeat
           (choice :tag "Item"
@@ -552,7 +553,7 @@ Argument POS Incoming EVENT position."
       (widget-insert (syncthing--title "\n")))))
 
 (defun syncthing--draw-folders (server)
-  "Draw folder widget in buffer from `syncthing-server'."
+  "Draw folder widget in buffer from SERVER."
   (let-alist (syncthing-server-data server)
     (syncthing--draw-folders-header)
     (cond ((>= .version 37)
@@ -560,7 +561,7 @@ Argument POS Incoming EVENT position."
                  (sort .folders #'syncthing--sort-folders))))))
 
 (defun syncthing--draw-devices (server)
-  "Draw device widget in buffer from `syncthing-server'."
+  "Draw device widget in buffer from SERVER."
   (let-alist (syncthing-server-data server)
     (syncthing--draw-devices-header :before t)
     (cond ((>= .version 37)
@@ -568,14 +569,14 @@ Argument POS Incoming EVENT position."
                  (sort .devices #'syncthing--sort-devices))))))
 
 (defun syncthing--draw-logs (server)
-  "Draw logs widget in buffer from `syncthing-server'."
+  "Draw logs widget in buffer from SERVER."
   (let-alist (syncthing-server-data server)
     (syncthing--draw-logs-header :before t)
     (cond ((>= .version 37)
            (syncthing--list-logs .logs)))))
 
 (defun syncthing--draw-changes (server)
-  "Draw recent changes widget in buffer from `syncthing-server'."
+  "Draw recent-changes widget in buffer from SERVER."
   (let-alist (syncthing-server-data server)
     (syncthing--draw-changes-header :before t)
     (cond ((>= .version 37)
@@ -592,8 +593,8 @@ Argument POS Incoming EVENT position."
           (push (format "%s\t%s" .when .message) text)))
       (widget-insert (string-join (reverse text) "\n")))))
 
-(defun syncthing--list-changes (changes)
-  "Render CHANGES as a widget."
+(defun syncthing--list-changes (change)
+  "Render CHANGE as a widget."
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -602,7 +603,7 @@ Argument POS Incoming EVENT position."
        (let (text)
          (push "|Device|Action|Type|Folder|Path|Time|" text)
          (push "|-|-|-|-|-|-|" text)
-         (dolist (item changes)
+         (dolist (item change)
            (let-alist (alist-get 'data item)
              (push (format "|%s|%s|%s|%s|%s|%s|"
                            .modifiedBy .action .type .label .path
@@ -617,7 +618,11 @@ Argument POS Incoming EVENT position."
 (defun syncthing--flat-string-sort (key left right)
   "Generic value sort func for flat Syncthing data.
 
-[{\"key\": value9}, {\"key\": value5}] -> [value5, value9]"
+[{\"key\": value9}, {\"key\": value5}] -> [value5, value9]
+
+Argument KEY to sort with.
+Argument LEFT first object to compare.
+Argument RIGHT second object to compare."
   (let ((lname "")
         (rname ""))
     (dolist (litem left)
@@ -629,11 +634,15 @@ Argument POS Incoming EVENT position."
     (string< lname rname)))
 
 (defun syncthing--sort-folders (left right)
-  "Sort folders by `label' value."
+  "Sort folders by `label' value.
+Argument LEFT first object to compare.
+Argument RIGHT second object to compare."
   (syncthing--flat-string-sort "label" left right))
 
 (defun syncthing--sort-devices (left right)
-  "Sort devices by `name' value."
+  "Sort devices by `name' value.
+Argument LEFT first object to compare.
+Argument RIGHT second object to compare."
   (syncthing--flat-string-sort "name" left right))
 
 (defun syncthing--progress (device-id folder-id)
@@ -914,6 +923,7 @@ Argument POS Incoming EVENT position."
   (format "%s/s" (syncthing--scale-bytes bytes 0)))
 
 (defun syncthing--draw-buffer (server)
+  "Setup widgets and draw other buffer items for SERVER."
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -923,7 +933,7 @@ Argument POS Incoming EVENT position."
     (goto-char 0)))
 
 (defun syncthing--draw (server)
-  "Setup buffer and draw widgets."
+  "Setup buffer and draw widgets for SERVER."
   (syncthing--draw-folders server)
   (syncthing--draw-devices server)
   (syncthing--draw-changes server)
