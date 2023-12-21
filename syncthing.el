@@ -191,6 +191,12 @@ Special meaning for empty list / nil to skip rendering the header line."
   :group 'syncthing
   :type 'boolean)
 
+(defcustom syncthing-display-changes
+  nil
+  "Display recent-changes in `syncthing-buffer'."
+  :group 'syncthing
+  :type 'boolean)
+
 (defcustom syncthing-limit-changes
   25
   "Limit of items for recent changes."
@@ -1011,7 +1017,8 @@ Argument RIGHT second object to compare."
   "Setup buffer and draw widgets for SERVER."
   (syncthing--draw-folders server)
   (syncthing--draw-devices server)
-  (syncthing--draw-changes server)
+  (when syncthing-display-changes
+    (syncthing--draw-changes server))
   (when syncthing-display-logs
     (syncthing--draw-logs server))
   (syncthing--draw-buffer server))
@@ -1145,14 +1152,19 @@ Argument TOKEN API server token."
           (alist-get 'version
                      (syncthing-request server "GET" "rest/system/version"))
           (alist-get 'system-status data)
-          (syncthing-request server "GET" "rest/system/status")
-          (alist-get 'changes data)
-          (syncthing-request server "GET" (format "rest/events/disk?limit=%s"
-                                                  syncthing-limit-changes)))
+          (syncthing-request server "GET" "rest/system/status"))
 
     (when syncthing-display-logs
       (setf (alist-get 'logs data)
             (syncthing-request server "GET" "rest/system/log")))
+
+    ;; TODO: Syncthing possibly timeouts after 60s with [] which causes Emacs
+    ;;       to hang while waiting for the response but can be stopped with C-g
+    ;;       Maybe a bug when there are no changes?
+    (when syncthing-display-changes
+      (setf (alist-get 'changes data)
+            (syncthing-request server "GET" (format "rest/events/disk?limit=%s"
+                                                    syncthing-limit-changes))))
 
     (syncthing--server-update-folder-completion server data)
     (syncthing--server-update-folder-stats server data)
