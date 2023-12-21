@@ -670,16 +670,113 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--list-37-folder (folder)
   "Render single FOLDER item in a widget."
-  (let ((name (alist-get 'label folder))
+  (let* ((name (alist-get 'label folder))
         (id (alist-get 'id folder))
+        (paused (alist-get 'paused folder))
         (type (alist-get 'type folder))
         (path (alist-get 'path folder))
         (devices (alist-get 'devices folder))
-        (perc (alist-get 'completion (alist-get 'completion folder)))
+        (completion (alist-get 'completion folder))
+        (perc (or (alist-get 'completion completion) 0))
         (order (alist-get 'order folder))
-        (stats (alist-get 'stats folder)))
+        (stats (alist-get 'stats folder))
+        (text ""))
     (when (syncthing-buffer-collapse-after-start syncthing-buffer)
       (push id (syncthing-buffer-fold-folders syncthing-buffer)))
+
+    (setq text
+          (format "%s \tFolder ID\t\t\t%s\n \tFolder Path\t\t\t%s\n"
+                  text id path))
+    (unless paused
+      (setq text
+            (format "%s \tGlobal State\t\t%s\n \tLocal State\t\t\t%s\n"
+                    text
+                    (format "%s %s %s"
+                          (format
+                           syncthing-format-count-local-files
+                           (alist-get 'globalFiles (alist-get 'status folder)))
+                          (format
+                           syncthing-format-count-local-folders
+                           (alist-get 'globalDirectories
+                                      (alist-get 'status folder)))
+                          (format
+                           syncthing-format-count-local-bytes
+                           (syncthing--scale-bytes
+                            (alist-get 'globalBytes
+                                       (alist-get 'status folder)) 2)))
+                    (format "%s %s %s"
+                          (format
+                           syncthing-format-count-local-files
+                           (alist-get 'localFiles (alist-get 'status folder)))
+                          (format
+                           syncthing-format-count-local-folders
+                           (alist-get 'localDirectories
+                                      (alist-get 'status folder)))
+                          (format
+                           syncthing-format-count-local-bytes
+                           (syncthing--scale-bytes
+                            (alist-get 'localBytes
+                                       (alist-get 'status folder)) 2))))))
+    (setq text
+          (format
+           "%s \tFolder Type\t\t\t%s\n"
+           text
+           (cond ((string= type "sendreceive") "Send & Receive")
+                 ((string= type "sendonly") "Send Only")
+                 ((string= type "receiveonly") "Receive Only")
+                 ((string= type "receiveencrypted") "Receive Encrypted"))))
+    (setq text
+          (format "%s \tRescans\t\t\t\t%s\n"
+                  text
+                  (format " %s  %s"
+                          (format (syncthing--sec-to-uptime
+                                   (alist-get 'rescanIntervalS folder)))
+                          (if (alist-get 'fsWatcherEnabled folder)
+                              "Enabled" "Disabled"))))
+    (setq text
+          (format "%s \tFile Pull Order\t\t%s\n"
+                  text
+                  (cond ((string= order "random") "Random")
+                        ((string= order "alphabetic") "Alphabetic")
+                        ((string= order "smallestFirst") "Smallest First")
+                        ((string= order "largestFirst") "Largest First")
+                        ((string= order "oldestFirst") "Oldest First")
+                        ((string= order "newestFirst") "Newest First"))))
+    (setq text
+          (format "%s \tShared With\t\t\t%s\n"
+                  text
+                  (string-join
+                   (mapcar (lambda (dev) (alist-get 'name dev)) devices)
+                   ", ")))
+    (setq text
+          (format "%s \tLast Scan\t\t\t%s\n"
+                  text
+                  ;; TODO: proper date parse + trim
+                  (replace-regexp-in-string
+                   "T" " "
+                   (substring
+                    (alist-get 'stateChanged
+                               (alist-get 'status folder)) 0 19))))
+    (setq text
+          (format "%s ⇄\tLatest Change\t\t%s\n"
+                  text
+                  (when stats
+                    (concat
+                     (if (alist-get 'deleted (alist-get 'lastFile stats))
+                         "Deleted " "Updated ")
+                     (if (file-name-extension
+                          (alist-get 'filename
+                                     (alist-get 'lastFile stats)))
+                         (file-name-with-extension
+                          (file-name-base
+                           (alist-get 'filename
+                                      (alist-get 'lastFile stats)))
+                          (file-name-extension
+                           (alist-get 'filename
+                                      (alist-get 'lastFile stats))))
+                       (file-name-base
+                        (alist-get 'filename
+                                   (alist-get 'lastFile stats))))))))
     (save-window-excursion
       (switch-to-buffer
        (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -690,88 +787,12 @@ Argument RIGHT second object to compare."
        (concat
         " "
         (syncthing--color-perc perc)
-        (syncthing--bold (format " %s\n" name))
+        (format "%s%s\n"
+                (syncthing--bold
+                 (format " %s" name))
+                (if paused (syncthing--italic " (Paused)") ""))
         (unless (member id (syncthing-buffer-fold-folders syncthing-buffer))
-          (syncthing--prop
-           (format (concat
-                    (string-join
-                     (list " \tFolder ID\t\t\t%s"
-                           " \tFolder Path\t\t\t%s"
-                           " \tGlobal State\t\t%s"
-                           " \tLocal State\t\t\t%s"
-                           " \tFolder Type\t\t\t%s"
-                           " \tRescans\t\t\t\t%s"
-                           " \tFile Pull Order\t\t%s"
-                           " \tShared With\t\t\t%s"
-                           " \tLast Scan\t\t\t%s"
-                           " ⇄\tLatest Change\t\t%s"
-                           ) "\n") "\n")
-                   id path
-                   (format "%s %s %s"
-                           (format
-                            syncthing-format-count-local-files
-                            (alist-get 'globalFiles (alist-get 'status folder)))
-                           (format
-                            syncthing-format-count-local-folders
-                            (alist-get 'globalDirectories
-                                       (alist-get 'status folder)))
-                           (format
-                            syncthing-format-count-local-bytes
-                            (syncthing--scale-bytes
-                             (alist-get 'globalBytes
-                                        (alist-get 'status folder)) 2)))
-                   (format "%s %s %s"
-                           (format
-                            syncthing-format-count-local-files
-                            (alist-get 'localFiles (alist-get 'status folder)))
-                           (format
-                            syncthing-format-count-local-folders
-                            (alist-get 'localDirectories
-                                       (alist-get 'status folder)))
-                           (format
-                            syncthing-format-count-local-bytes
-                            (syncthing--scale-bytes
-                             (alist-get 'localBytes
-                                        (alist-get 'status folder)) 2)))
-                   (cond ((string= type "sendreceive") "Send & Receive")
-                         ((string= type "sendonly") "Send Only")
-                         ((string= type "receiveonly") "Receive Only")
-                         ((string= type "receiveencrypted") "Receive Encrypted"))
-                   (format " %s  %s"
-                           (format (syncthing--sec-to-uptime
-                                    (alist-get 'rescanIntervalS folder)))
-                           (if (alist-get 'fsWatcherEnabled folder)
-                               "Enabled" "Disabled"))
-                   (cond ((string= order "random") "Random")
-                         ((string= order "alphabetic") "Alphabetic")
-                         ((string= order "smallestFirst") "Smallest First")
-                         ((string= order "largestFirst") "Largest First")
-                         ((string= order "oldestFirst") "Oldest First")
-                         ((string= order "newestFirst") "Newest First"))
-                   (string-join
-                    (mapcar (lambda (dev) (alist-get 'name dev)) devices)
-                    ", ")
-                   ;; TODO: proper date parse + trim
-                   (replace-regexp-in-string
-                    "T" " "
-                    (substring
-                     (alist-get 'stateChanged (alist-get 'status folder)) 0 19))
-                   (concat
-                    (if (alist-get 'deleted (alist-get 'lastFile stats))
-                        "Deleted " "Updated ")
-                    (if (file-name-extension
-                         (alist-get 'filename
-                                    (alist-get 'lastFile stats)))
-                        (file-name-with-extension
-                         (file-name-base
-                          (alist-get 'filename
-                                     (alist-get 'lastFile stats)))
-                         (file-name-extension
-                          (alist-get 'filename
-                                     (alist-get 'lastFile stats))))
-                      (file-name-base
-                       (alist-get 'filename
-                                  (alist-get 'lastFile stats)))))))))
+          (syncthing--prop text)))
        :action
        (lambda (&rest _event)
          (if (member id (syncthing-buffer-fold-folders syncthing-buffer))
@@ -1099,9 +1120,10 @@ Argument TOKEN API server token."
   (let* ((folders (alist-get 'folders data)))
     (dolist (idx (number-sequence 0 (1- (length folders))))
       (setf (alist-get 'completion (nth idx folders))
-            (syncthing-request
-             server "GET" (format "rest/db/completion?folder=%s"
-                                  (alist-get 'id (nth idx folders))))
+            (unless (alist-get 'paused (nth idx folders))
+              (syncthing-request
+               server "GET" (format "rest/db/completion?folder=%s"
+                                    (alist-get 'id (nth idx folders)))))
             (alist-get 'status (nth idx folders))
             (syncthing-request
              server "GET" (format "rest/db/status?folder=%s"
