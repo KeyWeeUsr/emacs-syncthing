@@ -1317,7 +1317,7 @@ Argument TOKEN API server token."
     (message "emacs-syncthing: funcall: %s, args: %s"
              "syncthing--interactive-common"
              (format "(name: %s url: %s token: %s)" name url token)))
-  (unless token
+  (when (or (not token) (string= token ""))
     (user-error "Syncthing REST API token not configured"))
   (let ((buff (syncthing--buffer
               :name (generate-new-buffer (format syncthing-format-buffer name))
