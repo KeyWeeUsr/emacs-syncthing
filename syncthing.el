@@ -833,25 +833,106 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--list-37-device (device)
   "Render single DEVICE item in a widget."
-  (let ((name "")
-        (id "")
-        (paused t)
-        (addresses '())
-        (perc 0))
-    (dolist (item device)
-      (cond ((string-equal "name" (car item))
-             (setq name (format "%s" (cdr item))))
-            ((string-equal "deviceID" (car item))
-             (setq id (format "%s" (cdr item)))
-             (when (syncthing-buffer-collapse-after-start syncthing-buffer)
-               (push id (syncthing-buffer-fold-devices syncthing-buffer))))
-            ((string-equal "paused" (car item))
-             (setq paused (if (eq (cdr item) :false) "active" "paused")))
-            ((string-equal "addresses" (car item))
-             (setq addresses (format "%s" (cdr item))))))
-    (dolist (item (alist-get 'completion device))
-      (cond ((string-equal "completion" (car item))
-             (setq perc (cdr item)))))
+  (let* ((name (alist-get 'name device))
+        (id (alist-get 'deviceID device))
+        (paused (alist-get 'paused device))
+        (addresses (alist-get 'addresses device))
+        (conns (alist-get
+                'connections
+                (alist-get 'connections
+                           (syncthing-server-data syncthing-server))))
+        (stats (alist-get 'stats device))
+        (compression (alist-get 'compression device))
+        (completion (alist-get 'completion device))
+        (text "")
+        (conn-type "Disconnected")
+        (sync-state 0)
+        dev-conn
+        connected
+        folders)
+    (dolist (item conns)
+      (when (string= id (car item))
+        (setq dev-conn (cdr item))))
+    (when dev-conn
+      (setq connected (alist-get 'connected dev-conn))
+      (when connected
+        (alist-get 'connected dev-conn)
+        (cond ((string-match "relay" (alist-get 'type dev-conn))
+               (setq conn-type "Relay"))
+              ((string-match "quic" (alist-get 'type dev-conn))
+               (setq conn-type "QUIC"))
+              ((string-match "tcp" (alist-get 'type dev-conn))
+               (setq conn-type "TCP")))
+        (setq conn-type
+              (concat conn-type
+                      (if (alist-get 'isLocal dev-conn) " LAN" " WAN")))))
+    (setq sync-state
+          (* 100 (- 1 (/ (alist-get 'needBytes completion)
+                         (syncthing--maybe-float
+                          (if (not (eq 0 (alist-get 'globalBytes completion)))
+                              (alist-get 'globalBytes completion)
+                            1) 1)))))
+    (when (syncthing-buffer-collapse-after-start syncthing-buffer)
+      (push id (syncthing-buffer-fold-devices syncthing-buffer)))
+    (dolist (folder-cfg (alist-get 'folders
+                                   (syncthing-server-data syncthing-server)))
+      (dolist (dev-cfg (alist-get 'devices folder-cfg))
+        (when (string= id (alist-get 'deviceID dev-cfg))
+          (push (alist-get 'label folder-cfg) folders))))
+
+    (if connected
+        (setq text
+              (concat text
+                      (format " \tDownload Rate\t\t\t%s\n" "down")
+                      (format " \tUpload Rate\t\t\t\t%s\n" "up")))
+      (setq text
+            (format "%s \tLast seen\t\t\t\t%s\n \tSync Status\t\t\t\t%s\n"
+                    text
+                    ;; TODO: proper date parse + trim
+                    (replace-regexp-in-string
+                     "T" " "
+                     (substring (alist-get 'lastSeen stats) 0 19))
+                    (if (< (floor sync-state) 100)
+                        (format "Out of Sync (%.2f%%)" sync-state)
+                      "Up to Date")))
+      (when (< (floor sync-state) 100)
+        (setq text
+              (format "%s ⇄\tOut of Sync Items\t\t%s items, ~%s\n"
+                      text
+                      ;; TODO: num separator style
+                      (+ (alist-get 'needItems completion)
+                         (alist-get 'needDeletes completion))
+                      (syncthing--scale-bytes
+                       (alist-get 'needBytes completion) 2)))))
+    (setq text
+          (format "%s \tAddress\t\t\t\t\t%s\n"
+                  text
+                  (or (unless (string= "" (alist-get 'address dev-conn))
+                        (alist-get 'address dev-conn))
+                      (string-join addresses "\n\t\t\t\t\t\t\t"))))
+    (when connected
+      (setq text
+            (format
+             "%s \tConnection Type\t\t\t%s\n \tNumber of Connections\t%s\n"
+             text
+             conn-type
+             (+ 1 (length (alist-get 'secondary dev-conn))))))
+    (setq text
+          (format "%s \tCompression\t\t\t\t%s\n \tIdentification\t\t\t%s\n"
+                  text
+                  (cond ((string= compression "always") "All Data")
+                        ((string= compression "metadata") "Metadata Only")
+                        ((string= compression "never") "Off"))
+                  (substring id 0 6)))
+    (when (alist-get 'connected dev-conn)
+      (setq text
+            (format "%s \tVersion\t\t\t\t\t%s\n"
+                    text
+                    (alist-get 'clientVersion dev-conn))))
+    (setq text
+          (format "%s \tFolders\t\t\t\t\t%s\n"
+                  text
+                  (string-join folders "\n\t\t\t\t\t\t\t")))
     (save-window-excursion
       (switch-to-buffer
        (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -861,11 +942,14 @@ Argument RIGHT second object to compare."
        :button-suffix
        (concat
         " "
-        (syncthing--color-perc perc)
-        (syncthing--bold (format " %s\n" name))
+        (syncthing--color-perc
+         (alist-get 'completion (alist-get 'completion device)))
+        (format "%s%s\n"
+                (syncthing--bold
+                 (format " %s" name))
+                (if paused (syncthing--italic " (Paused)") ""))
         (unless (member id (syncthing-buffer-fold-devices syncthing-buffer))
-          (syncthing--prop (format "\t%s\n\t%s\n\t%s\n"
-                                   id paused addresses))))
+          (syncthing--prop text)))
        :action
        (lambda (&rest _event)
          (if (member id (syncthing-buffer-fold-devices syncthing-buffer))
@@ -1094,7 +1178,7 @@ Argument TOKEN API server token."
 (defun syncthing--calc-speed (server)
   "Calculate upload and download rate for SERVER."
   (let* ((data (syncthing-server-data server))
-         (conns (syncthing-request server "GET" "rest/system/connections"))
+         (conns (alist-get 'connections (syncthing-server-data server)))
          (last-speed-date
           (or (syncthing-server-last-speed-date server) 0))
          (now (time-convert nil 'integer))
@@ -1148,8 +1232,18 @@ Argument TOKEN API server token."
              server "GET" (format "rest/db/completion?device=%s"
                                   (alist-get 'deviceID (nth idx devices))))))))
 
-(defun syncthing--server-update-device-map (server data)
-  "Update device completion DATA for SERVER."
+(defun syncthing--server-update-device-stats (server data)
+  "Update device stats DATA for SERVER."
+  (let* ((devices (alist-get 'devices data))
+         (stats (syncthing-request server "GET" "rest/stats/device")))
+    (dolist (idx (number-sequence 0 (1- (length devices))))
+      (dolist (stat stats)
+        (when (string= (car stat) (alist-get 'deviceID (nth idx devices)))
+          (setf (alist-get 'stats (nth idx devices))
+                (cdr stat)))))))
+
+(defun syncthing--server-update-device-map (data)
+  "Update device completion DATA."
   ;; TODO: (const (alist-get 'deviceID item) (alist-get 'device-map data))
   ;;       except it fails with raw key access by always being nil
   ;;       probably something with bad (quote) / ' / `, / etc
@@ -1174,7 +1268,9 @@ Argument TOKEN API server token."
           (alist-get 'version
                      (syncthing-request server "GET" "rest/system/version"))
           (alist-get 'system-status data)
-          (syncthing-request server "GET" "rest/system/status"))
+          (syncthing-request server "GET" "rest/system/status")
+          (alist-get 'connections data)
+          (syncthing-request server "GET" "rest/system/connections"))
 
     (when syncthing-display-logs
       (setf (alist-get 'logs data)
@@ -1191,7 +1287,8 @@ Argument TOKEN API server token."
     (syncthing--server-update-folder-completion server data)
     (syncthing--server-update-folder-stats server data)
     (syncthing--server-update-device-completion server data)
-    (syncthing--server-update-device-map server data)
+    (syncthing--server-update-device-stats server data)
+    (syncthing--server-update-device-map data)
 
     (setf (syncthing-server-data server) data)
     (syncthing--calc-speed server)))
