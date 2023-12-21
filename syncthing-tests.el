@@ -96,7 +96,7 @@
 
 (ert-deftest syncthing-run-customize ()
   "Run `customize-variable' on missing API token."
-  (let (called args)
+  (let (called args throw)
     (syncthing-cleanup)
     (advice-add 'syncthing--interactive-common
                 :override
@@ -112,7 +112,11 @@
     (should
      (string= (format "%s" args)
          (format "%s"`(,syncthing-default-name ,syncthing-base-url ""))))
-    (should called)))
+    (should called)
+    (condition-case nil
+        (apply 'syncthing--interactive-common args)
+      (user-error (setq throw t)))
+    (should throw)))
 
 (ert-deftest syncthing-use-default-token ()
   "If set to non-empty, use default token."
