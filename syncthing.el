@@ -1146,11 +1146,13 @@ Argument TOKEN API server token."
                      (syncthing-request server "GET" "rest/system/version"))
           (alist-get 'system-status data)
           (syncthing-request server "GET" "rest/system/status")
-          (alist-get 'logs data)
-          (syncthing-request server "GET" "rest/system/log")
           (alist-get 'changes data)
           (syncthing-request server "GET" (format "rest/events/disk?limit=%s"
                                                   syncthing-limit-changes)))
+
+    (when syncthing-display-logs
+      (setf (alist-get 'logs data)
+            (syncthing-request server "GET" "rest/system/log")))
 
     (syncthing--server-update-folder-completion server data)
     (syncthing--server-update-folder-stats server data)
