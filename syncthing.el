@@ -1188,7 +1188,7 @@ Argument TOKEN API server token."
          (conns (alist-get 'connections (syncthing-server-data server)))
          (last-speed-date
           (or (syncthing-server-last-speed-date server) 0))
-         (now (time-convert nil 'integer))
+         (now (floor (float-time)))
          (now-total (alist-get 'total conns))
          (conns-total (syncthing-server-connections-total server))
          (td (- now last-speed-date)))
