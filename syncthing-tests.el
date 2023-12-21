@@ -118,6 +118,29 @@
       (user-error (setq throw t)))
     (should throw)))
 
+(ert-deftest syncthing-run-customize-keep-focused ()
+  "Run `customize-variable' on missing API token."
+  (let (args throw)
+    (syncthing-cleanup)
+    (advice-add 'syncthing--interactive-common
+                :override
+                (lambda (&rest rest) (setq args rest)))
+    ;; Creating customization items... etc noise
+    (advice-add 'message :override (lambda (&rest _)))
+    (syncthing)
+    (advice-remove 'syncthing--interactive-common
+                   (lambda (&rest rest) (setq args rest)))
+    (advice-remove 'message (lambda (&rest _)))
+    (should
+     (string= (format "%s" args)
+         (format "%s"`(,syncthing-default-name ,syncthing-base-url ""))))
+    (condition-case nil
+        (apply 'syncthing--interactive-common args)
+      (user-error (setq throw t)))
+    (should throw)
+    (should (string= "*Customize Option: Syncthing Default Server Token*"
+                     (buffer-name (current-buffer))))))
+
 (ert-deftest syncthing-use-default-token ()
   "If set to non-empty, use default token."
   (let* ((dummy "meow")
