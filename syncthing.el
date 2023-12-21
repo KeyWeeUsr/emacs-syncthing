@@ -564,9 +564,16 @@ Argument POS Incoming EVENT position."
   "Draw device widget in buffer from SERVER."
   (let-alist (syncthing-server-data server)
     (syncthing--draw-devices-header :before t)
-    (cond ((>= .version 37)
-           (mapc #'syncthing--list-37-device
-                 (sort (copy-alist .devices) #'syncthing--sort-devices))))))
+    (let (filtered)
+      (dolist (dev .devices)
+        (unless (string=
+                 (alist-get 'deviceID dev)
+                 (alist-get 'myID .system-status))
+          (push dev filtered)))
+      (cond ((>= .version 37)
+             (mapc #'syncthing--list-37-device
+                   (sort (copy-alist filtered)
+                         #'syncthing--sort-devices)))))))
 
 (defun syncthing--draw-logs (server)
   "Draw logs widget in buffer from SERVER."
