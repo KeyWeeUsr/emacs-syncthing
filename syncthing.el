@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 1.3.0
+;; Version: 1.4.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -767,13 +767,18 @@ Argument RIGHT second object to compare."
                      (if (file-name-extension
                           (alist-get 'filename
                                      (alist-get 'lastFile stats)))
-                         (file-name-with-extension
-                          (file-name-base
-                           (alist-get 'filename
-                                      (alist-get 'lastFile stats)))
-                          (file-name-extension
-                           (alist-get 'filename
-                                      (alist-get 'lastFile stats))))
+
+                         (let ((extn
+                                (string-remove-prefix
+                                 "."
+                                 (file-name-extension
+                                  (alist-get 'filename
+                                             (alist-get 'lastFile stats))))))
+                           (concat (file-name-sans-extension
+                                    (file-name-base
+                                     (alist-get 'filename
+                                                (alist-get 'lastFile stats))))
+                                   "." extn))
                        (file-name-base
                         (alist-get 'filename
                                    (alist-get 'lastFile stats))))))))
@@ -991,6 +996,7 @@ Argument RIGHT second object to compare."
                        (syncthing--bytes-to-rate
                         (or (alist-get 'rate-upload data) -1))))
               line))
+      ;; TODO: num separator style
       (when (string= item "count-local-files")
         (push (syncthing--count-local-files
                (format
@@ -1001,6 +1007,7 @@ Argument RIGHT second object to compare."
                         (alist-get 'localFiles
                                    (alist-get 'status folder) 0)))))
               line))
+      ;; TODO: num separator style
       (when (string= item "count-local-folders")
         (push (syncthing--count-local-folders
                (format
