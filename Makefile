@@ -13,9 +13,11 @@ all:
 		--load syncthing-tests.el \
 		--funcall ert-run-tests-batch
 
+.PHONY: demo
 demo:
 	$(EMACSCLIENT) --eval \
-		'(syncthing-with-base "Demo" "$(DEMO_ADDR)" "$(DEMO_TOKEN)")'
-	FLASK_APP=demo.py flask run \
+		'(load "$(PWD)/demo/demo.el")' \
+		'(syncthing-demo "Demo" "$(DEMO_ADDR)")' &
+	FLASK_APP=demo/demo.py flask run \
 		--host $(DEMO_HOST) --port $(DEMO_PORT) \
 		--reload
