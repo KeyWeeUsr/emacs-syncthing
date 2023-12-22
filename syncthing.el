@@ -1322,10 +1322,8 @@ Argument TOKEN API server token."
   (let ((buff (syncthing--buffer
               :name (generate-new-buffer (format syncthing-format-buffer name))
               :collapse-after-start syncthing-start-collapsed))
-        (server (car (or syncthing--servers
-                         (push (syncthing--server
-                                :name name :url url :token token)
-                               syncthing--servers)))))
+        (server (car (push (syncthing--server :name name :url url :token token)
+                           syncthing--servers))))
     (with-current-buffer (get-buffer-create (syncthing-buffer-name buff))
       (setq-local syncthing-buffer buff)
       (put 'syncthing-buffer 'permanent-local t)
@@ -1494,6 +1492,16 @@ Argument TOKEN API server token."
                        (syncthing-server-token server))
                  data)))
 
+(defun syncthing-cleanup ()
+  "Clean resources when closing the client."
+  (interactive)
+  (message "emacs-syncthing: Cleaning up client %s"
+           (syncthing-server-name syncthing-server))
+  (setq syncthing--servers
+        (delete syncthing-server syncthing--servers))
+  (message "emacs-syncthing: Remaining open clients: %s"
+           (length syncthing--servers)))
+
 ;; modes for client's session buffer(s)
 (define-derived-mode syncthing-mode special-mode "Syncthing"
   "Major mode for Syncthing client.
@@ -1506,6 +1514,10 @@ Activating this mode will launch Syncthing client in the current window.
 
   ;; Hook to auto-revert mode for refreshing
   (setq-local revert-buffer-function #'syncthing--update)
+  ;; purge resources
+  (add-hook 'kill-buffer-hook
+            #'syncthing-cleanup
+            syncthing-cleanup-priority t)
 
   (when syncthing-start-with-auto-refresh
     (syncthing-auto-refresh-mode 1)))
