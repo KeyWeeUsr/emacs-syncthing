@@ -1525,11 +1525,7 @@ Activating this mode will launch Syncthing client in the current window.
 (defun syncthing-with-base (name base-url token)
   "Launch Syncthing instance NAME for BASE-URL and TOKEN in a new buffer."
   (interactive
-   (string-join
-    (list
-     "sName: "
-     "sSyncthing REST API base URL: "
-     "sSynchting REST API token: ") "\n"))
+   "sName: \nSyncthing REST API base URL: \nsSynchting REST API token: ")
   (when syncthing-debug
     (message "emacs-syncthing: funcall: %s, args: %s"
              "syncthing-with-base"
