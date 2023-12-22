@@ -6,14 +6,15 @@
 (require 'syncthing)
 
 
-(defun syncthing-cleanup ()
+(defun syncthing-ert-cleanup ()
+  (should (eq nil syncthing--servers))
   (dolist (buf (buffer-list))
     (unless (or (string-match-p (regexp-quote "*Messages*") (buffer-name buf)))
       (kill-buffer buf))))
 
 (ert-deftest syncthing-calc-scale ()
   "Ensure `syncthing--scale-bytes' calculates units properly."
-  (syncthing-cleanup)
+  (syncthing-ert-cleanup)
   (should (string= (syncthing--scale-bytes 0 0) "0B"))
   (should (string= (syncthing--scale-bytes 0 1) "0.0B"))
   (should (string= (syncthing--scale-bytes 0 2) "0.00B"))
@@ -97,7 +98,7 @@
 (ert-deftest syncthing-run-customize ()
   "Run `customize-variable' on missing API token."
   (let (called args throw)
-    (syncthing-cleanup)
+    (syncthing-ert-cleanup)
     (advice-add 'syncthing--interactive-common
                 :override
                 (lambda (&rest rest) (setq args rest)))
@@ -121,7 +122,7 @@
 (ert-deftest syncthing-run-customize-keep-focused ()
   "Run `customize-variable' on missing API token."
   (let (args throw)
-    (syncthing-cleanup)
+    (syncthing-ert-cleanup)
     (advice-add 'syncthing--interactive-common
                 :override
                 (lambda (&rest rest) (setq args rest)))
@@ -146,7 +147,7 @@
   (let* ((dummy "meow")
          (syncthing-default-server-token dummy)
          called args)
-    (syncthing-cleanup)
+    (syncthing-ert-cleanup)
     (advice-add 'syncthing--interactive-common
                 :override
                 (lambda (&rest rest) (setq args rest)))
@@ -166,7 +167,7 @@
 (ert-deftest syncthing-refresh-reject ()
   "Reject activating the refresh mode if not in `syncthing-mode'."
   (with-temp-buffer
-    (syncthing-cleanup)
+    (syncthing-ert-cleanup)
     (let (called)
       (condition-case err
           (progn
@@ -186,7 +187,7 @@
 (ert-deftest syncthing-refresh-activate ()
   "Check whether `auto-revert-mode' gets activated."
   (with-temp-buffer
-    (syncthing-cleanup)
+    (syncthing-ert-cleanup)
     (let (called)
       (advice-add 'auto-revert-mode
                   :override
@@ -204,7 +205,7 @@
          (url "https://base-url.tld:1234")
          (server (syncthing--server :name name :url url :token token))
          args)
-    (syncthing-cleanup)
+    (syncthing-ert-cleanup)
     (advice-add 'syncthing--request
                 :override
                 (lambda (&rest largs) (setq args largs)))
@@ -216,6 +217,43 @@
                      (format "(GET %s//something %s)" url token)))
     (advice-remove 'syncthing--request
                    (lambda (&rest largs) (setq args largs)))))
+
+(ert-deftest syncthing-multi-client-bug ()
+  "Ensure a new client buffer creates own `syncthing-server' instance."
+  (syncthing-ert-cleanup)
+  (should (not syncthing--servers))
+
+  (advice-add 'auto-revert-mode :override (lambda (&rest _)))
+  (syncthing-with-base "dummy1" "url1" "token1")
+  (set-buffer (window-buffer (selected-window)))
+  (should
+   (not (eq nil (string-match
+                 "dummy1"
+                 (buffer-name (current-buffer))))))
+  (should (string= "dummy1" (syncthing-server-name syncthing-server)))
+  (should (eq 1 (length syncthing--servers)))
+
+  (syncthing-with-base "dummy2" "url2" "token2")
+  (set-buffer (window-buffer (selected-window)))
+  (should
+   (not (eq nil (string-match
+                 "dummy2"
+                 (buffer-name (current-buffer))))))
+  (should (string= "dummy2" (syncthing-server-name syncthing-server)))
+  (should (eq 2 (length syncthing--servers)))
+
+  (advice-add 'message :override (lambda (&rest _)))
+  (kill-buffer (get-buffer (syncthing-buffer-name syncthing-buffer)))
+  (advice-remove 'message (lambda (&rest _)))
+  (should (eq 1 (length syncthing--servers)))
+
+  (advice-add 'message :override (lambda (&rest _)))
+  (kill-buffer (get-buffer (syncthing-buffer-name syncthing-buffer)))
+  (advice-remove 'message (lambda (&rest _)))
+  (should (eq 0 (length syncthing--servers)))
+
+  (should (eq nil syncthing--servers))
+  (advice-remove 'auto-revert-mode (lambda (&rest _))))
 
 (provide 'syncthing-tests)
 
