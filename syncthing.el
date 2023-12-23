@@ -1169,10 +1169,11 @@ Argument RIGHT second object to compare."
                        (syncthing--sec-to-uptime uptime)))
               line))
       (when (string= item "my-id")
-        (push (format syncthing-format-my-id
-                      (substring
-                       (alist-get 'myID (alist-get 'system-status data)
-                                  "n/a") 0 6))
+        (push (syncthing--my-id
+               (format syncthing-format-my-id
+                       (substring
+                        (alist-get 'myID (alist-get 'system-status data)
+                                   "n/a") 0 6)))
               line))
       (when (string= item "version")
         (push (format syncthing-format-version
