@@ -45,6 +45,11 @@
   "Customization sub-group for `syncthing' start-up stage."
   :group 'syncthing)
 
+(defgroup syncthing-debug
+  nil
+  "Customization sub-group for `syncthing' debugging."
+  :group 'syncthing)
+
 (defgroup syncthing-faces
   nil
   "Customization group for `syncthing' faces."
@@ -55,6 +60,12 @@
   "*syncthing(%s)*"
   "Syncthing's buffer name with a =%s= placeholder for address."
   :group 'syncthing-startup
+  :type 'string)
+
+(defcustom syncthing-trace-format-buffer
+  "*syncthing trace(%s)*"
+  "Syncthing's buffer name with a =%s= placeholder for address."
+  :group 'syncthing-debug
   :type 'string)
 
 (defcustom syncthing-default-name
@@ -206,8 +217,8 @@ Special meaning for empty list / nil to skip rendering the header line."
 
 (defcustom syncthing-debug
   nil
-  "Enable debugging logs in `*Messages'."
-  :group 'syncthing
+  "Enable debugging logs in special buffer."
+  :group 'syncthing-debug
   :type 'boolean)
 
 ;; customization faces/colors/fonts
@@ -418,9 +429,7 @@ Special meaning for empty list / nil to skip rendering the header line."
 ;; private/helper funcs
 (defun syncthing--ping (server)
   "Check whether we can use the API at SERVER with TOKEN."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--ping" server))
+  (syncthing-trace)
   (let ((url-request-method "GET")
         (url-request-extra-headers
          `(("X-Api-Key" . ,(syncthing-server-token server)))))
@@ -437,11 +446,7 @@ Argument METHOD HTTP method/verb.
 Argument URL API to call.
 Optional argument DATA Data to send.
 Argument TOKEN API token."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--request"
-             (format "(method: %s url: %s token: %s data: %s)"
-                     method url token data)))
+  (syncthing-trace)
   (let ((url-request-method method)
         (url-request-data data)
         (url-request-extra-headers `(("X-Api-Key" . ,token))))
@@ -459,9 +464,7 @@ Argument TOKEN API token."
 
 (defun syncthing--get-widget (pos)
   "Try to find an Emacs Widget at POS."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (pos: %s)"
-             "syncthing--get-widget" pos))
+  (syncthing-trace)
   (let ((button (get-char-property pos 'button)))
     (or button
         (setq button (get-char-property (line-beginning-position) 'button)))
@@ -471,118 +474,80 @@ Argument TOKEN API token."
   "RET/Enter/newline-keypress handler.
 Argument POS Incoming EVENT position."
   (interactive "@d")
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--newline" (format "(pos: %s event: %s)" pos event)))
+  (syncthing-trace)
   (let ((button (syncthing--get-widget pos)))
     (if button
 	    (widget-apply-action button event)
       (error "You can't edit this part of the Syncthing buffer"))))
 
-(defun syncthing--url (path)
-  "Assemble full API url from PATH."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (path: %s)"
-             "syncthing--url" path))
-  (format "%s/%s" syncthing-base-url path))
-
 (defun syncthing--title (text)
   "Format TEXT as title."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--title" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-title))
 
 (defun syncthing--prop (text)
   "Format TEXT as property."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--prop" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-prop))
 
 (defun syncthing--bold (text)
   "Format TEXT as bold."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--bold" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-bold))
 
 (defun syncthing--italic (text)
   "Format TEXT as italic."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--italic" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-italic))
 
 (defun syncthing--rate-download (text)
   "Format TEXT as download rate."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--rate-download" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-rate-download))
 
 (defun syncthing--rate-upload (text)
   "Format TEXT as upload rate."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--rate-upload" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-progress-75))
 
 (defun syncthing--count-local-files (text)
   "Format TEXT as local files count."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--count-local-files" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-count-local-files))
 
 (defun syncthing--count-local-folders (text)
   "Format TEXT as local folders count."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--count-local-folders" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-count-local-folders))
 
 (defun syncthing--count-local-bytes (text)
   "Format TEXT as local bytes count."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--count-local-bytes" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-count-local-bytes))
 
 (defun syncthing--count-listeners (text)
   "Format TEXT as listeners count."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--count-listeners" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-count-listeners))
 
 (defun syncthing--count-discovery (text)
   "Format TEXT as discovery count."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--count-discovery" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-count-discovery))
 
 (defun syncthing--uptime (text)
   "Format TEXT as uptime."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--uptime" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-uptime))
 
 (defun syncthing--my-id (text)
   "Format TEXT as Syncthing ID."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (text: %s)"
-             "syncthing--my-id" text))
+  (syncthing-trace)
   (propertize text 'face 'syncthing-my-id))
 
 (defun syncthing--draw-folders-header (&optional &key before after)
   "Draw folder header with optional BEFORE and AFTER separator."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--draw-folders-header"
-             (format "(before: %s after: %s)" before after)))
+  (syncthing-trace)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -594,10 +559,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw-devices-header (&optional &key before after)
   "Draw device header with optional BEFORE and AFTER separator."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--draw-devices-header"
-             (format "(before: %s after: %s)" before after)))
+  (syncthing-trace)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -609,10 +571,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw-logs-header (&optional &key before after)
   "Draw log header with optional BEFORE and AFTER separator."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--draw-logs-header"
-             (format "(before: %s after: %s)" before after)))
+  (syncthing-trace)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -624,10 +583,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw-changes-header (&optional &key before after)
   "Draw log header with optional BEFORE and AFTER separator."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--draw-changes-header"
-             (format "(before: %s after: %s)" before after)))
+  (syncthing-trace)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -639,9 +595,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw-folders (server)
   "Draw folder widget in buffer from SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--draw-folders" server))
+  (syncthing-trace)
   (let-alist (syncthing-server-data server)
     (syncthing--draw-folders-header)
     (cond ((>= .version 37)
@@ -650,9 +604,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw-devices (server)
   "Draw device widget in buffer from SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--draw-devices" server))
+  (syncthing-trace)
   (let-alist (syncthing-server-data server)
     (syncthing--draw-devices-header :before t)
     (let (filtered)
@@ -668,9 +620,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw-logs (server)
   "Draw logs widget in buffer from SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--draw-logs" server))
+  (syncthing-trace)
   (let-alist (syncthing-server-data server)
     (syncthing--draw-logs-header :before t)
     (cond ((>= .version 37)
@@ -678,9 +628,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--draw-changes (server)
   "Draw recent-changes widget in buffer from SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--draw-changes" server))
+  (syncthing-trace)
   (let-alist (syncthing-server-data server)
     (syncthing--draw-changes-header :before t)
     (cond ((>= .version 37)
@@ -688,9 +636,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--list-logs (logs)
   "Render LOGS as a widget."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (logs: %s)"
-             "syncthing--list-logs" logs))
+  (syncthing-trace)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -702,9 +648,7 @@ Argument POS Incoming EVENT position."
 
 (defun syncthing--list-changes (change)
   "Render CHANGE as a widget."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (change: %s)"
-             "syncthing--list-changes" change))
+  (syncthing-trace)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -735,10 +679,7 @@ Argument POS Incoming EVENT position."
 Argument KEY to sort with.
 Argument LEFT first object to compare.
 Argument RIGHT second object to compare."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--flat-string-sort"
-             (format "(key: %s left: %s right: %s)" key left right)))
+  (syncthing-trace)
   (let ((lname "")
         (rname ""))
     (dolist (litem left)
@@ -753,39 +694,19 @@ Argument RIGHT second object to compare."
   "Sort folders by `label' value.
 Argument LEFT first object to compare.
 Argument RIGHT second object to compare."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--sort-folders"
-             (format "(left: %s right: %s)" left right)))
+  (syncthing-trace)
   (syncthing--flat-string-sort "label" left right))
 
 (defun syncthing--sort-devices (left right)
   "Sort devices by `name' value.
 Argument LEFT first object to compare.
 Argument RIGHT second object to compare."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--sort-devices"
-             (format "(left: %s right: %s)" left right)))
+  (syncthing-trace)
   (syncthing--flat-string-sort "name" left right))
-
-(defun syncthing--progress (device-id folder-id)
-  "Get progress for DEVICE-ID and FOLDER-ID."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--progress"
-             (format "(device-id: %s folder-id: %s)" device-id folder-id)))
-  (let-alist (syncthing-request
-              syncthing-server "GET"
-              (format "rest/db/completion?device=%s&folder=%s"
-                      device-id folder-id))
-    .completion))
 
 (defun syncthing--list-37-folder (folder)
   "Render single FOLDER item in a widget."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (folder: %s)"
-             "syncthing--list-37-folder" folder))
+  (syncthing-trace)
   (let* ((name (alist-get 'label folder))
         (id (alist-get 'id folder))
         (paused (alist-get 'paused folder))
@@ -938,9 +859,7 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--color-perc (perc)
   "Colorize PERC float."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (perc: %s)"
-             "syncthing--color-perc" perc))
+  (syncthing-trace)
   (propertize
    (format syncthing-format-perc perc)
    'face
@@ -957,9 +876,7 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--list-37-device (device)
   "Render single DEVICE item in a widget."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (device: %s)"
-             "syncthing--list-37-device" device))
+  (syncthing-trace)
   (let* ((name (alist-get 'name device))
         (id (alist-get 'deviceID device))
         (paused (alist-get 'paused device))
@@ -1101,9 +1018,7 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--header-line (server)
   "Return SERVER `header-line-format' string."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--header-line" server))
+  (syncthing-trace)
   (let* ((data (syncthing-server-data server))
          (uptime
           (alist-get 'uptime (alist-get 'system-status data)))
@@ -1183,9 +1098,7 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--sec-to-uptime (sec)
   "Convert SEC number to DDd HHh MMm SSs uptime string."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (sec: %s)"
-             "syncthing--sec-to-uptime" sec))
+  (syncthing-trace)
   (let* ((days  (/ sec syncthing-day-seconds))
          (hours (/ (- sec
                       (* days syncthing-day-seconds))
@@ -1219,18 +1132,12 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--maybe-float (num places)
   "Convert NUM to float if decimal PLACES are > 0."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--maybe-float"
-             (format "(num: %s places: %s)" num places)))
+  (syncthing-trace)
   (if (> places 0) (float num) num))
 
 (defun syncthing--scale-bytes (bytes places)
   "Convert BYTES to highest reached 1024 exponent with decimal PLACES."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--scale-bytes"
-             (format "(bytes: %s places: %s)" bytes places)))
+  (syncthing-trace)
   (let* ((gigs  (/ bytes (syncthing--maybe-float
                           syncthing-gibibyte places)))
          (megs (/ bytes (syncthing--maybe-float
@@ -1250,16 +1157,12 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--bytes-to-rate (bytes)
   "Format BYTES to speed rate string."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (bytes: %s)"
-             "syncthing--bytes-to-rate" bytes))
+  (syncthing-trace)
   (format "%s/s" (syncthing--scale-bytes bytes 0)))
 
 (defun syncthing--draw-buffer (server)
   "Setup widgets and draw other buffer items for SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--draw-buffer" server))
+  (syncthing-trace)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -1270,9 +1173,7 @@ Argument RIGHT second object to compare."
 
 (defun syncthing--draw (server)
   "Setup buffer and draw widgets for SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--draw" server))
+  (syncthing-trace)
   (syncthing--draw-folders server)
   (syncthing--draw-devices server)
   (when syncthing-display-changes
@@ -1284,9 +1185,7 @@ Argument RIGHT second object to compare."
 (defun syncthing--init-state ()
   "Reset all variables holding initial state.
 Optional argument SKIP-CANCEL Skip removing auto-refresh."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--init-state" "()"))
+  (syncthing-trace)
   ;; everything += or appendable has to reset in each update
   (setf (syncthing-buffer-collapse-after-start syncthing-buffer)
         syncthing-start-collapsed
@@ -1295,9 +1194,7 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
 
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: ()"
-             "syncthing--update"))
+  (syncthing-trace)
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
@@ -1315,9 +1212,10 @@ Argument NAME Display name for Syncthing buffer.
 Argument URL API server URL.
 Argument TOKEN API server token."
   (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--interactive-common"
-             (format "(name: %s url: %s token: %s)" name url token)))
+    (with-current-buffer
+        (get-buffer-create (format syncthing-trace-format-buffer name))
+      (insert (format "%S\n" (syncthing--previous-func
+                              "syncthing--interactive-common")))))
   (when (or (not token) (string= token ""))
     (user-error "Syncthing REST API token not configured"))
   (let ((buff (syncthing--buffer
@@ -1338,9 +1236,7 @@ Argument TOKEN API server token."
 
 (defun syncthing--calc-speed (server)
   "Calculate upload and download rate for SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--calc-speed" server))
+  (syncthing-trace)
   (let* ((data (syncthing-server-data server))
          (conns (alist-get 'connections (syncthing-server-data server)))
          (last-speed-date
@@ -1365,10 +1261,7 @@ Argument TOKEN API server token."
 
 (defun syncthing--server-update-folder-completion (server data)
   "Update folder completion DATA for SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--server-update-folder-completion"
-             (format "(server: %s data: %s)" server data)))
+  (syncthing-trace)
   (let* ((folders (alist-get 'folders data)))
     (dotimes (idx (length folders))
       (setf (alist-get 'completion (nth idx folders))
@@ -1383,10 +1276,7 @@ Argument TOKEN API server token."
 
 (defun syncthing--server-update-folder-stats (server data)
   "Update folder stats DATA for SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--server-update-folder-stats"
-             (format "(server: %s data: %s)" server data)))
+  (syncthing-trace)
   (let* ((folders (alist-get 'folders data))
          (stats (syncthing-request server "GET" "rest/stats/folder")))
     (dotimes (idx (length folders))
@@ -1397,10 +1287,7 @@ Argument TOKEN API server token."
 
 (defun syncthing--server-update-device-completion (server data)
   "Update device completion DATA for SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--server-update-device-completion"
-             (format "(server: %s data: %s)" server data)))
+  (syncthing-trace)
   (let* ((devices (alist-get 'devices data)))
     (dotimes (idx (length devices))
       (setf (alist-get 'completion (nth idx devices))
@@ -1410,10 +1297,7 @@ Argument TOKEN API server token."
 
 (defun syncthing--server-update-device-stats (server data)
   "Update device stats DATA for SERVER."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing--server-update-device-stats"
-             (format "(server: %s data: %s)" server data)))
+  (syncthing-trace)
   (let* ((devices (alist-get 'devices data))
          (stats (syncthing-request server "GET" "rest/stats/device")))
     (dotimes (idx (length devices))
@@ -1424,9 +1308,7 @@ Argument TOKEN API server token."
 
 (defun syncthing--server-update-device-map (data)
   "Update device completion DATA."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (data %s)"
-             "syncthing--server-update-device-map" data))
+  (syncthing-trace)
   ;; TODO: (const (alist-get 'deviceID item) (alist-get 'device-map data))
   ;;       except it fails with raw key access by always being nil
   ;;       probably something with bad (quote) / ' / `, / etc
@@ -1442,9 +1324,7 @@ Argument TOKEN API server token."
 
 (defun syncthing--server-update (server)
   "Update SERVER data."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: (server: %s)"
-             "syncthing--server-update" server))
+  (syncthing-trace)
   ;; TODO: handle version change: >= current + branches for each <
   ;;       via rest/config's '{"version": 37}' key
   (let* ((data (syncthing-request server "GET" "rest/config")))
@@ -1477,14 +1357,27 @@ Argument TOKEN API server token."
     (setf (syncthing-server-data server) data)
     (syncthing--calc-speed server)))
 
+(defun syncthing--previous-func (&optional name)
+  "Retrieve previous function from `backtrace-frame'."
+  (let* ((idx 0) current)
+    (setq current (backtrace-frame idx))
+    ;; Trace from the current frame, find *this* func and get previous one
+    (while (and (not (string= "syncthing--previous-func"
+                              (format "%s" (car (cdr current)))))
+                (< idx 30)) ; shouldn't get larger or inf
+      (setq idx (1+ idx))
+      (setq current (backtrace-frame idx)))
+    (while (and (not (string= (or name "syncthing-trace")
+                              (format "%s" (car (cdr current)))))
+                (< idx 30)) ; shouldn't get larger or inf
+      (setq idx (1+ idx))
+      (setq current (backtrace-frame idx)))
+    (cdr (backtrace-frame idx))))
+
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
   "Return SERVER response for METHOD at ENDPOINT for request with DATA."
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing-request"
-             (format "(server: %s method: %s endpoint: %s data: %s)"
-                     server method endpoint data)))
+  (syncthing-trace)
   (apply #'syncthing--request
          (append (list method
                        (format "%s/%s" (syncthing-server-url server) endpoint)
@@ -1494,12 +1387,20 @@ Argument TOKEN API server token."
 (defun syncthing-cleanup ()
   "Clean resources when closing the client."
   (interactive)
+  (syncthing-trace)
   (message "emacs-syncthing: Cleaning up client %s"
            (syncthing-server-name syncthing-server))
   (setq syncthing--servers
         (delete syncthing-server syncthing--servers))
   (message "emacs-syncthing: Remaining open clients: %s"
            (length syncthing--servers)))
+
+(defsubst syncthing-trace ()
+  (when syncthing-debug
+    (with-current-buffer
+        (get-buffer-create (format syncthing-trace-format-buffer
+                                   (syncthing-server-name syncthing-server)))
+      (insert (format "%S\n" (syncthing--previous-func))))))
 
 ;; modes for client's session buffer(s)
 (define-derived-mode syncthing-mode special-mode "Syncthing"
@@ -1538,18 +1439,15 @@ Activating this mode will launch Syncthing client in the current window.
   (interactive
    "sName: \nSyncthing REST API base URL: \nsSynchting REST API token: ")
   (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing-with-base"
-             (format "(name: %s base-url: %s token: %s)"
-                     name base-url token)))
+    (with-current-buffer
+        (get-buffer-create (format syncthing-trace-format-buffer name))
+      (insert (format "%S\n" (syncthing--previous-func
+                              "syncthing-with-base")))))
   (syncthing--interactive-common name base-url token))
 
 (defun syncthing ()
   "Launch Syncthing client's instance in a new buffer."
   (interactive)
-  (when syncthing-debug
-    (message "emacs-syncthing: funcall: %s, args: %s"
-             "syncthing" "()"))
   ;; switch first, assign later, buffer-local variable gets cleared otherwise
   (syncthing--interactive-common
    syncthing-default-name

@@ -255,6 +255,19 @@
   (should (eq nil syncthing--servers))
   (advice-remove 'auto-revert-mode (lambda (&rest _))))
 
-(provide 'syncthing-tests)
+(ert-deftest syncthing-trace-get-prev-func ()
+  (syncthing-ert-cleanup)
+  (let* ((name "dummy")
+         (syncthing-server (syncthing--server :name name))
+         (syncthing-debug t)
+         result)
+    (defun dummy () (syncthing-trace))
+    (dummy)
+    (should (string=
+             (format "(%s)\n" name)
+             (with-current-buffer
+                 (get-buffer (format syncthing-trace-format-buffer name))
+               (buffer-string))))))
 
+(provide 'syncthing-tests)
 ;;; syncthing-tests.el ends here
