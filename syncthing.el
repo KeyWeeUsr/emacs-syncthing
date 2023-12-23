@@ -1072,11 +1072,29 @@ Argument RIGHT second object to compare."
               line))
       (when (string= item "count-listeners")
         (push (syncthing--count-listeners
-               (format syncthing-format-count-listeners "3/3"))
+               (format
+                syncthing-format-count-listeners
+                (format
+                 "%s/%s"
+                 (cl-reduce
+                  #'+ (alist-get 'connectionServiceStatus
+                                 (alist-get 'system-status data))
+                  :key (lambda (disc) (if (alist-get 'error (cdr disc)) 0 1)))
+                 (length (alist-get 'connectionServiceStatus
+                                    (alist-get 'system-status data))))))
               line))
       (when (string= item "count-discovery")
         (push (syncthing--count-discovery
-               (format syncthing-format-count-discovery "4/5"))
+               (format
+                syncthing-format-count-discovery
+                (format
+                 "%s/%s"
+                 (cl-reduce
+                  #'+ (alist-get 'discoveryStatus
+                                 (alist-get 'system-status data))
+                  :key (lambda (disc) (if (alist-get 'error (cdr disc)) 0 1)))
+                 (length (alist-get 'discoveryStatus
+                                    (alist-get 'system-status data))))))
               line))
       (when (string= item "uptime")
         (push (syncthing--uptime
