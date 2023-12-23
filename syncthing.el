@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 1.4.0
+;; Version: 1.5.1
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -1369,7 +1369,7 @@ Argument TOKEN API server token."
              "syncthing--server-update-folder-completion"
              (format "(server: %s data: %s)" server data)))
   (let* ((folders (alist-get 'folders data)))
-    (dolist (idx (number-sequence 0 (1- (length folders))))
+    (dotimes (idx (length folders))
       (setf (alist-get 'completion (nth idx folders))
             (unless (alist-get 'paused (nth idx folders))
               (syncthing-request
@@ -1388,7 +1388,7 @@ Argument TOKEN API server token."
              (format "(server: %s data: %s)" server data)))
   (let* ((folders (alist-get 'folders data))
          (stats (syncthing-request server "GET" "rest/stats/folder")))
-    (dolist (idx (number-sequence 0 (1- (length folders))))
+    (dotimes (idx (length folders))
       (dolist (stat stats)
         (when (string= (car stat) (alist-get 'id (nth idx folders)))
           (setf (alist-get 'stats (nth idx folders))
@@ -1401,7 +1401,7 @@ Argument TOKEN API server token."
              "syncthing--server-update-device-completion"
              (format "(server: %s data: %s)" server data)))
   (let* ((devices (alist-get 'devices data)))
-    (dolist (idx (number-sequence 0 (1- (length devices))))
+    (dotimes (idx (length devices))
       (setf (alist-get 'completion (nth idx devices))
             (syncthing-request
              server "GET" (format "rest/db/completion?device=%s"
@@ -1415,7 +1415,7 @@ Argument TOKEN API server token."
              (format "(server: %s data: %s)" server data)))
   (let* ((devices (alist-get 'devices data))
          (stats (syncthing-request server "GET" "rest/stats/device")))
-    (dolist (idx (number-sequence 0 (1- (length devices))))
+    (dotimes (idx (length devices))
       (dolist (stat stats)
         (when (string= (car stat) (alist-get 'deviceID (nth idx devices)))
           (setf (alist-get 'stats (nth idx devices))
@@ -1430,10 +1430,8 @@ Argument TOKEN API server token."
   ;;       except it fails with raw key access by always being nil
   ;;       probably something with bad (quote) / ' / `, / etc
   (dolist (folder (alist-get 'folders data))
-    (dolist (foldev-idx
-             (number-sequence 0 (1- (length (alist-get 'devices folder)))))
-      (dolist (dev-idx
-               (number-sequence 0 (1- (length (alist-get 'devices data)))))
+    (dotimes (foldev-idx (length (alist-get 'devices folder)))
+      (dotimes (dev-idx (length (alist-get 'devices data)))
         (when (string= (alist-get 'deviceID (nth foldev-idx
                                                  (alist-get 'devices folder)))
                        (alist-get 'deviceID (nth dev-idx
