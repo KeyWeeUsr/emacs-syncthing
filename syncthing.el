@@ -438,6 +438,15 @@ Special meaning for empty list / nil to skip rendering the header line."
     (define-key map (kbd "p") #'previous-line)
     map))
 
+;; inlines & macros
+(defsubst syncthing-trace ()
+  "Simple tracing inline func to dump caller and its args into a buffer."
+  (when syncthing-debug
+    (with-current-buffer
+        (get-buffer-create (format syncthing-trace-format-buffer
+                                   (syncthing-server-name syncthing-server)))
+      (insert (format "%S\n" (syncthing--previous-func))))))
+
 ;; private/helper funcs
 (defun syncthing--ping (server)
   "Check whether we can use the API at SERVER with TOKEN."
@@ -1406,7 +1415,8 @@ Argument TOKEN API server token."
     (syncthing--calc-speed server)))
 
 (defun syncthing--previous-func (&optional name)
-  "Retrieve previous function from `backtrace-frame'."
+  "Retrieve previous function from `backtrace-frame'.
+Optional argument NAME Caller's name if called by other than `syncthing-trace'."
   (let* ((idx 0) current)
     (setq current (backtrace-frame idx))
     ;; Trace from the current frame, find *this* func and get previous one
@@ -1423,7 +1433,9 @@ Argument TOKEN API server token."
     (cdr (backtrace-frame idx))))
 
 (cl-defun syncthing--num-group (num &key (dec-sep ".") (ths-sep " "))
-  "Group number's digits with decimal and thousands separators."
+  "Group NUM's digits with decimal and thousands separators.
+Optional argument DEC-SEP custom decimal separator or default of `.'.
+Optional argument THS-SEP custom thousands separator or default of ` '."
   (if (not num) ""
     (let* ((stringified (format "%s" num))
            (integer-part
@@ -1472,13 +1484,6 @@ Argument TOKEN API server token."
         (delete syncthing-server syncthing--servers))
   (message "emacs-syncthing: Remaining open clients: %s"
            (length syncthing--servers)))
-
-(defsubst syncthing-trace ()
-  (when syncthing-debug
-    (with-current-buffer
-        (get-buffer-create (format syncthing-trace-format-buffer
-                                   (syncthing-server-name syncthing-server)))
-      (insert (format "%S\n" (syncthing--previous-func))))))
 
 ;; modes for client's session buffer(s)
 (define-derived-mode syncthing-mode special-mode "Syncthing"
