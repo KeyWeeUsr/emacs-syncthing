@@ -1,7 +1,9 @@
 (load (concat default-directory "syncthing.el"))
 (defun syncthing-demo (name addr)
   (dotimes (_ 30) (sleep-for 0.1))
+  (setq syncthing-debug t)
   (syncthing-with-base name addr "dummy-token")
+  (setq syncthing-debug nil)
   (end-of-buffer)
   (save-window-excursion
     (beginning-of-buffer)
