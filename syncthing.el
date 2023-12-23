@@ -99,13 +99,13 @@
   :type 'string)
 
 (defcustom syncthing-format-count-local-files
-  " %d"
+  " %s"
   "Format for displaying local files count in header line."
   :group 'syncthing
   :type 'string)
 
 (defcustom syncthing-format-count-local-folders
-  " %d"
+  " %s"
   "Format for displaying local folders count in header line."
   :group 'syncthing
   :type 'string)
@@ -220,6 +220,18 @@ Special meaning for empty list / nil to skip rendering the header line."
   "Enable debugging logs in special buffer."
   :group 'syncthing-debug
   :type 'boolean)
+
+(defcustom syncthing-decimal-separator
+  "."
+  "Stylize number with custom decimal separator."
+  :group 'syncthing
+  :type 'string)
+
+(defcustom syncthing-thousands-separator
+  " "
+  "Stylize number with custom thousands separator."
+  :group 'syncthing
+  :type 'string)
 
 ;; customization faces/colors/fonts
 (defface syncthing-title
@@ -731,11 +743,17 @@ Argument RIGHT second object to compare."
                     (format "%s %s %s"
                           (format
                            syncthing-format-count-local-files
-                           (alist-get 'globalFiles (alist-get 'status folder)))
+                           (syncthing--num-group
+                            (alist-get 'globalFiles (alist-get 'status folder))
+                            :dec-sep syncthing-decimal-separator
+                            :ths-sep syncthing-thousands-separator))
                           (format
                            syncthing-format-count-local-folders
-                           (alist-get 'globalDirectories
-                                      (alist-get 'status folder)))
+                           (syncthing--num-group
+                            (alist-get 'globalDirectories
+                                       (alist-get 'status folder))
+                            :dec-sep syncthing-decimal-separator
+                            :ths-sep syncthing-thousands-separator))
                           (format
                            syncthing-format-count-local-bytes
                            (syncthing--scale-bytes
@@ -744,11 +762,17 @@ Argument RIGHT second object to compare."
                     (format "%s %s %s"
                           (format
                            syncthing-format-count-local-files
-                           (alist-get 'localFiles (alist-get 'status folder)))
+                           (syncthing--num-group
+                            (alist-get 'localFiles (alist-get 'status folder))
+                            :dec-sep syncthing-decimal-separator
+                            :ths-sep syncthing-thousands-separator))
                           (format
                            syncthing-format-count-local-folders
-                           (alist-get 'localDirectories
-                                      (alist-get 'status folder)))
+                           (syncthing--num-group
+                            (alist-get 'localDirectories
+                                       (alist-get 'status folder))
+                            :dec-sep syncthing-decimal-separator
+                            :ths-sep syncthing-thousands-separator))
                           (format
                            syncthing-format-count-local-bytes
                            (syncthing--scale-bytes
@@ -943,9 +967,11 @@ Argument RIGHT second object to compare."
         (setq text
               (format "%s ⇄\tOut of Sync Items\t\t%s items, ~%s\n"
                       text
-                      ;; TODO: num separator style
-                      (+ (alist-get 'needItems completion)
-                         (alist-get 'needDeletes completion))
+                      (syncthing--num-group
+                       (+ (alist-get 'needItems completion)
+                          (alist-get 'needDeletes completion))
+                       :dec-sep syncthing-decimal-separator
+                       :ths-sep syncthing-thousands-separator)
                       (syncthing--scale-bytes
                        (alist-get 'needBytes completion) 2)))))
     (setq text
@@ -1036,27 +1062,31 @@ Argument RIGHT second object to compare."
                        (syncthing--bytes-to-rate
                         (or (alist-get 'rate-upload data) -1))))
               line))
-      ;; TODO: num separator style
       (when (string= item "count-local-files")
         (push (syncthing--count-local-files
                (format
                 syncthing-format-count-local-files
-                (cl-reduce
-                 #'+ (alist-get 'folders data)
-                 :key (lambda (folder)
-                        (alist-get 'localFiles
-                                   (alist-get 'status folder) 0)))))
+                (syncthing--num-group
+                 (cl-reduce
+                  #'+ (alist-get 'folders data)
+                  :key (lambda (folder)
+                         (alist-get 'localFiles
+                                    (alist-get 'status folder) 0)))
+                 :dec-sep syncthing-decimal-separator
+                 :ths-sep syncthing-thousands-separator)))
               line))
-      ;; TODO: num separator style
       (when (string= item "count-local-folders")
         (push (syncthing--count-local-folders
                (format
                 syncthing-format-count-local-folders
-                (cl-reduce
-                 #'+ (alist-get 'folders data)
-                 :key (lambda (folder)
-                        (alist-get 'localDirectories
-                                   (alist-get 'status folder) 0)))))
+                (syncthing--num-group
+                 (cl-reduce
+                  #'+ (alist-get 'folders data)
+                  :key (lambda (folder)
+                         (alist-get 'localDirectories
+                                    (alist-get 'status folder) 0)))
+                 :dec-sep syncthing-decimal-separator
+                 :ths-sep syncthing-thousands-separator)))
               line))
       (when (string= item "count-local-bytes")
         (push (syncthing--count-local-bytes
@@ -1391,6 +1421,36 @@ Argument TOKEN API server token."
       (setq idx (1+ idx))
       (setq current (backtrace-frame idx)))
     (cdr (backtrace-frame idx))))
+
+(cl-defun syncthing--num-group (num &key (dec-sep ".") (ths-sep " "))
+  "Group number's digits with decimal and thousands separators."
+  (if (not num) ""
+    (let* ((stringified (format "%s" num))
+           (integer-part
+            (string-to-list
+             (car (split-string
+                   stringified (regexp-quote (or dec-sep "."))))))
+           (fraction-part
+            (string-to-list
+             (cadr (split-string
+                    stringified (regexp-quote (or dec-sep "."))))))
+           (idx 0) out)
+      (when fraction-part
+        (dolist (char fraction-part)
+          (when (and (not (eq 0 idx)) (eq 0 (% idx 3)))
+            (push (or ths-sep " ") out))
+          (push (string char) out)
+          (setq idx (1+ idx))))
+      (setq idx 0)
+      (setq out (reverse out))
+      (when fraction-part
+        (push (or dec-sep ".") out))
+      (dolist (char (reverse integer-part))
+        (when (and (not (eq 0 idx)) (eq 0 (% idx 3)))
+          (push (or ths-sep " ") out))
+        (push (string char) out)
+        (setq idx (1+ idx)))
+      (string-join out ""))))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)

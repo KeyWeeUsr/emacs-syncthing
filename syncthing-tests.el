@@ -269,5 +269,41 @@
                  (get-buffer (format syncthing-trace-format-buffer name))
                (buffer-string))))))
 
+(ert-deftest syncthing-number-grouping ()
+  (syncthing-ert-cleanup)
+  (should (string= (syncthing--num-group nil) ""))
+  (should (string= (syncthing--num-group 0) "0"))
+  (should (string= (syncthing--num-group 10) "10"))
+  (should (string= (syncthing--num-group 100) "100"))
+  (should (string= (syncthing--num-group 1000) "1 000"))
+  (should (string= (syncthing--num-group 10000) "10 000"))
+  (should (string= (syncthing--num-group 100000) "100 000"))
+  (should (string= (syncthing--num-group 1000000) "1 000 000"))
+  (should (string= (syncthing--num-group 10000000) "10 000 000"))
+  (should (string= (syncthing--num-group 100000000) "100 000 000"))
+  (should (string= (syncthing--num-group 1000000000) "1 000 000 000"))
+
+  (should (string= (syncthing--num-group 0.0) "0.0"))
+  (should (string= (syncthing--num-group 10.01) "10.01"))
+  (should (string= (syncthing--num-group 100.001) "100.001"))
+  (should (string= (syncthing--num-group 1000.0001) "1 000.000 1"))
+  (should (string= (syncthing--num-group 10000.00001) "10 000.000 01"))
+  (should (string= (syncthing--num-group 100000.000001) "100 000.000 001"))
+  (should (string= (syncthing--num-group
+                    1234567.8901234 :dec-sep ".") "1 234 567.890 123 4"))
+
+  (should (string= (syncthing--num-group 0 :ths-sep ",") "0"))
+  (should (string= (syncthing--num-group 10 :ths-sep ",") "10"))
+  (should (string= (syncthing--num-group 100 :ths-sep ",") "100"))
+  (should (string= (syncthing--num-group 1000 :ths-sep ",") "1,000"))
+  (should (string= (syncthing--num-group 10000 :ths-sep ",") "10,000"))
+  (should (string= (syncthing--num-group 100000 :ths-sep ",") "100,000"))
+  (should (string= (syncthing--num-group 1000000 :ths-sep ",") "1,000,000"))
+  (should (string= (syncthing--num-group 10000000 :ths-sep ",") "10,000,000"))
+  (should (string= (syncthing--num-group
+                    100000000 :ths-sep ",") "100,000,000"))
+  (should (string= (syncthing--num-group
+                    1000000000 :ths-sep ",") "1,000,000,000")))
+
 (provide 'syncthing-tests)
 ;;; syncthing-tests.el ends here
