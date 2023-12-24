@@ -425,7 +425,10 @@ Special meaning for empty list / nil to skip rendering the header line."
 (cl-defstruct (syncthing-buffer
                (:copier nil) (:named nil) (:constructor syncthing--buffer))
   "Local state holder for Syncthing buffer drawables and state."
-  name collapse-after-start initialized fold-folders fold-devices point)
+  name collapse-after-start initialized
+  fold-folders skip-fold-folders
+  fold-devices skip-fold-devices
+  point)
 
 ;; keyboard
 (defvar-local syncthing-mode-map
@@ -739,7 +742,9 @@ Argument RIGHT second object to compare."
         (order (alist-get 'order folder))
         (stats (alist-get 'stats folder))
         (text ""))
-    (when (syncthing-buffer-collapse-after-start syncthing-buffer)
+    (when (and (syncthing-buffer-collapse-after-start syncthing-buffer)
+               (not (member id (syncthing-buffer-skip-fold-folders
+                                syncthing-buffer))))
       (push id (syncthing-buffer-fold-folders syncthing-buffer)))
 
     (setq text
@@ -875,14 +880,19 @@ Argument RIGHT second object to compare."
                (setf (syncthing-buffer-fold-folders syncthing-buffer)
                      (delete id
                              (syncthing-buffer-fold-folders syncthing-buffer)))
+               (push id (syncthing-buffer-skip-fold-folders syncthing-buffer))
                (save-excursion
                  (widget-delete (syncthing--get-widget (point)))
                  (syncthing--list-37-folder folder)))
            (progn
+             ;; TODO: redundant check for push?
              (if (syncthing-buffer-fold-folders syncthing-buffer)
                  (push id (syncthing-buffer-fold-folders syncthing-buffer))
                (setf (syncthing-buffer-fold-folders syncthing-buffer)
                      (list id)))
+             (setf (syncthing-buffer-skip-fold-folders syncthing-buffer)
+                   (delete id (syncthing-buffer-skip-fold-folders
+                               syncthing-buffer)))
              (save-excursion
                (widget-delete (syncthing--get-widget (point)))
                (syncthing--list-37-folder folder)))))
@@ -949,7 +959,9 @@ Argument RIGHT second object to compare."
                           (if (not (eq 0 (alist-get 'globalBytes completion)))
                               (alist-get 'globalBytes completion)
                             1) 1)))))
-    (when (syncthing-buffer-collapse-after-start syncthing-buffer)
+    (when (and (syncthing-buffer-collapse-after-start syncthing-buffer)
+               (not (member id (syncthing-buffer-skip-fold-devices
+                                syncthing-buffer))))
       (push id (syncthing-buffer-fold-devices syncthing-buffer)))
     (dolist (folder-cfg (alist-get 'folders
                                    (syncthing-server-data syncthing-server)))
@@ -1040,14 +1052,19 @@ Argument RIGHT second object to compare."
                (setf (syncthing-buffer-fold-devices syncthing-buffer)
                      (delete id
                              (syncthing-buffer-fold-devices syncthing-buffer)))
+               (push id (syncthing-buffer-skip-fold-devices syncthing-buffer))
                (save-excursion
                  (widget-delete (syncthing--get-widget (point)))
                  (syncthing--list-37-device device)))
            (progn
+             ;; TODO: redundant check for push?
              (if (syncthing-buffer-fold-devices syncthing-buffer)
                  (push id (syncthing-buffer-fold-devices syncthing-buffer))
                (setf (syncthing-buffer-fold-devices syncthing-buffer)
                      (list id)))
+             (setf (syncthing-buffer-fold-devices syncthing-buffer)
+                   (delete id (syncthing-buffer-skip-fold-devices
+                               syncthing-buffer)))
              (save-excursion
                (widget-delete (syncthing--get-widget (point)))
                (syncthing--list-37-device device)))))
