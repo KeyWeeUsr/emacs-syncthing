@@ -417,7 +417,7 @@ Special meaning for empty list / nil to skip rendering the header line."
   ;; on slot order change or on new slot basically restart Emacs because
   ;; "args-out-of-range" even though it's present and cl-defstruct is called
   ;; via e.g. eval-buffer
-  name url token data connections-total last-speed-date)
+  name url token data connections-total dev-connections-total last-speed-date)
 
 (defvar-local syncthing-buffer nil
   "Buffer-local instance for all drawables and other buffer states.")
@@ -960,8 +960,12 @@ Argument RIGHT second object to compare."
     (if connected
         (setq text
               (concat text
-                      (format " \tDownload Rate\t\t\t%s\n" "down")
-                      (format " \tUpload Rate\t\t\t\t%s\n" "up")))
+                      (format " \tDownload Rate\t\t\t%s\n"
+                              (syncthing--bytes-to-rate
+                               (or (alist-get 'rate-download device) -1)))
+                      (format " \tUpload Rate\t\t\t\t%s\n"
+                              (syncthing--bytes-to-rate
+                               (or (alist-get 'rate-upload device) -1)))))
       (setq text
             (format "%s \tLast seen\t\t\t\t%s\n \tSync Status\t\t\t\t%s\n"
                     text
@@ -1313,8 +1317,37 @@ Argument TOKEN API server token."
                        (or (alist-get 'outBytesTotal conns-total) 0))
                     td))
           (syncthing-server-connections-total server)
-          now-total
-          (syncthing-server-data server) data)))
+          now-total)
+    (let (dev dev-id conn)
+      (dotimes (dev-idx (length (alist-get 'devices data)))
+        (setq dev (nth dev-idx (alist-get 'devices data)))
+        (setq dev-id (alist-get 'deviceID dev))
+        (dotimes (conn-idx (length (alist-get 'connections conns)))
+          (setq conn (nth conn-idx (alist-get 'connections conns)))
+          (when (and (string= dev-id (car conn))
+                     (alist-get 'connected (cdr conn)))
+            (let* ((dev-id (alist-get 'deviceID dev))
+                   (dev-now-total (cdr conn))
+                   (dev-conns-total
+                    (alist-get (intern `,dev-id)
+                               (syncthing-server-dev-connections-total server))))
+              (setf (alist-get 'rate-download dev)
+                    (max
+                     0 (/ (- (alist-get 'inBytesTotal dev-now-total)
+                             (or (alist-get 'inBytesTotal dev-conns-total) 0))
+                          td))
+                    (alist-get 'rate-upload dev)
+                    (max
+                     0 (/ (- (alist-get 'outBytesTotal dev-now-total)
+                             (or (alist-get 'outBytesTotal dev-conns-total) 0))
+                          td))
+                    (alist-get
+                     (intern `,dev-id)
+                     (syncthing-server-dev-connections-total server))
+                    dev-now-total))))
+        ;; replace with modified item
+        (setf (nth dev-idx (alist-get 'devices data)) dev)))
+    (setf (syncthing-server-data server) data)))
 
 (defun syncthing--server-update-folder-completion (server data)
   "Update folder completion DATA for SERVER."

@@ -305,5 +305,19 @@
   (should (string= (syncthing--num-group
                     1000000000 :ths-sep ",") "1,000,000,000")))
 
+(ert-deftest syncthing-alist-var-access ()
+  "Convert 'a' (string) to 'a (symbol) and access value with alist-get."
+  (syncthing-ert-cleanup)
+  (let ((data '((key . 1) (key2 . 2)))
+        (var 'key)
+        (var-str "key"))
+    (should (string= "((key . 1) (key2 . 2))" (format "%s" data)))
+    (should (string= "cons" (format "%s" (type-of data))))
+    (should (eq 1 (alist-get 'key data)))
+    (should (eq 1 (alist-get `,var data)))
+    (should (eq 'key (intern `,var-str)))
+    (should (eq var (intern `,var-str)))
+    (should (eq 1 (alist-get (intern `,var-str) data)))))
+
 (provide 'syncthing-tests)
 ;;; syncthing-tests.el ends here
