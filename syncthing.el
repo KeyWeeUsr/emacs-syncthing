@@ -425,7 +425,7 @@ Special meaning for empty list / nil to skip rendering the header line."
 (cl-defstruct (syncthing-buffer
                (:copier nil) (:named nil) (:constructor syncthing--buffer))
   "Local state holder for Syncthing buffer drawables and state."
-  name collapse-after-start fold-folders fold-devices)
+  name collapse-after-start initialized fold-folders fold-devices point)
 
 ;; keyboard
 (defvar-local syncthing-mode-map
@@ -1229,19 +1229,24 @@ Argument RIGHT second object to compare."
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
     (widget-setup)
     (setq header-line-format (syncthing--header-line server))
-    ;; messes up with cursor position, reset to 0,0
-    (goto-char 0)))
+    ;; header drawing messes up with cursor position, reset to 0,0
+    (goto-char (or (syncthing-buffer-point syncthing-buffer) 0))))
 
 (defun syncthing--draw (server)
   "Setup buffer and draw widgets for SERVER."
   (syncthing-trace)
+  (when (syncthing-buffer-initialized syncthing-buffer)
+    (setf (syncthing-buffer-point syncthing-buffer) (point)))
+  (let ((inhibit-read-only t))
+    (erase-buffer))
   (syncthing--draw-folders server)
   (syncthing--draw-devices server)
   (when syncthing-display-changes
     (syncthing--draw-changes server))
   (when syncthing-display-logs
     (syncthing--draw-logs server))
-  (syncthing--draw-buffer server))
+  (syncthing--draw-buffer server)
+  (setf (syncthing-buffer-initialized syncthing-buffer) t))
 
 (defun syncthing--init-state ()
   "Reset all variables holding initial state.
@@ -1259,8 +1264,6 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (save-window-excursion
     (switch-to-buffer
      (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (let ((inhibit-read-only t))
-      (erase-buffer))
     (syncthing--ping syncthing-server)
     (syncthing--server-update syncthing-server)
     (syncthing--init-state)
