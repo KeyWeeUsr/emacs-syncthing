@@ -28,6 +28,7 @@ demo:
 
 .PHONY: tag
 tag:
+	$(MAKE) all
 	git add -f . && git stash
 	@grep ";; Version:" syncthing.el | tee /dev/stderr | grep "$(TAG)"
 	@git tag "$(TAG)" --sign
