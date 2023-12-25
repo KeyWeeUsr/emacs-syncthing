@@ -16,9 +16,9 @@ install manually, then simply <kbd>M</kbd>-<kbd>x</kbd> <kbd>syncthing</kbd>.
 
 Make sure to check related `defconst` parts of the file to customize.
 
-## Screenshot
+## Screenshots
 
-![Screenshot][demo]
+![Screenshot][demo]![Screenshot][demo-term]
 
 [melpa-badge]: https://melpa.org/packages/syncthing-badge.svg
 [melpa-package]: https://melpa.org/#/syncthing
@@ -29,3 +29,4 @@ Make sure to check related `defconst` parts of the file to customize.
 [ppl-badge]: https://img.shields.io/badge/-paypal-grey?logo=paypal
 [ppl-link]: https://paypal.me/peterbadida
 [demo]: https://raw.githubusercontent.com/KeyWeeUsr/emacs-syncthing/master/screenshot.png
+[demo-term]: https://raw.githubusercontent.com/KeyWeeUsr/emacs-syncthing/master/screenshot-term.png

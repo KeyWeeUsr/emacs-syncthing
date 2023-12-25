@@ -1106,6 +1106,10 @@ def stats_device():
         }
     }
 
+@APP.route("/rest/events")
+def events():
+    return []
+
 
 if __name__ == "__main__":
     APP.run()
