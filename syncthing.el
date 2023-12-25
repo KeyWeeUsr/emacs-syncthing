@@ -1796,6 +1796,12 @@ Optional argument THS-SEP custom thousands separator or default of ` '."
   (message "Event: syncthing--watcher-failure"))
 
 (defun syncthing--watcher-folder-completion (event)
+  (let* ((server-data (syncthing-server-data syncthing-server))
+         (folders (alist-get 'folders server-data))
+         (data (alist-get 'data event)))
+    (dolist (folder folders)
+      (when (string= (alist-get 'folder data) (alist-get 'id folder))
+        (setf (alist-get 'completion folder) data))))
   (message "Event: syncthing--watcher-folder-completion"))
 
 (defun syncthing--watcher-folder-rejected (event)
