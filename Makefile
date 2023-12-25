@@ -25,3 +25,9 @@ demo:
 		'(load "$(PWD)/demo/demo.el")' \
 		'(syncthing-demo "Demo" "$(DEMO_ADDR)")' &
 	$(MAKE) demo-server
+
+.PHONY: tag
+tag:
+	git add -f . && git stash
+	@grep ";; Version:" syncthing.el | tee /dev/stderr | grep "$(TAG)"
+	@git tag "$(TAG)" --sign
