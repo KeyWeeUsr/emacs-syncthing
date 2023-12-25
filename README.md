@@ -14,7 +14,9 @@ install manually, then simply <kbd>M</kbd>-<kbd>x</kbd> <kbd>syncthing</kbd>.
 
 ## Customization
 
-Make sure to check related `defconst` parts of the file to customize.
+Check the manual for Emacs Customization: <kbd>C</kbd>-<kbd>h</kbd><kbd>i</kbd>
+<kbd>m</kbd><kbd>Emacs</kbd><kbd>m</kbd><kbd>Customization</kbd> and group
+<kbd>M</kbd>-<kbd>x</kbd> <kbd>customize-group</kbd> <kbd>syncthing</kbd>.
 
 ## Screenshots
 

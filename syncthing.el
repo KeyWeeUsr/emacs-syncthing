@@ -34,43 +34,65 @@
 (require 'org-table)
 (require 'autorevert)
 
-(defgroup syncthing
-  nil
-  "Customization group for `syncthing'."
+(defgroup syncthing nil
+  "Basic configuration."
   :group 'external
   :group 'communication)
 
-(defgroup syncthing-startup
-  nil
-  "Customization sub-group for `syncthing' start-up stage."
+(defgroup syncthing-startup nil
+  "Start-up stage."
   :group 'syncthing)
 
-(defgroup syncthing-debug
-  nil
-  "Customization sub-group for `syncthing' debugging."
+(defgroup syncthing-debug nil
+  "Debugging configuration."
   :group 'syncthing)
 
-(defgroup syncthing-faces
-  nil
-  "Customization group for `syncthing' faces."
+(defgroup syncthing-faces nil
+  "Faces used in client buffers."
+  :group 'syncthing)
+
+(defgroup syncthing-format nil
+  "String formatting and templating."
+  :group 'syncthing)
+
+(defgroup syncthing-times nil
+  "Times and intervals."
+  :group 'syncthing)
+
+(defgroup syncthing-limits nil
+  "Limits and paginations."
+  :group 'syncthing)
+
+(defgroup syncthing-display nil
+  "What to display in client buffers."
+  :group 'syncthing)
+
+(defgroup syncthing-events nil
+  "Configuration for `syncthing-watcher'."
+  :group 'syncthing)
+
+(defgroup syncthing-cleanup nil
+  "Cleanup configuration."
   :group 'syncthing)
 
 ;; customization values
 (defcustom syncthing-format-buffer
   "*syncthing(%s)*"
-  "Syncthing's buffer name with a =%s= placeholder for address."
+  "Client's buffer name with a `%s' placeholder for address."
   :group 'syncthing-startup
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-trace-format-buffer
   "*syncthing trace(%s)*"
-  "Syncthing's buffer name with a =%s= placeholder for address."
+  "Tracing buffer name with a `%s' placeholder for address."
   :group 'syncthing-debug
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-default-name
   "Default Localhost"
-  "Base URL for Syncthing REST API endpoint."
+  "Default client name for `syncthing-format-buffer'."
   :group 'syncthing
   :type 'string)
 
@@ -83,73 +105,73 @@
 (defcustom syncthing-format-perc
   "%6.2f%%"
   "Format for displaying process percentage."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-rate-download
   " %s"
   "Format for displaying download rate in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-rate-upload
   " %s"
   "Format for displaying upload rate in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-count-local-files
   " %s"
   "Format for displaying local files count in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-count-local-folders
   " %s"
   "Format for displaying local folders count in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-count-local-bytes
   " ~%s"
   "Format for displaying local size in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-count-listeners
   " %s"
   "Format for displaying listeners count in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-count-discovery
   " %s"
   "Format for displaying discovery count in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-uptime
   " %s"
   "Format for displaying Syncthing server uptime in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-my-id
   " %s"
   "Format for displaying current device's ID in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-format-version
   " %s"
   "Format for displaying version in header line."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-cleanup-priority
   0
   "`add-hook' priority."
-  :group 'syncthing
+  :group 'syncthing-cleanup
   :type 'number)
 
 (defcustom syncthing-default-server-token
@@ -162,6 +184,7 @@
   t
   "Start all items collapsed."
   :group 'syncthing-startup
+  :group 'syncthing-display
   :type 'boolean)
 
 (defcustom syncthing-start-with-auto-refresh
@@ -173,7 +196,7 @@
 (defcustom syncthing-auto-refresh-interval
   10
   "Number of seconds to wait before refreshing client buffer."
-  :group 'syncthing
+  :group 'syncthing-time
   :type 'number)
 
 (defcustom syncthing-header-items
@@ -183,7 +206,7 @@
   "Items to render at `header-line-format'.
 
 Special meaning for empty list / nil to skip rendering the header line."
-  :group 'syncthing
+  :group 'syncthing-display
   :type '(repeat
           (choice :tag "Item"
                   (const :tag "Download rate" "rate-download")
@@ -200,7 +223,7 @@ Special meaning for empty list / nil to skip rendering the header line."
 (defcustom syncthing-display-logs
   nil
   "Display logs in `syncthing-buffer'."
-  :group 'syncthing
+  :group 'syncthing-display
   :type 'boolean)
 
 ;; TODO: async/kill from client side
@@ -213,13 +236,13 @@ Note:
     listener waits for some to be emitted which causes Emacs to hang while
     waiting for the response but can be stopped with C-g
     https://docs.syncthing.net/rest/events-get.html"
-  :group 'syncthing
+  :group 'syncthing-display
   :type 'boolean)
 
 (defcustom syncthing-limit-changes
   25
   "Limit of items for recent changes."
-  :group 'syncthing
+  :group 'syncthing-limits
   :type 'number)
 
 (defcustom syncthing-debug
@@ -231,13 +254,13 @@ Note:
 (defcustom syncthing-decimal-separator
   "."
   "Stylize number with custom decimal separator."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-thousands-separator
   " "
   "Stylize number with custom thousands separator."
-  :group 'syncthing
+  :group 'syncthing-format
   :type 'string)
 
 (defcustom syncthing-watch-events
@@ -249,13 +272,14 @@ Note:
     listener waits for some to be emitted which causes Emacs to hang while
     waiting for the response but can be stopped with C-g
     https://docs.syncthing.net/rest/events-get.html"
-  :group 'syncthing
+  :group 'syncthing-events
   :type 'boolean)
 
 (defcustom syncthing-watch-events-interval
   1
   "Number of seconds to wait before polling for next event batch."
-  :group 'syncthing
+  :group 'syncthing-events
+  :group 'syncthing-time
   :type 'number)
 
 ;; customization faces/colors/fonts
