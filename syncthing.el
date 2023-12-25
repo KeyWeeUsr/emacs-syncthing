@@ -264,7 +264,7 @@ Note:
   :type 'string)
 
 (defcustom syncthing-watch-events
-  t
+  nil
   "Poll Syncthing server for events such as status, files or errors.
 
 Note:
