@@ -1172,7 +1172,7 @@ Argument RIGHT second object to compare."
                  (push id (syncthing-buffer-fold-devices syncthing-buffer))
                (setf (syncthing-buffer-fold-devices syncthing-buffer)
                      (list id)))
-             (setf (syncthing-buffer-fold-devices syncthing-buffer)
+             (setf (syncthing-buffer-skip-fold-devices syncthing-buffer)
                    (delete id (syncthing-buffer-skip-fold-devices
                                syncthing-buffer)))
              (save-excursion
