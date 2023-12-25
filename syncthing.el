@@ -227,14 +227,21 @@ Special meaning for empty list / nil to skip rendering the header line."
   :type 'boolean)
 
 ;; TODO: async/kill from client side
+(defcustom syncthing-timeout-events
+  0
+  "Amount of time to wait for server to generate events."
+  :group 'syncthing-times
+  :type 'number)
+
 (defcustom syncthing-display-changes
-  nil
+  t
   "Display recent-changes in `syncthing-buffer'.
 
 Note:
     Syncthing timeouts after 60s with [] when there are no events and the
     listener waits for some to be emitted which causes Emacs to hang while
-    waiting for the response but can be stopped with C-g
+    waiting for the response but can be stopped with C-g. This is customized
+    with `syncthing-timeout-events'.
     https://docs.syncthing.net/rest/events-get.html"
   :group 'syncthing-display
   :type 'boolean)
@@ -264,13 +271,14 @@ Note:
   :type 'string)
 
 (defcustom syncthing-watch-events
-  nil
+  t
   "Poll Syncthing server for events such as status, files or errors.
 
 Note:
     Syncthing timeouts after 60s with [] when there are no events and the
     listener waits for some to be emitted which causes Emacs to hang while
-    waiting for the response but can be stopped with C-g
+    waiting for the response but can be stopped with C-g. This is customized
+    with `syncthing-timeout-events'.
     https://docs.syncthing.net/rest/events-get.html"
   :group 'syncthing-events
   :type 'boolean)
@@ -1636,8 +1644,11 @@ Argument TOKEN API server token."
 
     (when syncthing-display-changes
       (setf (alist-get 'changes data)
-            (syncthing-request server "GET" (format "rest/events/disk?limit=%s"
-                                                    syncthing-limit-changes))))
+            (syncthing-request
+             server "GET"
+             (format "rest/events/disk?limit=%s&timeout=%s"
+                     syncthing-limit-changes
+                     syncthing-timeout-events))))
 
     (syncthing--server-update-folder-completion server data)
     (syncthing--server-update-folder-stats server data)
@@ -1713,8 +1724,10 @@ Argument SERVER `syncthing-server' instance.
 Argument WATCHER `syncthing-watcher' instance.
 Optional argument INIT Are we in the initialization stage?"
   (let* ((endpoint (if init
-                       "rest/events?limit=1"
-                     (format "rest/events?since=%s"
+                       (format "rest/events?timeout=%s&limit=1"
+                               syncthing-timeout-events)
+                     (format "rest/events?timeout=%s&since=%s"
+                             syncthing-timeout-events
                              (syncthing-watcher-last-id watcher))))
          (events (syncthing-request server "GET" endpoint))
          last-id type)
@@ -1787,7 +1800,9 @@ Optional argument INIT Are we in the initialization stage?"
              (syncthing--watcher-folder-paused event))
             ((string= type syncthing-event-folder-resumed)
              (syncthing--watcher-folder-resumed event))))
-    (setf (syncthing-watcher-last-id watcher) last-id)))
+    (when last-id
+      ;; set only if there was some event present
+      (setf (syncthing-watcher-last-id watcher) last-id))))
 
 (defun syncthing--watcher-config-saved (event)
   "TODO docstring, handle EVENT."
