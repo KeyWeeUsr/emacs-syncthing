@@ -12,6 +12,11 @@ all viewing functionality, later on even with editing/writing.
 Install it from [Melpa](https://melpa.org/#/getting-started) or clone and
 install manually, then simply <kbd>M</kbd>-<kbd>x</kbd> <kbd>syncthing</kbd>.
 
+## Key bindings
+
+Ensure you are in the Syncthing buffer:
+<kbd>C</kbd>-<kbd>h</kbd><kbd>m</kbd> or <kbd>?</kbd> for all bindings.
+
 ## Customization
 
 Check the manual for Emacs Customization: <kbd>C</kbd>-<kbd>h</kbd><kbd>i</kbd>

@@ -578,7 +578,12 @@ scan it is at.")
     (define-key map (kbd "?") #'describe-bindings)
     (define-key map (kbd "n") #'next-line)
     (define-key map (kbd "p") #'previous-line)
-    map))
+    map)
+  "`syncthing-mode' key map.
+
+* `RET'/`SPC'/`TAB' when `point' is on a foldable widget toggles the fold.
+* `<backtab>' or Shift+`TAB' toggles all foldable widgets.
+* `n'/`p' for navigation down/up in the buffer.")
 
 ;; inlines & macros
 (defsubst syncthing-trace ()
