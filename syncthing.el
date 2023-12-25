@@ -203,9 +203,16 @@ Special meaning for empty list / nil to skip rendering the header line."
   :group 'syncthing
   :type 'boolean)
 
+;; TODO: async/kill from client side
 (defcustom syncthing-display-changes
   nil
-  "Display recent-changes in `syncthing-buffer'."
+  "Display recent-changes in `syncthing-buffer'.
+
+Note:
+    Syncthing timeouts after 60s with [] when there are no events and the
+    listener waits for some to be emitted which causes Emacs to hang while
+    waiting for the response but can be stopped with C-g
+    https://docs.syncthing.net/rest/events-get.html"
   :group 'syncthing
   :type 'boolean)
 
@@ -1450,9 +1457,6 @@ Argument TOKEN API server token."
       (setf (alist-get 'logs data)
             (syncthing-request server "GET" "rest/system/log")))
 
-    ;; TODO: Syncthing possibly timeouts after 60s with [] which causes Emacs
-    ;;       to hang while waiting for the response but can be stopped with C-g
-    ;;       Maybe a bug when there are no changes?
     (when syncthing-display-changes
       (setf (alist-get 'changes data)
             (syncthing-request server "GET" (format "rest/events/disk?limit=%s"
