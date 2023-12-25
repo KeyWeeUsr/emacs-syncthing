@@ -616,7 +616,7 @@ Argument POS Incoming EVENT position."
 	    (widget-apply-action button event)
       (error "You can't edit this part of the Syncthing buffer"))))
 
-(defun syncthing--tab (pos &optional event)
+(defun syncthing--tab (&rest _)
   "TAB handler.
 Argument POS Incoming EVENT position."
   (interactive "@d")
@@ -1752,99 +1752,130 @@ Optional argument THS-SEP custom thousands separator or default of ` '."
     (setf (syncthing-watcher-last-id watcher) last-id)))
 
 (defun syncthing--watcher-config-saved (event)
+  (ignore event)
   (message "Event: syncthing--watcher-config-saved"))
 
 (defun syncthing--watcher-device-connected (event)
+  (ignore event)
   (message "Event: syncthing--watcher-device-connected"))
 
 (defun syncthing--watcher-device-disconnected (event)
+  (ignore event)
   (message "Event: syncthing--watcher-device-disconnected"))
 
 (defun syncthing--watcher-device-discovered (event)
+  (ignore event)
   (message "Event: syncthing--watcher-device-discovered"))
 
 (defun syncthing--watcher-device-rejected (event)
+  (ignore event)
   (message "Event: syncthing--watcher-device-rejected"))
 
 (defun syncthing--watcher-pending-devices-changed (event)
+  (ignore event)
   (message "Event: syncthing--watcher-pending-devices-changed"))
 
 (defun syncthing--watcher-device-paused (event)
+  (ignore event)
   (message "Event: syncthing--watcher-device-paused"))
 
 (defun syncthing--watcher-device-resumed (event)
+  (ignore event)
   (message "Event: syncthing--watcher-device-resumed"))
 
 (defun syncthing--watcher-cluster-config-received (event)
+  (ignore event)
   (message "Event: syncthing--watcher-cluster-config-received"))
 
 (defun syncthing--watcher-download-progress (event)
+  (ignore event)
   (message "Event: syncthing--watcher-download-progress"))
 
 (defun syncthing--watcher-failure (event)
+  (ignore event)
   (message "Event: syncthing--watcher-failure"))
 
 (defun syncthing--watcher-folder-completion (event)
   (message "Event: syncthing--watcher-folder-completion"))
 
 (defun syncthing--watcher-folder-rejected (event)
+  (ignore event)
   (message "Event: syncthing--watcher-folder-rejected"))
 
 (defun syncthing--watcher-pending-folders-changed (event)
+  (ignore event)
   (message "Event: syncthing--watcher-pending-folders-changed"))
 
 (defun syncthing--watcher-folder-summary (event)
+  (ignore event)
   (message "Event: syncthing--watcher-folder-summary"))
 
 (defun syncthing--watcher-item-finished (event)
+  (ignore event)
   (message "Event: syncthing--watcher-item-finished"))
 
 (defun syncthing--watcher-item-started (event)
+  (ignore event)
   (message "Event: syncthing--watcher-item-started"))
 
 (defun syncthing--watcher-listen-addresses-changed (event)
+  (ignore event)
   (message "Event: syncthing--watcher-listen-addresses-changed"))
 
 (defun syncthing--watcher-local-change-detected (event)
+  (ignore event)
   (message "Event: syncthing--watcher-local-change-detected"))
 
 (defun syncthing--watcher-local-index-updated (event)
+  (ignore event)
   (message "Event: syncthing--watcher-local-index-updated"))
 
 (defun syncthing--watcher-login-attempt (event)
+  (ignore event)
   (message "Event: syncthing--watcher-login-attempt"))
 
 (defun syncthing--watcher-remote-change-detected (event)
+  (ignore event)
   (message "Event: syncthing--watcher-remote-change-detected"))
 
 (defun syncthing--watcher-remote-download-progress (event)
+  (ignore event)
   (message "Event: syncthing--watcher-remote-download-progress"))
 
 (defun syncthing--watcher-remote-index-updated (event)
+  (ignore event)
   (message "Event: syncthing--watcher-remote-index-updated"))
 
 (defun syncthing--watcher-starting (event)
+  (ignore event)
   (message "Event: syncthing--watcher-starting"))
 
 (defun syncthing--watcher-startup-completed (event)
+  (ignore event)
   (message "Event: syncthing--watcher-startup-completed"))
 
 (defun syncthing--watcher-state-changed (event)
+  (ignore event)
   (message "Event: syncthing--watcher-state-changed"))
 
 (defun syncthing--watcher-folder-errors (event)
+  (ignore event)
   (message "Event: syncthing--watcher-folder-errors"))
 
 (defun syncthing--watcher-folder-watch-state-changed (event)
+  (ignore event)
   (message "Event: syncthing--watcher-folder-watch-state-changed"))
 
 (defun syncthing--watcher-folder-scan-progress (event)
+  (ignore event)
   (message "Event: syncthing--watcher-folder-scan-progress"))
 
 (defun syncthing--watcher-folder-paused (event)
+  (ignore event)
   (message "Event: syncthing--watcher-folder-paused"))
 
 (defun syncthing--watcher-folder-resumed (event)
+  (ignore event)
   (message "Event: syncthing--watcher-folder-resumed"))
 
 ;; public funcs
