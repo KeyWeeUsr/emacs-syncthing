@@ -44,7 +44,7 @@
   :group 'syncthing)
 
 (defgroup syncthing-debug nil
-  "Debugging configuration."
+  "Debugging and verbosity configuration."
   :group 'syncthing)
 
 (defgroup syncthing-faces nil
@@ -289,6 +289,22 @@ Note:
   :group 'syncthing-events
   :group 'syncthing-time
   :type 'number)
+
+(defcustom syncthing-no-upstream-noise
+  t
+  "Prevent any upstream library to pollute minibuffer with `message'.
+
+Many libs, modes and other facilities have their info messages, but can be
+annoying or hide more urgent messages when used at large scale or in short
+intervals. Setting this to non-nil allows `syncthing' to purge all of them."
+  :group 'syncthing-debug
+  :type 'boolean)
+
+(defcustom syncthing-info
+  t
+  "Show info messages in minibuffer."
+  :group 'syncthing-debug
+  :type 'boolean)
 
 ;; customization faces/colors/fonts
 (defface syncthing-title
@@ -608,7 +624,8 @@ scan it is at.")
   (syncthing-trace)
   (let ((url-request-method "GET")
         (url-request-extra-headers
-         `(("X-Api-Key" . ,(syncthing-server-token server)))))
+         `(("X-Api-Key" . ,(syncthing-server-token server))))
+        (url-show-status (null syncthing-no-upstream-noise)))
     (ignore url-request-method url-request-extra-headers)
     (condition-case-unless-debug nil
         (with-temp-buffer
@@ -625,7 +642,8 @@ Argument TOKEN API token."
   (syncthing-trace)
   (let ((url-request-method method)
         (url-request-data data)
-        (url-request-extra-headers `(("X-Api-Key" . ,token))))
+        (url-request-extra-headers `(("X-Api-Key" . ,token)))
+        (url-show-status (null syncthing-no-upstream-noise)))
     (ignore url-request-method method
             url-request-data data
             url-request-extra-headers)
@@ -1807,57 +1825,68 @@ Optional argument INIT Are we in the initialization stage?"
 (defun syncthing--watcher-config-saved (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-config-saved"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-config-saved")))
 
 (defun syncthing--watcher-device-connected (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-device-connected"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-device-connected")))
 
 (defun syncthing--watcher-device-disconnected (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-device-disconnected"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-device-disconnected")))
 
 (defun syncthing--watcher-device-discovered (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-device-discovered"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-device-discovered")))
 
 (defun syncthing--watcher-device-rejected (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-device-rejected"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-device-rejected")))
 
 (defun syncthing--watcher-pending-devices-changed (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-pending-devices-changed"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-pending-devices-changed")))
 
 (defun syncthing--watcher-device-paused (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-device-paused"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-device-paused")))
 
 (defun syncthing--watcher-device-resumed (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-device-resumed"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-device-resumed")))
 
 (defun syncthing--watcher-cluster-config-received (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-cluster-config-received"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-cluster-config-received")))
 
 (defun syncthing--watcher-download-progress (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-download-progress"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-download-progress")))
 
 (defun syncthing--watcher-failure (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-failure"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-failure")))
 
 (defun syncthing--watcher-folder-completion (event)
   "TODO docstring for EVENT."
@@ -1867,107 +1896,128 @@ Optional argument INIT Are we in the initialization stage?"
     (dolist (folder folders)
       (when (string= (alist-get 'folder data) (alist-get 'id folder))
         (setf (alist-get 'completion folder) data))))
-  (message "Event: syncthing--watcher-folder-completion"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-folder-completion")))
 
 (defun syncthing--watcher-folder-rejected (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-folder-rejected"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-folder-rejected")))
 
 (defun syncthing--watcher-pending-folders-changed (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-pending-folders-changed"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-pending-folders-changed")))
 
 (defun syncthing--watcher-folder-summary (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-folder-summary"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-folder-summary")))
 
 (defun syncthing--watcher-item-finished (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-item-finished"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-item-finished")))
 
 (defun syncthing--watcher-item-started (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-item-started"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-item-started")))
 
 (defun syncthing--watcher-listen-addresses-changed (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-listen-addresses-changed"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-listen-addresses-changed")))
 
 (defun syncthing--watcher-local-change-detected (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-local-change-detected"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-local-change-detected")))
 
 (defun syncthing--watcher-local-index-updated (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-local-index-updated"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-local-index-updated")))
 
 (defun syncthing--watcher-login-attempt (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-login-attempt"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-login-attempt")))
 
 (defun syncthing--watcher-remote-change-detected (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-remote-change-detected"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-remote-change-detected")))
 
 (defun syncthing--watcher-remote-download-progress (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-remote-download-progress"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-remote-download-progress")))
 
 (defun syncthing--watcher-remote-index-updated (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-remote-index-updated"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-remote-index-updated")))
 
 (defun syncthing--watcher-starting (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-starting"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-starting")))
 
 (defun syncthing--watcher-startup-completed (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-startup-completed"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-startup-completed")))
 
 (defun syncthing--watcher-state-changed (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-state-changed"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-state-changed")))
 
 (defun syncthing--watcher-folder-errors (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-folder-errors"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-folder-errors")))
 
 (defun syncthing--watcher-folder-watch-state-changed (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-folder-watch-state-changed"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-folder-watch-state-changed")))
 
 (defun syncthing--watcher-folder-scan-progress (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-folder-scan-progress"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-folder-scan-progress")))
 
 (defun syncthing--watcher-folder-paused (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-folder-paused"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-folder-paused")))
 
 (defun syncthing--watcher-folder-resumed (event)
   "TODO docstring, handle EVENT."
   (ignore event)
-  (message "Event: syncthing--watcher-folder-resumed"))
+  (when syncthing-info
+    (message "Event: syncthing--watcher-folder-resumed")))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
@@ -1983,12 +2033,14 @@ Optional argument INIT Are we in the initialization stage?"
   "Clean resources when closing the client."
   (interactive)
   (syncthing-trace)
-  (message "emacs-syncthing: Cleaning up client %s"
-           (syncthing-server-name syncthing-server))
+  (when syncthing-info
+    (message "emacs-syncthing: Cleaning up client %s"
+             (syncthing-server-name syncthing-server)))
   (setq syncthing--servers
         (delete syncthing-server syncthing--servers))
-  (message "emacs-syncthing: Remaining open clients: %s"
-           (length syncthing--servers)))
+  (when syncthing-info
+    (message "emacs-syncthing: Remaining open clients: %s"
+             (length syncthing--servers))))
 
 ;; modes for client's session buffer(s)
 (define-derived-mode syncthing-mode special-mode "Syncthing"
@@ -2020,6 +2072,8 @@ Activating this mode will launch Syncthing client in the current window.
    (when syncthing-auto-refresh-mode (lambda (&rest _) t))
    auto-revert-interval
    (when syncthing-auto-refresh-mode syncthing-auto-refresh-interval))
+  (when syncthing-no-upstream-noise
+    (setq-local auto-revert-verbose nil))
   (auto-revert-mode (if syncthing-auto-refresh-mode 1 -1)))
 
 (defun syncthing-with-base (name base-url token)
