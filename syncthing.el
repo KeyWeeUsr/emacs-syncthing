@@ -240,6 +240,24 @@ Note:
   :group 'syncthing
   :type 'string)
 
+(defcustom syncthing-watch-events
+  t
+  "Poll Syncthing server for events such as status, files or errors.
+
+Note:
+    Syncthing timeouts after 60s with [] when there are no events and the
+    listener waits for some to be emitted which causes Emacs to hang while
+    waiting for the response but can be stopped with C-g
+    https://docs.syncthing.net/rest/events-get.html"
+  :group 'syncthing
+  :type 'boolean)
+
+(defcustom syncthing-watch-events-interval
+  1
+  "Number of seconds to wait before polling for next event batch."
+  :group 'syncthing
+  :type 'number)
+
 ;; customization faces/colors/fonts
 (defface syncthing-title
   '((((class color) (background dark))
@@ -411,6 +429,83 @@ Note:
 (defconst syncthing-hour-seconds (* 1 60 60))
 (defconst syncthing-min-seconds (* 1 60))
 
+(defconst syncthing-event-config-saved "ConfigSaved"
+  "Emitted after the config has been saved by the user or by Syncthing itself")
+(defconst syncthing-event-device-connected "DeviceConnected"
+  "Generated each time a connection to a device has been established")
+(defconst syncthing-event-device-disconnected "DeviceDisconnected"
+  "Generated each time a connection to a device has been terminated")
+(defconst syncthing-event-device-discovered "DeviceDiscovered"
+  "Emitted when a new device is discovered using local discovery")
+(defconst syncthing-event-device-rejected "DeviceRejected"
+  "DEPRECATED: Emitted when there is a connection from a device we are not
+configured to talk to")
+(defconst syncthing-event-pending-devices-changed "PendingDevicesChanged"
+  "Emitted when pending devices were added / updated (connection from unknown
+ID) or removed (device is ignored or added)")
+(defconst syncthing-event-device-paused "DevicePaused"
+  "Emitted when a device has been paused")
+(defconst syncthing-event-device-resumed "DeviceResumed"
+  "Emitted when a device has been resumed")
+(defconst syncthing-event-cluster-config-received "ClusterConfigReceived"
+  "Emitted when receiving a remote device's cluster config")
+(defconst syncthing-event-download-progress "DownloadProgress"
+  "Emitted during file downloads for each folder for each file")
+(defconst syncthing-event-failure "Failure"
+  "Specific errors sent to the usage reporting server for diagnosis")
+(defconst syncthing-event-folder-completion "FolderCompletion"
+  "mitted when the local or remote contents for a folder changes")
+(defconst syncthing-event-folder-rejected "FolderRejected"
+  "DEPRECATED: Emitted when a device sends index information for a folder we do
+not have, or have but do not share with the device in question")
+(defconst syncthing-event-pending-folders-changed "PendingFoldersChanged"
+  "Emitted when pending folders were added / updated (offered by some device,
+but not shared to them) or removed (folder ignored or added or no longer
+offered from the remote device)")
+(defconst syncthing-event-folder-summary "FolderSummary"
+  "Emitted when folder contents have changed locally")
+(defconst syncthing-event-item-finished "ItemFinished"
+  "Generated when Syncthing ends synchronizing a file to a newer version")
+(defconst syncthing-event-item-started "ItemStarted"
+  "Generated when Syncthing begins synchronizing a file to a newer version")
+(defconst syncthing-event-listen-addresses-changed "ListenAddressesChanged"
+  "Listen address resolution has changed.")
+(defconst syncthing-event-local-change-detected "LocalChangeDetected"
+  "Generated upon scan whenever the local disk has discovered an updated file
+from the previous scan.")
+(defconst syncthing-event-local-index-updated "LocalIndexUpdated"
+  "Generated when the local index information has changed, due to synchronizing
+one or more items from the cluster or discovering local changes during a scan")
+(defconst syncthing-event-login-attempt "LoginAttempt"
+  "Emitted on every login attempt when authentication is enabled for the GUI.")
+(defconst syncthing-event-remote-change-detected "RemoteChangeDetected"
+  "Generated upon scan whenever a file is locally updated due to a remote
+change.")
+(defconst syncthing-event-remote-download-progress "RemoteDownloadProgress"
+  "DownloadProgress message received from a connected remote device.")
+(defconst syncthing-event-remote-index-updated "RemoteIndexUpdated"
+  "Generated each time new index information is received from a device")
+(defconst syncthing-event-starting "Starting"
+  "Emitted exactly once, when Syncthing starts, before parsing configuration
+etc")
+(defconst syncthing-event-startup-completed "StartupCompleted"
+  "Emitted exactly once, when initialization is complete and Syncthing is ready
+to start exchanging data with other devices")
+(defconst syncthing-event-state-changed "StateChanged"
+  "Emitted when a folder changes state")
+(defconst syncthing-event-folder-errors "FolderErrors"
+  "Emitted when a folder has errors preventing a full sync")
+(defconst syncthing-event-folder-watch-state-changed "FolderWatchStateChanged"
+  "Watcher routine encountered a new error, or a previous error disappeared
+after retrying.")
+(defconst syncthing-event-folder-scan-progress "FolderScanProgress"
+  "Emitted every ScanProgressIntervalS seconds, indicating how far into the
+scan it is at.")
+(defconst syncthing-event-folder-paused "FolderPaused"
+  "Emitted when a folder is paused")
+(defconst syncthing-event-folder-resumed "FolderResumed"
+  "Emitted when a folder is resumed")
+
 ;; local/state variables
 (defvar syncthing--servers nil
   "List of currently active Syncthing servers.")
@@ -436,6 +531,14 @@ Note:
   fold-folders skip-fold-folders
   fold-devices skip-fold-devices
   point)
+
+(defvar-local syncthing-watcher nil
+  "Buffer-local instance for event poller.")
+
+(cl-defstruct (syncthing-watcher
+               (:copier nil) (:named nil) (:constructor syncthing--watcher))
+  "Poller and state holder for Syncthing server events."
+  (last-id 1))
 
 ;; keyboard
 (defvar-local syncthing-mode-map
@@ -1453,6 +1556,9 @@ Argument TOKEN API server token."
           (alist-get 'connections data)
           (syncthing-request server "GET" "rest/system/connections"))
 
+    (when (and syncthing-watch-events (not syncthing-watcher))
+      (syncthing--watcher-start server))
+
     (when syncthing-display-logs
       (setf (alist-get 'logs data)
             (syncthing-request server "GET" "rest/system/log")))
@@ -1469,7 +1575,9 @@ Argument TOKEN API server token."
     (syncthing--server-update-device-map data)
 
     (setf (syncthing-server-data server) data)
-    (syncthing--calc-speed server)))
+    (syncthing--calc-speed server)
+    (when syncthing-watch-events
+      (syncthing--watcher-poll server syncthing-watcher))))
 
 (defun syncthing--previous-func (&optional name)
   "Retrieve previous function from `backtrace-frame'.
@@ -1520,6 +1628,185 @@ Optional argument THS-SEP custom thousands separator or default of ` '."
         (push (string char) out)
         (setq idx (1+ idx)))
       (string-join out ""))))
+
+(defun syncthing--watcher-start (server)
+  (setq-local syncthing-watcher (syncthing--watcher))
+  (put 'syncthing-watcher 'permanent-local t)
+  (syncthing--watcher-poll server syncthing-watcher t))
+
+(defun syncthing--watcher-poll (server watcher &optional init)
+  (let* ((endpoint (if init
+                       "rest/events?limit=1"
+                     (format "rest/events?since=%s"
+                             (syncthing-watcher-last-id watcher))))
+         (events (syncthing-request server "GET" endpoint))
+         last-id type)
+    (dolist (event events)
+      (setq last-id (alist-get 'id event))
+      (setq type (alist-get 'type event))
+      (cond ((string= type syncthing-event-state-changed)
+             (syncthing--watcher-state-changed event))
+            ((string= type syncthing-event-config-saved)
+             (syncthing--watcher-config-saved event))
+            ((string= type syncthing-event-device-connected)
+             (syncthing--watcher-device-connected event))
+            ((string= type syncthing-event-device-disconnected)
+             (syncthing--watcher-device-disconnected event))
+            ((string= type syncthing-event-device-discovered)
+             (syncthing--watcher-device-discovered event))
+            ((string= type syncthing-event-device-rejected)
+             (syncthing--watcher-device-rejected event))
+            ((string= type syncthing-event-pending-devices-changed)
+             (syncthing--watcher-pending-devices-changed event))
+            ((string= type syncthing-event-device-paused)
+             (syncthing--watcher-device-paused event))
+            ((string= type syncthing-event-device-resumed)
+             (syncthing--watcher-device-resumed event))
+            ((string= type syncthing-event-cluster-config-received)
+             (syncthing--watcher-cluster-config-received event))
+            ((string= type syncthing-event-download-progress)
+             (syncthing--watcher-download-progress event))
+            ((string= type syncthing-event-failure)
+             (syncthing--watcher-failure event))
+            ((string= type syncthing-event-folder-completion)
+             (syncthing--watcher-folder-completion event))
+            ((string= type syncthing-event-folder-rejected)
+             (syncthing--watcher-folder-rejected event))
+            ((string= type syncthing-event-pending-folders-changed)
+             (syncthing--watcher-pending-folders-changed event))
+            ((string= type syncthing-event-folder-summary)
+             (syncthing--watcher-folder-summary event))
+            ((string= type syncthing-event-item-finished)
+             (syncthing--watcher-item-finished event))
+            ((string= type syncthing-event-item-started)
+             (syncthing--watcher-item-started event))
+            ((string= type syncthing-event-listen-addresses-changed)
+             (syncthing--watcher-listen-addresses-changed event))
+            ((string= type syncthing-event-local-change-detected)
+             (syncthing--watcher-local-change-detected event))
+            ((string= type syncthing-event-local-index-updated)
+             (syncthing--watcher-local-index-updated event))
+            ((string= type syncthing-event-login-attempt)
+             (syncthing--watcher-login-attempt event))
+            ((string= type syncthing-event-remote-change-detected)
+             (syncthing--watcher-remote-change-detected event))
+            ((string= type syncthing-event-remote-download-progress)
+             (syncthing--watcher-remote-download-progress event))
+            ((string= type syncthing-event-remote-index-updated)
+             (syncthing--watcher-remote-index-updated event))
+            ((string= type syncthing-event-starting)
+             (syncthing--watcher-starting event))
+            ((string= type syncthing-event-startup-completed)
+             (syncthing--watcher-startup-completed event))
+            ((string= type syncthing-event-state-changed)
+             (syncthing--watcher-state-changed event))
+            ((string= type syncthing-event-folder-errors)
+             (syncthing--watcher-folder-errors event))
+            ((string= type syncthing-event-folder-watch-state-changed)
+             (syncthing--watcher-folder-watch-state-changed event))
+            ((string= type syncthing-event-folder-scan-progress)
+             (syncthing--watcher-folder-scan-progress event))
+            ((string= type syncthing-event-folder-paused)
+             (syncthing--watcher-folder-paused event))
+            ((string= type syncthing-event-folder-resumed)
+             (syncthing--watcher-folder-resumed event))))
+    (setf (syncthing-watcher-last-id watcher) last-id)))
+
+(defun syncthing--watcher-config-saved (event)
+  (message "Event: syncthing--watcher-config-saved"))
+
+(defun syncthing--watcher-device-connected (event)
+  (message "Event: syncthing--watcher-device-connected"))
+
+(defun syncthing--watcher-device-disconnected (event)
+  (message "Event: syncthing--watcher-device-disconnected"))
+
+(defun syncthing--watcher-device-discovered (event)
+  (message "Event: syncthing--watcher-device-discovered"))
+
+(defun syncthing--watcher-device-rejected (event)
+  (message "Event: syncthing--watcher-device-rejected"))
+
+(defun syncthing--watcher-pending-devices-changed (event)
+  (message "Event: syncthing--watcher-pending-devices-changed"))
+
+(defun syncthing--watcher-device-paused (event)
+  (message "Event: syncthing--watcher-device-paused"))
+
+(defun syncthing--watcher-device-resumed (event)
+  (message "Event: syncthing--watcher-device-resumed"))
+
+(defun syncthing--watcher-cluster-config-received (event)
+  (message "Event: syncthing--watcher-cluster-config-received"))
+
+(defun syncthing--watcher-download-progress (event)
+  (message "Event: syncthing--watcher-download-progress"))
+
+(defun syncthing--watcher-failure (event)
+  (message "Event: syncthing--watcher-failure"))
+
+(defun syncthing--watcher-folder-completion (event)
+  (message "Event: syncthing--watcher-folder-completion"))
+
+(defun syncthing--watcher-folder-rejected (event)
+  (message "Event: syncthing--watcher-folder-rejected"))
+
+(defun syncthing--watcher-pending-folders-changed (event)
+  (message "Event: syncthing--watcher-pending-folders-changed"))
+
+(defun syncthing--watcher-folder-summary (event)
+  (message "Event: syncthing--watcher-folder-summary"))
+
+(defun syncthing--watcher-item-finished (event)
+  (message "Event: syncthing--watcher-item-finished"))
+
+(defun syncthing--watcher-item-started (event)
+  (message "Event: syncthing--watcher-item-started"))
+
+(defun syncthing--watcher-listen-addresses-changed (event)
+  (message "Event: syncthing--watcher-listen-addresses-changed"))
+
+(defun syncthing--watcher-local-change-detected (event)
+  (message "Event: syncthing--watcher-local-change-detected"))
+
+(defun syncthing--watcher-local-index-updated (event)
+  (message "Event: syncthing--watcher-local-index-updated"))
+
+(defun syncthing--watcher-login-attempt (event)
+  (message "Event: syncthing--watcher-login-attempt"))
+
+(defun syncthing--watcher-remote-change-detected (event)
+  (message "Event: syncthing--watcher-remote-change-detected"))
+
+(defun syncthing--watcher-remote-download-progress (event)
+  (message "Event: syncthing--watcher-remote-download-progress"))
+
+(defun syncthing--watcher-remote-index-updated (event)
+  (message "Event: syncthing--watcher-remote-index-updated"))
+
+(defun syncthing--watcher-starting (event)
+  (message "Event: syncthing--watcher-starting"))
+
+(defun syncthing--watcher-startup-completed (event)
+  (message "Event: syncthing--watcher-startup-completed"))
+
+(defun syncthing--watcher-state-changed (event)
+  (message "Event: syncthing--watcher-state-changed"))
+
+(defun syncthing--watcher-folder-errors (event)
+  (message "Event: syncthing--watcher-folder-errors"))
+
+(defun syncthing--watcher-folder-watch-state-changed (event)
+  (message "Event: syncthing--watcher-folder-watch-state-changed"))
+
+(defun syncthing--watcher-folder-scan-progress (event)
+  (message "Event: syncthing--watcher-folder-scan-progress"))
+
+(defun syncthing--watcher-folder-paused (event)
+  (message "Event: syncthing--watcher-folder-paused"))
+
+(defun syncthing--watcher-folder-resumed (event)
+  (message "Event: syncthing--watcher-folder-resumed"))
 
 ;; public funcs
 (defun syncthing-request (server method endpoint &rest data)
