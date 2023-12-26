@@ -945,24 +945,23 @@ Argument RIGHT second object to compare."
 (defun syncthing--list-37-folder (folder)
   "Render single FOLDER item in a widget."
   (syncthing-trace)
-  (let* ((name (alist-get 'label folder))
-        (id (alist-get 'id folder))
-        (paused (alist-get 'paused folder))
-        (type (alist-get 'type folder))
-        (path (alist-get 'path folder))
-        (devices (alist-get 'devices folder))
-        (completion
-         (alist-get
-          (intern `,id)
+  (let* ((data (syncthing-server-data syncthing-server))
+         (name (alist-get 'label folder))
+         (id (alist-get 'id folder))
+         (paused (alist-get 'paused folder))
+         (type (alist-get 'type folder))
+         (path (alist-get 'path folder))
+         (devices (alist-get 'devices folder))
+         (completion
           (alist-get
-           (intern `,(alist-get 'myID (alist-get 'system-status
-                                                 (syncthing-server-data
-                                                  syncthing-server))))
-           (syncthing-server-completion syncthing-server))))
-        (perc (or (alist-get 'completion completion) 0))
-        (order (alist-get 'order folder))
-        (stats (alist-get 'stats folder))
-        (text ""))
+           (intern `,id)
+           (alist-get
+            (intern `,(alist-get 'myID (alist-get 'system-status data)))
+            (syncthing-server-completion syncthing-server))))
+         (perc (or (alist-get 'completion completion) 0))
+         (order (alist-get 'order folder))
+         (stats (alist-get 'stats folder))
+         (text ""))
     (when (and (syncthing-buffer-collapse-after-start syncthing-buffer)
                (not (member id (syncthing-buffer-skip-fold-folders
                                 syncthing-buffer))))
@@ -1042,7 +1041,11 @@ Argument RIGHT second object to compare."
           (format "%s \tShared With\t\t\t%s\n"
                   text
                   (string-join
-                   (mapcar (lambda (dev) (alist-get 'name dev)) devices)
+                   (mapcar (lambda (dev)
+                             (alist-get
+                              (intern `,(alist-get 'deviceID dev))
+                              (alist-get 'device-map data)))
+                           devices)
                    ", ")))
     (setq text
           (format "%s \tLast Scan\t\t\t%s\n"
@@ -1653,20 +1656,19 @@ Argument TOKEN API server token."
                 (cdr stat)))))))
 
 (defun syncthing--server-update-device-map (data)
-  "Update device completion DATA."
+  "Create deviceID<->name map in DATA."
   (syncthing-trace)
-  ;; TODO: (const (alist-get 'deviceID item) (alist-get 'device-map data))
-  ;;       except it fails with raw key access by always being nil
-  ;;       probably something with bad (quote) / ' / `, / etc
-  (dolist (folder (alist-get 'folders data))
-    (dotimes (foldev-idx (length (alist-get 'devices folder)))
-      (dotimes (dev-idx (length (alist-get 'devices data)))
-        (when (string= (alist-get 'deviceID (nth foldev-idx
-                                                 (alist-get 'devices folder)))
-                       (alist-get 'deviceID (nth dev-idx
-                                                 (alist-get 'devices data))))
-          (setf (alist-get 'name (nth foldev-idx (alist-get 'devices folder)))
-                (alist-get 'name (nth dev-idx (alist-get 'devices data)))))))))
+  (let (device-map)
+    (dolist (folder (alist-get 'folders data))
+      (dolist (fol-dev (alist-get 'devices folder))
+        (dolist (device (alist-get 'devices data))
+          (let ((fol-dev-id (alist-get 'deviceID fol-dev)))
+            (when (string= fol-dev-id
+                           (alist-get 'deviceID device))
+              (setf (alist-get (intern `,fol-dev-id) device-map)
+                    (alist-get 'name device)))))))
+    (setf (alist-get 'device-map data) device-map))
+  data)
 
 (defun syncthing--server-update (server)
   "Update SERVER data."
@@ -1700,7 +1702,7 @@ Argument TOKEN API server token."
     (syncthing--server-update-folder-status server data)
     (syncthing--server-update-folder-stats server data)
     (syncthing--server-update-device-stats server data)
-    (syncthing--server-update-device-map data)
+    (setq data (syncthing--server-update-device-map data))
     (syncthing--server-update-completion server data)
 
     (setf (syncthing-server-data server) data)
