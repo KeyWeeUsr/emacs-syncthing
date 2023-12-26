@@ -1,4 +1,7 @@
-;;; syncthing-tests.el -- tests for syncthing
+;;; syncthing-tests.el -- tests for syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
 
 ;;; Code:
 

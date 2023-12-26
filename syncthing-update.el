@@ -1,3 +1,17 @@
+;;; syncthing-update.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
+(require 'syncthing-common)
+(require 'syncthing-custom)
+(require 'syncthing-draw)
+(require 'syncthing-network)
+(require 'syncthing-state)
+(require 'syncthing-watcher)
+
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
   (syncthing-trace)
@@ -64,7 +78,9 @@
   data)
 
 (defun syncthing--server-update-completion (server data)
-  "Update separate and aggregate completions for all folders and devices."
+  "Update separate and aggregate completions for all folders and devices.
+Argument SERVER `syncthing-server' instance.
+Argument DATA server data."
   (syncthing-trace)
   (let* ((devices (alist-get 'devices data))
          (folders (alist-get 'folders data))
@@ -186,3 +202,4 @@
       (syncthing--watcher-poll server syncthing-watcher))))
 
 (provide 'syncthing-update)
+;;; syncthing-update.el ends here

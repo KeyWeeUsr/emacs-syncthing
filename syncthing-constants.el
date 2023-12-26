@@ -1,3 +1,10 @@
+;;; syncthing-constants.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
 (defconst syncthing-gibibyte (expt 1024 3))
 (defconst syncthing-mibibyte (expt 1024 2))
 (defconst syncthing-kibibyte (expt 1024 1))
@@ -86,3 +93,4 @@ scan it is at.")
   "Emitted when a folder is resumed.")
 
 (provide 'syncthing-constants)
+;;; syncthing-constants.el ends here

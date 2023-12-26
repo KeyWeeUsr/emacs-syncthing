@@ -1,3 +1,10 @@
+;;; syncthing-groups.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
 (defgroup syncthing nil
   "Basic configuration."
   :group 'external
@@ -40,3 +47,4 @@
   :group 'syncthing)
 
 (provide 'syncthing-groups)
+;;; syncthing-groups.el ends here

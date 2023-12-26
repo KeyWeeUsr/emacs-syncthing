@@ -1,4 +1,18 @@
-(defvar-local syncthing-mode-map
+;;; syncthing-keyboard.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
+(require 'widget)
+(require 'wid-edit)
+
+(require 'syncthing-common)
+(require 'syncthing-draw)
+(require 'syncthing-state)
+
+(defvar-local syncthing-keyboard-map
   (let ((map (make-keymap)))
     ;; custom handler for RET / widget input handler
     (define-key map (kbd "RET") #'syncthing--newline)
@@ -63,3 +77,4 @@ Argument POS Incoming EVENT position."
   (syncthing--draw syncthing-server))
 
 (provide 'syncthing-keyboard)
+;;; syncthing-keyboard.el ends here

@@ -1,3 +1,16 @@
+;;; syncthing-network.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
+(require 'url-handlers)
+
+(require 'syncthing-common)
+(require 'syncthing-custom)
+(require 'syncthing-state)
+
 (defun syncthing--ping (server)
   "Check whether we can use the API at SERVER with TOKEN."
   (syncthing-trace)
@@ -45,3 +58,4 @@ Argument TOKEN API token."
                  data)))
 
 (provide 'syncthing-network)
+;;; syncthing-network.el ends here

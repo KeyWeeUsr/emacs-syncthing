@@ -1,3 +1,10 @@
+;;; syncthing-state.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
 (defvar syncthing--servers nil
   "List of currently active Syncthing servers.")
 
@@ -43,3 +50,4 @@ Optional argument SKIP-CANCEL Skip removing auto-refresh."
   (setf (syncthing-buffer-fold-devices syncthing-buffer) (list)))
 
 (provide 'syncthing-state)
+;;; syncthing-state.el ends here

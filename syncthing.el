@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 1.7.0
+;; Version: 2.0.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -27,12 +27,6 @@
 ;; The client requires Syncthing (server) obtainable from https://syncthing.net
 
 ;;; Code:
-
-(require 'widget)
-(require 'wid-edit)
-(require 'subr-x)
-(require 'org-table)
-(require 'autorevert)
 
 (require 'syncthing-groups)
 (require 'syncthing-custom)
@@ -99,7 +93,7 @@ Activating this mode will launch Syncthing client in the current window.
 
 \\{syncthing-mode-map}"
   :group 'syncthing
-  (use-local-map syncthing-mode-map)
+  (use-local-map syncthing-keyboard-map)
 
   ;; Hook to auto-revert mode for refreshing
   (setq-local revert-buffer-function #'syncthing--update)

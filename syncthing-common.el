@@ -1,3 +1,16 @@
+;;; syncthing-common.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'subr-x)
+
+(require 'syncthing-custom)
+(require 'syncthing-state)
+
 (defsubst syncthing-trace ()
   "Simple tracing inline func to dump caller and its args into a buffer."
   (when syncthing-debug
@@ -179,3 +192,4 @@ Optional argument THS-SEP custom thousands separator or default of ` '."
       (string-join out ""))))
 
 (provide 'syncthing-common)
+;;; syncthing-common.el ends here

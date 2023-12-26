@@ -1,3 +1,12 @@
+;;; syncthing-faces.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
+(require 'syncthing-common)
+
 (defface syncthing-title
   '((((class color) (background dark))
      (:inherit 'info-title-1))
@@ -226,3 +235,4 @@
   (propertize text 'face 'syncthing-my-id))
 
 (provide 'syncthing-faces)
+;;; syncthing-faces.el ends here

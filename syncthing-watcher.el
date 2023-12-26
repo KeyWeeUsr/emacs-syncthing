@@ -1,3 +1,13 @@
+;;; syncthing-watcher.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
+(require 'syncthing-network)
+(require 'syncthing-state)
+
 (defun syncthing--watcher-start (server)
   "Start `syncthing-watcher' and continue polling for events.
 Argument SERVER `syncthing-server' instance."
@@ -321,3 +331,4 @@ Optional argument INIT Are we in the initialization stage?"
              syncthing-prefix)))
 
 (provide 'syncthing-watcher)
+;;; syncthing-watcher.el ends here

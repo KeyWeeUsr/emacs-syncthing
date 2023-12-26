@@ -1,3 +1,4 @@
+(setq-local load-path (push default-directory load-path))
 (load (concat default-directory "syncthing.el"))
 (defun syncthing-demo (name addr)
   (dotimes (_ 30) (sleep-for 0.1))

@@ -1,3 +1,22 @@
+;;; syncthing-draw.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
+(require 'iso8601)
+(require 'org-table)
+(require 'subr-x)
+(require 'widget)
+(require 'wid-edit)
+
+(require 'syncthing-common)
+(require 'syncthing-custom)
+(require 'syncthing-constants)
+(require 'syncthing-faces)
+(require 'syncthing-state)
+
 (defun syncthing--draw-folders-header (&optional &key before after)
   "Draw folder header with optional BEFORE and AFTER separator."
   (syncthing-trace)
@@ -115,7 +134,7 @@
              (push (format "|%s|%s|%s|%s|%s|%s|"
                            .modifiedBy .action .type .label .path
                            (format-time-string
-                            "%Y-%m-%d %H:%M:%S"
+                            "%F %T"
                             (encode-time
                              (iso8601-parse (alist-get 'time item)))))
                    text)))
@@ -233,7 +252,7 @@
           (format "%s \tLast Scan\t\t\t%s\n"
                   text
                   (format-time-string
-                            "%Y-%m-%d %H:%M:%S"
+                            "%F %T"
                             (encode-time
                              (iso8601-parse
                               (alist-get 'stateChanged
@@ -372,7 +391,7 @@
             (format "%s \tLast seen\t\t\t\t%s\n \tSync Status\t\t\t\t%s\n"
                     text
                     (format-time-string
-                     "%Y-%m-%d %H:%M:%S"
+                     "%F %T"
                      (encode-time (iso8601-parse (alist-get 'lastSeen stats))))
                     (if (< (floor sync-state) 100)
                         (format "Out of Sync (%.2f%%)" sync-state)
@@ -587,3 +606,4 @@
   (setf (syncthing-buffer-initialized syncthing-buffer) t))
 
 (provide 'syncthing-draw)
+;;; syncthing-draw.el ends here

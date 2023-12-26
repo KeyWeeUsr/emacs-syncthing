@@ -1,3 +1,13 @@
+;;; syncthing-custom.el --- Client for Syncthing -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;; Code:
+
+(require 'syncthing-groups)
+(require 'syncthing-constants)
+
 (defcustom syncthing-format-buffer
   "*syncthing(%s)*"
   "Client's buffer name with a `%s' placeholder for address."
@@ -254,3 +264,4 @@ intervals. Setting this to non-nil allows `syncthing' to purge all of them."
   :type 'boolean)
 
 (provide 'syncthing-custom)
+;;; syncthing-custom.el ends here
