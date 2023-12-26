@@ -149,8 +149,6 @@
 (defun syncthing--server-update (server)
   "Update SERVER data."
   (syncthing-trace)
-  ;; TODO: handle version change: >= current + branches for each <
-  ;;       via rest/config's '{"version": 37}' key
   (let ((data (syncthing-request server "GET" "rest/config")))
     (setf (alist-get 'system-version data)
           (alist-get 'version

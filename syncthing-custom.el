@@ -168,7 +168,6 @@ Special meaning for empty list / nil to skip rendering the header line."
   :group 'syncthing-display
   :type 'boolean)
 
-;; TODO: async/kill from client side
 (defcustom syncthing-timeout-events
   0
   "Amount of time to wait for server to generate events."
