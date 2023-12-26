@@ -160,4 +160,69 @@
   "Face for this device's ID."
   :group 'syncthing-faces)
 
+(defun syncthing--title (text)
+  "Format TEXT as title."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-title))
+
+(defun syncthing--prop (text)
+  "Format TEXT as property."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-prop))
+
+(defun syncthing--bold (text)
+  "Format TEXT as bold."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-bold))
+
+(defun syncthing--italic (text)
+  "Format TEXT as italic."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-italic))
+
+(defun syncthing--rate-download (text)
+  "Format TEXT as download rate."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-rate-download))
+
+(defun syncthing--rate-upload (text)
+  "Format TEXT as upload rate."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-progress-75))
+
+(defun syncthing--count-local-files (text)
+  "Format TEXT as local files count."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-count-local-files))
+
+(defun syncthing--count-local-folders (text)
+  "Format TEXT as local folders count."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-count-local-folders))
+
+(defun syncthing--count-local-bytes (text)
+  "Format TEXT as local bytes count."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-count-local-bytes))
+
+(defun syncthing--count-listeners (text)
+  "Format TEXT as listeners count."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-count-listeners))
+
+(defun syncthing--count-discovery (text)
+  "Format TEXT as discovery count."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-count-discovery))
+
+(defun syncthing--uptime (text)
+  "Format TEXT as uptime."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-uptime))
+
+(defun syncthing--my-id (text)
+  "Format TEXT as Syncthing ID."
+  (syncthing-trace)
+  (propertize text 'face 'syncthing-my-id))
+
 (provide 'syncthing-faces)
