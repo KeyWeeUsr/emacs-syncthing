@@ -1542,11 +1542,10 @@ Argument TOKEN API server token."
                      '((display-buffer-reuse-window
                         display-buffer-same-window))))))
 
-(defun syncthing--calc-speed (server)
-  "Calculate upload and download rate for SERVER."
+(defun syncthing--calc-speed (server data)
+  "Calculate upload and download rate DATA for SERVER."
   (syncthing-trace)
-  (let* ((data (syncthing-server-data server))
-         (conns (alist-get 'connections (syncthing-server-data server)))
+  (let* ((conns (alist-get 'connections data))
          (last-speed-date
           (or (syncthing-server-last-speed-date server) 0))
          (now (floor (float-time)))
@@ -1593,8 +1592,8 @@ Argument TOKEN API server token."
                      (syncthing-server-dev-connections-total server))
                     dev-now-total))))
         ;; replace with modified item
-        (setf (nth dev-idx (alist-get 'devices data)) dev)))
-    (setf (syncthing-server-data server) data)))
+        (setf (nth dev-idx (alist-get 'devices data)) dev))))
+  data)
 
 (defun syncthing--server-update-completion (server data)
   "Update separate and aggregate completions for all folders and devices."
@@ -1621,17 +1620,22 @@ Argument TOKEN API server token."
                  server "GET"
                  (format "rest/db/completion?device=%s" device-id)))
           (setf (alist-get (intern `,device-id) completion) tmp))))
-    (setf (syncthing-server-completion server) completion)))
+    completion))
 
 (defun syncthing--server-update-folder-status (server data)
   "Update folder completion DATA for SERVER."
   (syncthing-trace)
-  (let* ((folders (alist-get 'folders data)))
+  (let ((folders (alist-get 'folders data)))
     (dotimes (idx (length folders))
-      (setf (alist-get 'status (nth idx folders))
-            (syncthing-request
-             server "GET" (format "rest/db/status?folder=%s"
-                                  (alist-get 'id (nth idx folders))))))))
+      (let ((folder (nth idx folders)))
+        (setf (alist-get 'status folder)
+              (syncthing-request
+               server "GET" (format "rest/db/status?folder=%s"
+                                    (alist-get 'id folder)))
+              (nth idx folders)
+              folder)))
+    (setf (alist-get 'folders data) folders))
+  data)
 
 (defun syncthing--server-update-folder-stats (server data)
   "Update folder stats DATA for SERVER."
@@ -1642,7 +1646,8 @@ Argument TOKEN API server token."
       (dolist (stat stats)
         (when (string= (car stat) (alist-get 'id (nth idx folders)))
           (setf (alist-get 'stats (nth idx folders))
-                (cdr stat)))))))
+                (cdr stat))))))
+  data)
 
 (defun syncthing--server-update-device-stats (server data)
   "Update device stats DATA for SERVER."
@@ -1650,10 +1655,13 @@ Argument TOKEN API server token."
   (let* ((devices (alist-get 'devices data))
          (stats (syncthing-request server "GET" "rest/stats/device")))
     (dotimes (idx (length devices))
-      (dolist (stat stats)
-        (when (string= (car stat) (alist-get 'deviceID (nth idx devices)))
-          (setf (alist-get 'stats (nth idx devices))
-                (cdr stat)))))))
+      (let ((device (nth idx devices)))
+        (dolist (stat stats)
+          (when (string= (car stat) (alist-get 'deviceID device))
+            (setf (alist-get 'stats device) (cdr stat))))
+        (setf (nth idx devices) device)))
+    (setf (alist-get 'devices data) devices))
+  data)
 
 (defun syncthing--server-update-device-map (data)
   "Create deviceID<->name map in DATA."
@@ -1675,7 +1683,7 @@ Argument TOKEN API server token."
   (syncthing-trace)
   ;; TODO: handle version change: >= current + branches for each <
   ;;       via rest/config's '{"version": 37}' key
-  (let* ((data (syncthing-request server "GET" "rest/config")))
+  (let ((data (syncthing-request server "GET" "rest/config")))
     (setf (alist-get 'system-version data)
           (alist-get 'version
                      (syncthing-request server "GET" "rest/system/version"))
@@ -1699,14 +1707,15 @@ Argument TOKEN API server token."
                      syncthing-limit-changes
                      syncthing-timeout-events))))
 
-    (syncthing--server-update-folder-status server data)
-    (syncthing--server-update-folder-stats server data)
-    (syncthing--server-update-device-stats server data)
+    (setq data (syncthing--server-update-folder-status server data))
+    (setq data (syncthing--server-update-folder-stats server data))
+    (setq data (syncthing--server-update-device-stats server data))
     (setq data (syncthing--server-update-device-map data))
-    (syncthing--server-update-completion server data)
+    (setf (syncthing-server-completion server)
+          (syncthing--server-update-completion server data))
 
+    (setq data (syncthing--calc-speed server data))
     (setf (syncthing-server-data server) data)
-    (syncthing--calc-speed server)
     (when syncthing-watch-events
       (syncthing--watcher-poll server syncthing-watcher))))
 
