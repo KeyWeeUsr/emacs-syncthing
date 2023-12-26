@@ -280,28 +280,29 @@
         (unless (member id (syncthing-buffer-fold-folders syncthing-buffer))
           (syncthing--prop text)))
        :action
-       (lambda (&rest _event)
-         (if (member id (syncthing-buffer-fold-folders syncthing-buffer))
+       `(lambda (&rest _event)
+         (if (member ,id (syncthing-buffer-fold-folders syncthing-buffer))
              (progn
                (setf (syncthing-buffer-fold-folders syncthing-buffer)
-                     (delete id
+                     (delete ,id
                              (syncthing-buffer-fold-folders syncthing-buffer)))
-               (push id (syncthing-buffer-skip-fold-folders syncthing-buffer))
+               (push ,id (syncthing-buffer-skip-fold-folders syncthing-buffer))
                (save-excursion
                  (widget-delete (syncthing--get-widget (point)))
-                 (syncthing--list-37-folder folder)))
+                 (syncthing--list-37-folder ',folder)))
            (progn
              ;; TODO: redundant check for push?
              (if (syncthing-buffer-fold-folders syncthing-buffer)
-                 (push id (syncthing-buffer-fold-folders syncthing-buffer))
+                 (push ,id (syncthing-buffer-fold-folders syncthing-buffer))
                (setf (syncthing-buffer-fold-folders syncthing-buffer)
-                     (list id)))
+                     (list ,id)))
              (setf (syncthing-buffer-skip-fold-folders syncthing-buffer)
-                   (delete id (syncthing-buffer-skip-fold-folders
+                   (delete ,id (syncthing-buffer-skip-fold-folders
                                syncthing-buffer)))
              (save-excursion
                (widget-delete (syncthing--get-widget (point)))
-               (syncthing--list-37-folder folder)))))
+               (syncthing--list-37-folder ',folder)))))
+
        (if (member id (syncthing-buffer-fold-folders syncthing-buffer))
            (syncthing--bold ">")
          (syncthing--bold "v"))))))
@@ -438,28 +439,29 @@
         (unless (member id (syncthing-buffer-fold-devices syncthing-buffer))
           (syncthing--prop text)))
        :action
-       (lambda (&rest _event)
-         (if (member id (syncthing-buffer-fold-devices syncthing-buffer))
+       `(lambda (&rest _event)
+         (if (member ,id (syncthing-buffer-fold-devices syncthing-buffer))
              (progn
                (setf (syncthing-buffer-fold-devices syncthing-buffer)
-                     (delete id
+                     (delete ,id
                              (syncthing-buffer-fold-devices syncthing-buffer)))
-               (push id (syncthing-buffer-skip-fold-devices syncthing-buffer))
+               (push ,id (syncthing-buffer-skip-fold-devices syncthing-buffer))
                (save-excursion
                  (widget-delete (syncthing--get-widget (point)))
-                 (syncthing--list-37-device device)))
+                 (syncthing--list-37-device ',device)))
            (progn
              ;; TODO: redundant check for push?
              (if (syncthing-buffer-fold-devices syncthing-buffer)
-                 (push id (syncthing-buffer-fold-devices syncthing-buffer))
+                 (push ,id (syncthing-buffer-fold-devices syncthing-buffer))
                (setf (syncthing-buffer-fold-devices syncthing-buffer)
-                     (list id)))
+                     (list ,id)))
              (setf (syncthing-buffer-skip-fold-devices syncthing-buffer)
-                   (delete id (syncthing-buffer-skip-fold-devices
+                   (delete ,id (syncthing-buffer-skip-fold-devices
                                syncthing-buffer)))
              (save-excursion
                (widget-delete (syncthing--get-widget (point)))
-               (syncthing--list-37-device device)))))
+               (syncthing--list-37-device ',device)))))
+
        (if (member id (syncthing-buffer-fold-devices syncthing-buffer))
            (syncthing--bold ">")
          (syncthing--bold "v"))))))
