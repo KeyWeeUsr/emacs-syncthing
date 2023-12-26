@@ -570,7 +570,8 @@ scan it is at.")
   ;; on slot order change or on new slot basically restart Emacs because
   ;; "args-out-of-range" even though it's present and cl-defstruct is called
   ;; via e.g. eval-buffer
-  name url token data connections-total dev-connections-total last-speed-date)
+  name url token data
+  connections-total dev-connections-total last-speed-date completion)
 
 (defvar-local syncthing-buffer nil
   "Buffer-local instance for all drawables and other buffer states.")
@@ -944,7 +945,14 @@ Argument RIGHT second object to compare."
         (type (alist-get 'type folder))
         (path (alist-get 'path folder))
         (devices (alist-get 'devices folder))
-        (completion (alist-get 'completion folder))
+        (completion
+         (alist-get
+          (intern `,id)
+          (alist-get
+           (intern `,(alist-get 'myID (alist-get 'system-status
+                                                 (syncthing-server-data
+                                                  syncthing-server))))
+           (syncthing-server-completion syncthing-server))))
         (perc (or (alist-get 'completion completion) 0))
         (order (alist-get 'order folder))
         (stats (alist-get 'stats folder))
@@ -1137,7 +1145,11 @@ Argument RIGHT second object to compare."
                            (syncthing-server-data syncthing-server))))
         (stats (alist-get 'stats device))
         (compression (alist-get 'compression device))
-        (completion (alist-get 'completion device))
+        (completion
+         (alist-get
+          'aggregate
+          (alist-get (intern `,id)
+                     (syncthing-server-completion syncthing-server))))
         (text "")
         (conn-type "Disconnected")
         (sync-state 0)
@@ -1244,8 +1256,7 @@ Argument RIGHT second object to compare."
        :button-suffix
        (concat
         " "
-        (syncthing--color-perc
-         (alist-get 'completion (alist-get 'completion device)))
+        (syncthing--color-perc (alist-get 'completion completion))
         (format "%s%s\n"
                 (syncthing--bold
                  (format " %s" name))
@@ -1576,17 +1587,39 @@ Argument TOKEN API server token."
         (setf (nth dev-idx (alist-get 'devices data)) dev)))
     (setf (syncthing-server-data server) data)))
 
-(defun syncthing--server-update-folder-completion (server data)
+(defun syncthing--server-update-completion (server data)
+  "Update separate and aggregate completions for all folders and devices."
+  (syncthing-trace)
+  (let* ((devices (alist-get 'devices data))
+         (folders (alist-get 'folders data))
+         completion)
+    (let (device-id tmp folder-id)
+      (dolist (device devices) ; remote + local
+        (setq device-id (alist-get 'deviceID device))
+        (setq tmp nil)
+
+        (dolist (folder folders)
+          (unless (alist-get 'paused folder)
+            (setq folder-id (alist-get 'id folder))
+            (setf (alist-get (intern `,folder-id) tmp)
+                  (syncthing-request
+                   server "GET"
+                   (format "rest/db/completion?device=%s&folder=%s"
+                           device-id folder-id)))))
+        (unless (alist-get 'paused device)
+          (setf (alist-get 'aggregate tmp)
+                (syncthing-request
+                 server "GET"
+                 (format "rest/db/completion?device=%s" device-id)))
+          (setf (alist-get (intern `,device-id) completion) tmp))))
+    (setf (syncthing-server-completion server) completion)))
+
+(defun syncthing--server-update-folder-status (server data)
   "Update folder completion DATA for SERVER."
   (syncthing-trace)
   (let* ((folders (alist-get 'folders data)))
     (dotimes (idx (length folders))
-      (setf (alist-get 'completion (nth idx folders))
-            (unless (alist-get 'paused (nth idx folders))
-              (syncthing-request
-               server "GET" (format "rest/db/completion?folder=%s"
-                                    (alist-get 'id (nth idx folders)))))
-            (alist-get 'status (nth idx folders))
+      (setf (alist-get 'status (nth idx folders))
             (syncthing-request
              server "GET" (format "rest/db/status?folder=%s"
                                   (alist-get 'id (nth idx folders))))))))
@@ -1601,16 +1634,6 @@ Argument TOKEN API server token."
         (when (string= (car stat) (alist-get 'id (nth idx folders)))
           (setf (alist-get 'stats (nth idx folders))
                 (cdr stat)))))))
-
-(defun syncthing--server-update-device-completion (server data)
-  "Update device completion DATA for SERVER."
-  (syncthing-trace)
-  (let* ((devices (alist-get 'devices data)))
-    (dotimes (idx (length devices))
-      (setf (alist-get 'completion (nth idx devices))
-            (syncthing-request
-             server "GET" (format "rest/db/completion?device=%s"
-                                  (alist-get 'deviceID (nth idx devices))))))))
 
 (defun syncthing--server-update-device-stats (server data)
   "Update device stats DATA for SERVER."
@@ -1668,11 +1691,11 @@ Argument TOKEN API server token."
                      syncthing-limit-changes
                      syncthing-timeout-events))))
 
-    (syncthing--server-update-folder-completion server data)
+    (syncthing--server-update-folder-status server data)
     (syncthing--server-update-folder-stats server data)
-    (syncthing--server-update-device-completion server data)
     (syncthing--server-update-device-stats server data)
     (syncthing--server-update-device-map data)
+    (syncthing--server-update-completion server data)
 
     (setf (syncthing-server-data server) data)
     (syncthing--calc-speed server)
