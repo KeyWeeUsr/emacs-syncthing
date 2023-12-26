@@ -1,0 +1,42 @@
+(defgroup syncthing nil
+  "Basic configuration."
+  :group 'external
+  :group 'communication)
+
+(defgroup syncthing-startup nil
+  "Start-up stage."
+  :group 'syncthing)
+
+(defgroup syncthing-debug nil
+  "Debugging and verbosity configuration."
+  :group 'syncthing)
+
+(defgroup syncthing-faces nil
+  "Faces used in client buffers."
+  :group 'syncthing)
+
+(defgroup syncthing-format nil
+  "String formatting and templating."
+  :group 'syncthing)
+
+(defgroup syncthing-times nil
+  "Times and intervals."
+  :group 'syncthing)
+
+(defgroup syncthing-limits nil
+  "Limits and paginations."
+  :group 'syncthing)
+
+(defgroup syncthing-display nil
+  "What to display in client buffers."
+  :group 'syncthing)
+
+(defgroup syncthing-events nil
+  "Configuration for `syncthing-watcher'."
+  :group 'syncthing)
+
+(defgroup syncthing-cleanup nil
+  "Cleanup configuration."
+  :group 'syncthing)
+
+(provide 'syncthing-groups)
