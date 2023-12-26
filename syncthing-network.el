@@ -35,4 +35,13 @@ Argument TOKEN API token."
                              :false-object nil))
       (file-error (error "Failed to handle response for %s" url)))))
 
+(defun syncthing-request (server method endpoint &rest data)
+  "Return SERVER response for METHOD at ENDPOINT for request with DATA."
+  (syncthing-trace)
+  (apply #'syncthing--request
+         (append (list method
+                       (format "%s/%s" (syncthing-server-url server) endpoint)
+                       (syncthing-server-token server))
+                 data)))
+
 (provide 'syncthing-network)

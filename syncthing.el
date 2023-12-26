@@ -76,15 +76,6 @@ Argument TOKEN API server token."
                         display-buffer-same-window))))))
 
 ;; public funcs
-(defun syncthing-request (server method endpoint &rest data)
-  "Return SERVER response for METHOD at ENDPOINT for request with DATA."
-  (syncthing-trace)
-  (apply #'syncthing--request
-         (append (list method
-                       (format "%s/%s" (syncthing-server-url server) endpoint)
-                       (syncthing-server-token server))
-                 data)))
-
 (defun syncthing-cleanup ()
   "Clean resources when closing the client."
   (interactive)
