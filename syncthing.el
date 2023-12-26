@@ -199,26 +199,46 @@
   :group 'syncthing-time
   :type 'number)
 
+(defconst syncthing-header-rate-download "rate-download"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-rate-upload "rate-upload"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-count-local-files "count-local-files"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-count-local-folders "count-local-folders"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-count-local-bytes "count-local-bytes"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-count-listeners "count-listeners"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-count-discovery "count-discovery"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-uptime "uptime"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-my-id "my-id"
+  "Header value for `syncthing-header-items'.")
+(defconst syncthing-header-version "version"
+  "Header value for `syncthing-header-items'.")
 (defcustom syncthing-header-items
   '("rate-download" "rate-upload" "count-local-files" "count-local-folders"
     "count-local-bytes" "count-listeners" "count-discovery" "uptime" "my-id"
     "version")
-  "Items to render at `header-line-format'.
+  "Items to render with `header-line-format'.
 
 Special meaning for empty list / nil to skip rendering the header line."
   :group 'syncthing-display
-  :type '(repeat
+  :type `(repeat
           (choice :tag "Item"
-                  (const :tag "Download rate" "rate-download")
-                  (const :tag "Upload rate" "rate-upload")
-                  (const :tag "Files" "count-local-files")
-                  (const :tag "Folders" "count-local-folders")
-                  (const :tag "Size" "count-local-bytes")
-                  (const :tag "Listeners" "count-listeners")
-                  (const :tag "Discovery" "count-discovery")
-                  (const :tag "Uptime" "uptime")
-                  (const :tag "ID" "my-id")
-                  (const :tag "Version" "version"))))
+                  (const :tag "Download rate" ,syncthing-header-rate-download)
+                  (const :tag "Upload rate" ,syncthing-header-rate-upload)
+                  (const :tag "Files" ,syncthing-header-count-local-files)
+                  (const :tag "Folders" ,syncthing-header-count-local-folders)
+                  (const :tag "Size" ,syncthing-header-count-local-bytes)
+                  (const :tag "Listeners" ,syncthing-header-count-listeners)
+                  (const :tag "Discovery" ,syncthing-header-count-discovery)
+                  (const :tag "Uptime" ,syncthing-header-uptime)
+                  (const :tag "ID" ,syncthing-header-my-id)
+                  (const :tag "Version" ,syncthing-header-version))))
 
 (defcustom syncthing-display-logs
   nil
@@ -1307,19 +1327,19 @@ Argument RIGHT second object to compare."
           (alist-get 'uptime (alist-get 'system-status data)))
          line)
     (dolist (item syncthing-header-items)
-      (when (string= item "rate-download")
+      (when (string= item syncthing-header-rate-download)
         (push (syncthing--rate-download
                (format syncthing-format-rate-download
                        (syncthing--bytes-to-rate
                         (or (alist-get 'rate-download data) -1))))
               line))
-      (when (string= item "rate-upload")
+      (when (string= item syncthing-header-rate-upload)
         (push (syncthing--rate-upload
                (format syncthing-format-rate-upload
                        (syncthing--bytes-to-rate
                         (or (alist-get 'rate-upload data) -1))))
               line))
-      (when (string= item "count-local-files")
+      (when (string= item syncthing-header-count-local-files)
         (push (syncthing--count-local-files
                (format
                 syncthing-format-count-local-files
@@ -1332,7 +1352,7 @@ Argument RIGHT second object to compare."
                  :dec-sep syncthing-decimal-separator
                  :ths-sep syncthing-thousands-separator)))
               line))
-      (when (string= item "count-local-folders")
+      (when (string= item syncthing-header-count-local-folders)
         (push (syncthing--count-local-folders
                (format
                 syncthing-format-count-local-folders
@@ -1345,7 +1365,7 @@ Argument RIGHT second object to compare."
                  :dec-sep syncthing-decimal-separator
                  :ths-sep syncthing-thousands-separator)))
               line))
-      (when (string= item "count-local-bytes")
+      (when (string= item syncthing-header-count-local-bytes)
         (push (syncthing--count-local-bytes
                (format
                 syncthing-format-count-local-bytes
@@ -1357,7 +1377,7 @@ Argument RIGHT second object to compare."
                                     (alist-get 'status folder) 0)))
                  1)))
               line))
-      (when (string= item "count-listeners")
+      (when (string= item syncthing-header-count-listeners)
         (push (syncthing--count-listeners
                (format
                 syncthing-format-count-listeners
@@ -1370,7 +1390,7 @@ Argument RIGHT second object to compare."
                  (length (alist-get 'connectionServiceStatus
                                     (alist-get 'system-status data))))))
               line))
-      (when (string= item "count-discovery")
+      (when (string= item syncthing-header-count-discovery)
         (push (syncthing--count-discovery
                (format
                 syncthing-format-count-discovery
@@ -1383,19 +1403,19 @@ Argument RIGHT second object to compare."
                  (length (alist-get 'discoveryStatus
                                     (alist-get 'system-status data))))))
               line))
-      (when (string= item "uptime")
+      (when (string= item syncthing-header-uptime)
         (push (syncthing--uptime
                (format syncthing-format-uptime
                        (syncthing--sec-to-uptime uptime)))
               line))
-      (when (string= item "my-id")
+      (when (string= item syncthing-header-my-id)
         (push (syncthing--my-id
                (format syncthing-format-my-id
                        (substring
                         (alist-get 'myID (alist-get 'system-status data)
                                    "n/a") 0 6)))
               line))
-      (when (string= item "version")
+      (when (string= item syncthing-header-version)
         (push (format syncthing-format-version
                       (alist-get 'system-version data "n/a"))
               line)))
