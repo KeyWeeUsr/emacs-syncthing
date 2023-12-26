@@ -114,10 +114,10 @@
            (let-alist (alist-get 'data item)
              (push (format "|%s|%s|%s|%s|%s|%s|"
                            .modifiedBy .action .type .label .path
-                           ;; TODO: proper date parse + trim
-                           (replace-regexp-in-string
-                            "T" " "
-                            (substring (alist-get 'time item) 0 19)))
+                           (format-time-string
+                            "%Y-%m-%d %H:%M:%S"
+                            (encode-time
+                             (iso8601-parse (alist-get 'time item)))))
                    text)))
          (insert (string-join (reverse text) "\n")))
        (org-mode)
@@ -232,12 +232,12 @@
     (setq text
           (format "%s \tLast Scan\t\t\t%s\n"
                   text
-                  ;; TODO: proper date parse + trim
-                  (replace-regexp-in-string
-                   "T" " "
-                   (substring
-                    (alist-get 'stateChanged
-                               (alist-get 'status folder)) 0 19))))
+                  (format-time-string
+                            "%Y-%m-%d %H:%M:%S"
+                            (encode-time
+                             (iso8601-parse
+                              (alist-get 'stateChanged
+                                         (alist-get 'status folder)))))))
     (setq text
           (format "%s ⇄\tLatest Change\t\t%s\n"
                   text
@@ -375,10 +375,9 @@
       (setq text
             (format "%s \tLast seen\t\t\t\t%s\n \tSync Status\t\t\t\t%s\n"
                     text
-                    ;; TODO: proper date parse + trim
-                    (replace-regexp-in-string
-                     "T" " "
-                     (substring (alist-get 'lastSeen stats) 0 19))
+                    (format-time-string
+                     "%Y-%m-%d %H:%M:%S"
+                     (encode-time (iso8601-parse (alist-get 'lastSeen stats))))
                     (if (< (floor sync-state) 100)
                         (format "Out of Sync (%.2f%%)" sync-state)
                       "Up to Date")))
