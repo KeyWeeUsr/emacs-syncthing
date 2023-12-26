@@ -45,16 +45,6 @@
 (require 'syncthing-draw)
 
 ;; private/helper funcs
-(defun syncthing--init-state ()
-  "Reset all variables holding initial state.
-Optional argument SKIP-CANCEL Skip removing auto-refresh."
-  (syncthing-trace)
-  ;; everything += or appendable has to reset in each update
-  (setf (syncthing-buffer-collapse-after-start syncthing-buffer)
-        syncthing-start-collapsed
-        (syncthing-buffer-fold-folders syncthing-buffer) (list))
-  (setf (syncthing-buffer-fold-devices syncthing-buffer) (list)))
-
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
   (syncthing-trace)

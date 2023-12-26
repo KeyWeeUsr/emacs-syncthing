@@ -32,4 +32,14 @@
   "Poller and state holder for Syncthing server events."
   (last-id 1))
 
+(defun syncthing--init-state ()
+  "Reset all variables holding initial state.
+Optional argument SKIP-CANCEL Skip removing auto-refresh."
+  (syncthing-trace)
+  ;; everything += or appendable has to reset in each update
+  (setf (syncthing-buffer-collapse-after-start syncthing-buffer)
+        syncthing-start-collapsed
+        (syncthing-buffer-fold-folders syncthing-buffer) (list))
+  (setf (syncthing-buffer-fold-devices syncthing-buffer) (list)))
+
 (provide 'syncthing-state)
