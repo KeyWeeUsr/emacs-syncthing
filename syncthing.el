@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 2.0.0
+;; Version: 2.0.1
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -105,6 +105,7 @@ Activating this mode will launch Syncthing client in the current window.
   (when syncthing-start-with-auto-refresh
     (syncthing-auto-refresh-mode 1)))
 
+;;;###autoload
 (define-minor-mode syncthing-auto-refresh-mode
   "Refresh client view every `syncthing-auto-refresh-interval' seconds."
   :lighter " Auto-refresh"
@@ -119,6 +120,7 @@ Activating this mode will launch Syncthing client in the current window.
     (setq-local auto-revert-verbose nil))
   (auto-revert-mode (if syncthing-auto-refresh-mode 1 -1)))
 
+;;;###autoload
 (defun syncthing-with-base (name base-url token)
   "Launch Syncthing instance NAME for BASE-URL and TOKEN in a new buffer."
   (interactive
@@ -130,6 +132,7 @@ Activating this mode will launch Syncthing client in the current window.
                               "syncthing-with-base")))))
   (syncthing--interactive-common name base-url token))
 
+;;;###autoload
 (defun syncthing ()
   "Launch Syncthing client's instance in a new buffer."
   (interactive)
