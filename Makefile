@@ -6,8 +6,25 @@ DEMO_PROTO := http
 DEMO_ADDR := $(DEMO_PROTO)://$(DEMO_HOST):$(DEMO_PORT)
 DEMO_TOKEN := dummy
 
-all:
+.PHONY: all
+all: tests
+
+.PHONY: tests
+clean:
 	@-rm syncthing.elc 2>/dev/null
+
+.PHONY: tests
+tests: clean main-tests keyboard-tests
+
+.PHONY: keyboard-tests
+keyboard-tests:
+	$(EMACS) --batch --quick \
+		--directory . \
+		--load syncthing-keyboard-tests.el \
+		--funcall ert-run-tests-batch
+
+.PHONY: main-tests
+main-tests:
 	$(EMACS) --batch --quick \
 		--directory . \
 		--load syncthing-tests.el \

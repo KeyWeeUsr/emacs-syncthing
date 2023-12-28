@@ -29,6 +29,8 @@
 * `<backtab>' or Shift+`TAB' toggles all foldable widgets.
 * `n'/`p' for navigation down/up in the buffer.")
 
+(defconst syncthing-error-cant-edit-buffer
+  "You can not edit this part of the Syncthing buffer")
 (defun syncthing--newline (pos &optional event)
   "RET/Enter/newline-keypress handler.
 Argument POS Incoming EVENT position."
@@ -37,7 +39,7 @@ Argument POS Incoming EVENT position."
   (let ((button (syncthing--get-widget pos)))
     (if button
 	    (widget-apply-action button event)
-      (error "You can't edit this part of the Syncthing buffer"))))
+      (error syncthing-error-cant-edit-buffer))))
 
 (defun syncthing--tab (&rest _)
   "TAB handler.
