@@ -14,18 +14,25 @@ clean:
 	@-rm syncthing.elc 2>/dev/null
 
 .PHONY: tests
-tests: clean main-tests keyboard-tests
+tests: clean main-tests keyboard-tests common-tests
+
+.PHONY: common-tests
+common-tests:
+	@$(EMACS) --batch --quick \
+		--directory . \
+		--load syncthing-common-tests.el \
+		--funcall ert-run-tests-batch
 
 .PHONY: keyboard-tests
 keyboard-tests:
-	$(EMACS) --batch --quick \
+	@$(EMACS) --batch --quick \
 		--directory . \
 		--load syncthing-keyboard-tests.el \
 		--funcall ert-run-tests-batch
 
 .PHONY: main-tests
 main-tests:
-	$(EMACS) --batch --quick \
+	@$(EMACS) --batch --quick \
 		--directory . \
 		--load syncthing-tests.el \
 		--funcall ert-run-tests-batch

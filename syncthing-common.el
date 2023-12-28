@@ -48,7 +48,10 @@ Optional argument NAME Caller's name if called by other than `syncthing-trace'."
 (defun syncthing--flat-string-sort (key left right)
   "Generic value sort func for flat Syncthing data.
 
-[{\"key\": value9}, {\"key\": value5}] -> [value5, value9]
+[{\"key\": value9}, {\"key\": value5}]
+                 |
+                 v
+[{\"key\": value5}, {\"key\": value9}]
 
 Argument KEY to sort with.
 Argument LEFT first object to compare.
@@ -95,10 +98,11 @@ Argument RIGHT second object to compare."
          ((>= perc 100)
           'syncthing-progress-100))))
 
-(defun syncthing--sec-to-uptime (sec)
+(cl-defun syncthing--sec-to-uptime (sec &key (full nil) (pad nil))
   "Convert SEC number to DDd HHh MMm SSs uptime string."
   (syncthing-trace)
-  (let* ((days  (/ sec syncthing-day-seconds))
+  (let* ((dig-format (if pad "%02d" "%d"))
+         (days  (/ sec syncthing-day-seconds))
          (hours (/ (- sec
                       (* days syncthing-day-seconds))
                    syncthing-hour-seconds))
@@ -111,22 +115,24 @@ Argument RIGHT second object to compare."
                      (* hours syncthing-hour-seconds)
                      (* minutes syncthing-min-seconds)))
          (out ""))
-    (when (< 0 days)
+    (when (or (and (= 0 days) full) (< 0 days))
       (setq out (if (eq 0 (length out))
-                    (format "%dd" days)
-                  (format "%s %dd" out days))))
-    (when (< 0 hours)
+                    (format (concat
+                             (replace-regexp-in-string "2" "3" dig-format)
+                             "d") days)
+                  (format (concat "%s " dig-format "d") out days))))
+    (when (or (and (= 0 hours) full) (< 0 hours))
       (setq out (if (eq 0 (length out))
-                    (format "%dh" hours)
-                  (format "%s %dh" out hours))))
-    (when (< 0 minutes)
+                    (format (concat dig-format "h") hours)
+                  (format (concat "%s " dig-format "h") out hours))))
+    (when (or (and (= 0 minutes) full) (< 0 minutes))
       (setq out (if (eq 0 (length out))
-                    (format "%dm" minutes)
-                  (format "%s %dm" out minutes))))
-    (when (< 0 seconds)
+                    (format (concat dig-format "m") minutes)
+                  (format (concat "%s " dig-format "m") out minutes))))
+    (when (or (and (= 0 seconds) full) (< 0 seconds))
       (setq out (if (eq 0 (length out))
-                    (format "%ds" seconds)
-                  (format "%s %ds" out seconds))))
+                    (format (concat dig-format "s") seconds)
+                  (format (concat "%s " dig-format "s") out seconds))))
     out))
 
 (defun syncthing--maybe-float (num places)
