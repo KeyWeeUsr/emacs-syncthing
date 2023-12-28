@@ -221,14 +221,25 @@
                  ((string= type "sendonly") "Send Only")
                  ((string= type "receiveonly") "Receive Only")
                  ((string= type "receiveencrypted") "Receive Encrypted"))))
-    (setq text
-          (format "%s \tRescans\t\t\t\t%s\n"
-                  text
-                  (format " %s  %s"
-                          (format (syncthing--sec-to-uptime
-                                   (alist-get 'rescanIntervalS folder)))
-                          (if (alist-get 'fsWatcherEnabled folder)
-                              "Enabled" "Disabled"))))
+    (setq
+     text
+     (format
+      "%s \tRescans\t\t\t\t%s\n"
+      text
+      (format " %s  %s"
+              (format (syncthing--sec-to-uptime
+                       (alist-get 'rescanIntervalS folder)
+                       :full (or (string= syncthing-header-uptime-type
+                                          syncthing-header-uptime-full)
+                                 (string= syncthing-header-uptime-type
+                                          syncthing-header-uptime-padded-full))
+                       :pad (or (string= syncthing-header-uptime-type
+                                         syncthing-header-uptime-padded-short)
+                                (string=
+                                 syncthing-header-uptime-type
+                                 syncthing-header-uptime-padded-full))))
+              (if (alist-get 'fsWatcherEnabled folder)
+                  "Enabled" "Disabled"))))
     (setq text
           (format "%s \tFile Pull Order\t\t%s\n"
                   text
@@ -563,7 +574,18 @@
       (when (string= item syncthing-header-uptime)
         (push (syncthing--uptime
                (format syncthing-format-uptime
-                       (syncthing--sec-to-uptime uptime)))
+                       (syncthing--sec-to-uptime
+                        uptime
+                        :full (or (string= syncthing-header-uptime-type
+                                           syncthing-header-uptime-full)
+                                  (string=
+                                   syncthing-header-uptime-type
+                                   syncthing-header-uptime-padded-full))
+                        :pad (or (string= syncthing-header-uptime-type
+                                          syncthing-header-uptime-padded-short)
+                                 (string=
+                                  syncthing-header-uptime-type
+                                  syncthing-header-uptime-padded-full)))))
               line))
       (when (string= item syncthing-header-my-id)
         (push (syncthing--my-id

@@ -263,5 +263,29 @@ intervals. Setting this to non-nil allows `syncthing' to purge all of them."
   :group 'syncthing-debug
   :type 'boolean)
 
+(defconst syncthing-header-uptime-short "uptime-short"
+  "Header value for `syncthing-header-uptime-type'.")
+(defconst syncthing-header-uptime-full "uptime-full"
+  "Header value for `syncthing-header-uptime-type'.")
+(defconst syncthing-header-uptime-padded-short "uptime-padded-short"
+  "Header value for `syncthing-header-uptime-type'.")
+(defconst syncthing-header-uptime-padded-full "uptime-padded-full"
+  "Header value for `syncthing-header-uptime-type'.")
+(defcustom syncthing-header-uptime-type
+  syncthing-header-uptime-padded-short
+  "Items to render with `header-line-format'.
+
+Special meaning for empty list / nil to skip rendering the header line."
+  :group 'syncthing-display
+  :type `(choice :tag "Type"
+                 (const :tag "[0d] [0h] [0m] [0s]"
+                        ,syncthing-header-uptime-short)
+                 (const :tag "0d 0h 0m 0s"
+                        ,syncthing-header-uptime-full)
+                 (const :tag "[000d] [00h] [00m] [00s]"
+                        ,syncthing-header-uptime-padded-short)
+                 (const :tag "000d 00h 00m 00s"
+                        ,syncthing-header-uptime-padded-full)))
+
 (provide 'syncthing-custom)
 ;;; syncthing-custom.el ends here
