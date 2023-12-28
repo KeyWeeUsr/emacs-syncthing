@@ -1,4 +1,4 @@
-;;; syncthing-tests.el -- tests for syncthing -*- lexical-binding: t; -*-
+;;; syncthing-keyboard-tests.el -- tests -*- lexical-binding: t; -*-
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;;; Commentary:
@@ -216,4 +216,4 @@
       (should redrawn))))
 
 (provide 'syncthing-keyboard-tests)
-;;; syncthing-tests.el ends here
+;;; syncthing-keyboard-tests.el ends here
