@@ -191,8 +191,8 @@ Special meaning for empty list / nil to skip rendering the header line."
 Note:
     Syncthing timeouts after 60s with [] when there are no events and the
     listener waits for some to be emitted which causes Emacs to hang while
-    waiting for the response but can be stopped with C-g. This is customized
-    with `syncthing-timeout-events'.
+    waiting for the response but can be stopped with \\[keyboard-quit].
+    This is customized with `syncthing-timeout-events'.
     https://docs.syncthing.net/rest/events-get.html"
   :group 'syncthing-display
   :type 'boolean)
@@ -234,8 +234,8 @@ Note:
 Note:
     Syncthing timeouts after 60s with [] when there are no events and the
     listener waits for some to be emitted which causes Emacs to hang while
-    waiting for the response but can be stopped with C-g. This is customized
-    with `syncthing-timeout-events'.
+    waiting for the response but can be stopped with \\[keyboard-quit].
+    This is customized with `syncthing-timeout-events'.
     https://docs.syncthing.net/rest/events-get.html"
   :group 'syncthing-events
   :type 'boolean)

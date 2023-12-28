@@ -99,7 +99,9 @@ Argument RIGHT second object to compare."
           'syncthing-progress-100))))
 
 (cl-defun syncthing--sec-to-uptime (sec &key (full nil) (pad nil))
-  "Convert SEC number to DDd HHh MMm SSs uptime string."
+  "Convert SEC number to DDd HHh MMm SSs uptime string.
+Optional argument FULL Show all available uptime parts.
+Optional argument PAD Pad parts to their max expected digit length."
   (syncthing-trace)
   (let* ((dig-format (if pad "%02d" "%d"))
          (days  (/ sec syncthing-day-seconds))
@@ -117,22 +119,21 @@ Argument RIGHT second object to compare."
          (out ""))
     (when (or (and (= 0 days) full) (< 0 days))
       (setq out (if (eq 0 (length out))
-                    (format (concat
-                             (replace-regexp-in-string "2" "3" dig-format)
-                             "d") days)
-                  (format (concat "%s " dig-format "d") out days))))
+                    (format (format "%sd" (replace-regexp-in-string
+                                           "2" "3" dig-format)) days)
+                  (format (format "%%s %sd" dig-format) out days))))
     (when (or (and (= 0 hours) full) (< 0 hours))
       (setq out (if (eq 0 (length out))
-                    (format (concat dig-format "h") hours)
-                  (format (concat "%s " dig-format "h") out hours))))
+                    (format (format "%sh" dig-format) hours)
+                  (format (format "%%s %sh" dig-format) out hours))))
     (when (or (and (= 0 minutes) full) (< 0 minutes))
       (setq out (if (eq 0 (length out))
-                    (format (concat dig-format "m") minutes)
-                  (format (concat "%s " dig-format "m") out minutes))))
+                    (format (format "%sm" dig-format) minutes)
+                  (format (format "%%s %sm" dig-format) out minutes))))
     (when (or (and (= 0 seconds) full) (< 0 seconds))
       (setq out (if (eq 0 (length out))
-                    (format (concat dig-format "s") seconds)
-                  (format (concat "%s " dig-format "s") out seconds))))
+                    (format (format "%ss" dig-format) seconds)
+                  (format (format "%%s %ss" dig-format) out seconds))))
     out))
 
 (defun syncthing--maybe-float (num places)
