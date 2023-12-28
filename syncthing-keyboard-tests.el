@@ -7,7 +7,10 @@
 
 (require 'ert)
 (require 'widget)
-(require 'syncthing)
+
+(require 'syncthing-common)
+(require 'syncthing-errors)
+(require 'syncthing-keyboard)
 
 
 (defun syncthing-ert-cleanup ()
@@ -34,9 +37,11 @@
     (let (called)
       (condition-case err
           (syncthing--newline 1)  ; Move into the button area first
-        (error (setq called t)
-               (should (string= (error-message-string err)
-                                syncthing-error-cant-edit-buffer))))
+        (syncthing-error
+         (setq called t)
+         (should (string= (error-message-string err)
+                          (get 'syncthing-error-cant-edit-buffer
+                               'error-message)))))
       (should called))))
 
 (ert-deftest syncthing-keyboard-tab-fold-all ()

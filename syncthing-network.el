@@ -9,6 +9,7 @@
 
 (require 'syncthing-common)
 (require 'syncthing-custom)
+(require 'syncthing-errors)
 (require 'syncthing-state)
 
 (defun syncthing--ping (server)
@@ -19,11 +20,13 @@
          `(("X-Api-Key" . ,(syncthing-server-token server))))
         (url-show-status (null syncthing-no-upstream-noise)))
     (ignore url-request-method url-request-extra-headers)
-    (condition-case-unless-debug nil
+    (condition-case nil
         (with-temp-buffer
+          ;; TODO: fetch status and message, compare, throw on mismatch
           (url-insert-file-contents
-           (format "%s/rest/system/ping" (syncthing-server-url server))))
-      (file-error (error "Failed to authenticate, check the token!")))))
+           (format "%s/rest/system/ping" (syncthing-server-url server)))
+          (buffer-string))
+      (file-error (signal 'syncthing-error-cant-authenticate nil)))))
 
 (defun syncthing--request (method url token &rest data)
   "Send authenticated HTTP request to Syncthing REST API.
@@ -39,14 +42,15 @@ Argument TOKEN API token."
     (ignore url-request-method method
             url-request-data data
             url-request-extra-headers)
-    (condition-case-unless-debug nil
+    (condition-case nil
         (with-temp-buffer
+          ;; TODO: fetch status and message, compare, throw on mismatch
           (url-insert-file-contents url)
           (json-parse-buffer :object-type 'alist
                              :array-type 'list
                              :null-object nil
                              :false-object nil))
-      (file-error (error "Failed to handle response for %s" url)))))
+      (file-error (signal 'syncthing-error-failed-response url)))))
 
 (defun syncthing-request (server method endpoint &rest data)
   "Return SERVER response for METHOD at ENDPOINT for request with DATA."
