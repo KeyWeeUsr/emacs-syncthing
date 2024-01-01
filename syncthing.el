@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 2.1.0
+;; Version: 2.2.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -143,4 +143,11 @@ Activating this mode will launch Syncthing client in the current window.
      syncthing-default-server-token)))
 
 (provide 'syncthing)
+;; TODO: test with native-comp
+;; TODO: allow switching between time format and raw timestamps
+;; TODO: long lines - check buffer width on each redraw
+;;       then if > use cl-print-to-string-with-limit so it folds under '...'
+;;       probably needs a major rework on how it's displayed
+;; TODO: fix underline/highlight for whole folder/device widget's text
+;;       needs probably creating a custom widget from scratch
 ;;; syncthing.el ends here
