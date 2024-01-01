@@ -7,9 +7,9 @@ DEMO_ADDR := $(DEMO_PROTO)://$(DEMO_HOST):$(DEMO_PORT)
 DEMO_TOKEN := dummy
 
 .PHONY: all
-all: tests
+all: test
 
-.PHONY: tests
+.PHONY: clean
 clean:
 	@-rm syncthing*.elc 2>/dev/null
 	@-rm syncthing*.ok 2>/dev/null
@@ -41,8 +41,8 @@ byte-compile: \
 	syncthing-update.elc \
 	syncthing-watcher.elc
 
-.PHONY: tests
-tests: byte-compile main-tests keyboard-tests common-tests network-tests
+.PHONY: test
+test: byte-compile main-tests keyboard-tests common-tests network-tests
 
 syncthing-network-tests.ok: syncthing-network.elc syncthing-network-tests.elc
 	@$(EMACS) --batch --quick \
@@ -88,6 +88,14 @@ demo:
 		'(load "$(PWD)/demo/demo.el")' \
 		'(syncthing-demo "Demo" "$(DEMO_ADDR)")' &
 	$(MAKE) demo-server
+
+Makefile.ok: Makefile
+	@make -n all
+	@docker run \
+		--network=none \
+		--volume "$(PWD)"/Makefile:/Makefile \
+		backplane/checkmake /Makefile
+lint-makefile: Makefile.ok
 
 .PHONY: tag
 tag:
