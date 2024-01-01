@@ -11,6 +11,8 @@
 (defconst syncthing-day-seconds (* 1 60 60 24))
 (defconst syncthing-hour-seconds (* 1 60 60))
 (defconst syncthing-min-seconds (* 1 60))
+(defconst syncthing-msg-cant-edit-buffer
+  "You can not edit this part of the Syncthing buffer")
 
 ;; Docstrings from Syncthing (MPL-2.0)
 ;; https://www.fsf.org/blogs/licensing/mpl-2.0-release

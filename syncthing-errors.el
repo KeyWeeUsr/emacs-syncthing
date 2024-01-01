@@ -7,10 +7,6 @@
 
 (define-error 'syncthing-error "Generic syncthing error")
 
-(define-error 'syncthing-error-cant-edit-buffer
-  "You can not edit this part of the Syncthing buffer"
-  'syncthing-error)
-
 (define-error 'syncthing-error-cant-authenticate
   "Failed to authenticate, check the token!"
   'syncthing-error)

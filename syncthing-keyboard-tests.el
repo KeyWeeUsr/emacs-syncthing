@@ -9,6 +9,7 @@
 (require 'widget)
 
 (require 'syncthing-common)
+(require 'syncthing-constants)
 (require 'syncthing-errors)
 (require 'syncthing-keyboard)
 
@@ -34,14 +35,15 @@
   "Throw an error when interacting with a non-widget."
   (syncthing-ert-cleanup)
   (with-temp-buffer
-    (let (called)
-      (condition-case err
-          (syncthing--newline 1)  ; Move into the button area first
-        (syncthing-error
-         (setq called t)
-         (should (string= (error-message-string err)
-                          (get 'syncthing-error-cant-edit-buffer
-                               'error-message)))))
+    (let (called args)
+      (advice-add 'message
+                  :override
+                  (lambda (&rest largs) (setq called t) (setq args largs)))
+      (syncthing--newline 1)  ; Move into the button area first
+      (advice-remove 'message
+                     (lambda (&rest largs) (setq called t) (setq args largs)))
+      (should called)
+      (should (string= (caddr args) syncthing-msg-cant-edit-buffer))
       (should called))))
 
 (ert-deftest syncthing-keyboard-tab-fold-all ()

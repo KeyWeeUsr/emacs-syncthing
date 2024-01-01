@@ -9,6 +9,7 @@
 (require 'wid-edit)
 
 (require 'syncthing-common)
+(require 'syncthing-constants)
 (require 'syncthing-draw)
 (require 'syncthing-errors)
 (require 'syncthing-state)
@@ -39,7 +40,7 @@ Argument POS Incoming EVENT position."
   (let ((button (syncthing--get-widget pos)))
     (if button
 	    (widget-apply-action button event)
-      (signal 'syncthing-error-cant-edit-buffer nil))))
+      (message "%s: %s" syncthing-prefix syncthing-msg-cant-edit-buffer))))
 
 (defun syncthing--tab (&rest _)
   "TAB handler.
