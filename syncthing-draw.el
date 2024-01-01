@@ -122,32 +122,31 @@
 (defun syncthing--list-changes (change)
   "Render CHANGE as a widget."
   (syncthing-trace)
-  (save-window-excursion
-    (switch-to-buffer
-     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (widget-insert
-     (with-temp-buffer
-       (let (text)
-         (push "|Device|Action|Type|Folder|Path|Time|" text)
-         (push "|-|-|-|-|-|-|" text)
-         (dolist (item change)
-           (let-alist (alist-get 'data item)
-             (push (format
-                    "|%s|%s|%s|%s|%s|%s|"
-                    (alist-get
-                     (intern `,.modifiedBy)
-                     (alist-get 'device-map
-                                (syncthing-server-data syncthing-server)))
-                    .action .type .label .path
-                    (format-time-string
-                     "%F %T"
-                     (encode-time
-                      (iso8601-parse (alist-get 'time item)))))
-                   text)))
-         (insert (string-join (reverse text) "\n")))
-       (org-mode)
-       (org-table-align)
-       (substring-no-properties (buffer-string))))))
+  (let ((data (syncthing-server-data syncthing-server)))
+    (save-window-excursion
+      (switch-to-buffer
+       (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
+      (widget-insert
+       (with-temp-buffer
+         (let (text)
+           (push "|Device|Action|Type|Folder|Path|Time|" text)
+           (push "|-|-|-|-|-|-|" text)
+           (dolist (item change)
+             (let-alist (alist-get 'data item)
+               (push (format
+                      "|%s|%s|%s|%s|%s|%s|"
+                      (alist-get (intern `,.modifiedBy)
+                                 (alist-get 'device-map data))
+                      .action .type .label .path
+                      (format-time-string
+                       "%F %T"
+                       (encode-time
+                        (iso8601-parse (alist-get 'time item)))))
+                     text)))
+           (insert (string-join (reverse text) "\n")))
+         (org-mode)
+         (org-table-align)
+         (substring-no-properties (buffer-string)))))))
 
 (defun syncthing--list-37-folder (folder)
   "Render single FOLDER item in a widget."
