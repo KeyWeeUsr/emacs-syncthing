@@ -15,6 +15,7 @@ clean:
 	@-rm syncthing*.ok 2>/dev/null
 
 %.elc: %.el
+	@-rm "$@" 2>/dev/null
 	@$(EMACS) --batch --quick \
 		--directory . \
 		--load compile-setup \
