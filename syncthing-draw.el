@@ -73,7 +73,9 @@
   (let-alist (syncthing-server-data server)
     (syncthing--draw-folders-header)
     (cond ((>= .version 37)
-           (mapc #'syncthing--list-37-folder
+           (mapc (lambda (folder)
+                   (syncthing--list-37-folder folder)
+                   (widget-insert "\n"))
                  (sort (copy-alist .folders) #'syncthing--sort-folders))))))
 
 (defun syncthing--draw-devices (server)
@@ -88,7 +90,9 @@
                  (alist-get 'myID .system-status))
           (push dev filtered)))
       (cond ((>= .version 37)
-             (mapc #'syncthing--list-37-device
+             (mapc (lambda (device)
+                     (syncthing--list-37-device device)
+                     (widget-insert "\n"))
                    (sort (copy-alist filtered)
                          #'syncthing--sort-devices)))))))
 
@@ -309,12 +313,12 @@
        (concat
         " "
         (syncthing--color-perc perc)
-        (format "%s%s\n"
+        (format "%s%s"
                 (syncthing--bold
                  (format " %s" name))
                 (if paused (syncthing--italic " (Paused)") ""))
         (unless (member id (syncthing-buffer-fold-folders syncthing-buffer))
-          (syncthing--prop text)))
+          (concat "\n" (syncthing--prop text))))
        :action
        `(lambda (&rest _event)
          (if (member ,id (syncthing-buffer-fold-folders syncthing-buffer))
@@ -463,12 +467,12 @@
        (concat
         " "
         (syncthing--color-perc (alist-get 'completion completion))
-        (format "%s%s\n"
+        (format "%s%s"
                 (syncthing--bold
                  (format " %s" name))
                 (if paused (syncthing--italic " (Paused)") ""))
         (unless (member id (syncthing-buffer-fold-devices syncthing-buffer))
-          (syncthing--prop text)))
+          (concat "\n" (syncthing--prop text))))
        :action
        `(lambda (&rest _event)
          (if (member ,id (syncthing-buffer-fold-devices syncthing-buffer))
