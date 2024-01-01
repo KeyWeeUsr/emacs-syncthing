@@ -20,7 +20,7 @@
         (url-request-extra-headers
          `(("X-Api-Key" . ,(syncthing-server-token server))))
         (url-show-status (null syncthing-no-upstream-noise)))
-    (ignore url-request-method url-request-extra-headers)
+    (ignore url-request-method url-request-extra-headers url-show-status)
     (condition-case nil
         (with-temp-buffer
           ;; TODO: fetch status and message, compare, throw on mismatch
@@ -42,7 +42,8 @@ Argument TOKEN API token."
         (url-show-status (null syncthing-no-upstream-noise)))
     (ignore url-request-method method
             url-request-data data
-            url-request-extra-headers)
+            url-request-extra-headers
+            url-show-status)
     (condition-case nil
         (with-temp-buffer
           ;; TODO: fetch status and message, compare, throw on mismatch

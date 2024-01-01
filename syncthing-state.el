@@ -7,8 +7,6 @@
 
 (require 'cl-lib)
 
-(require 'syncthing-custom)
-
 
 (defvar syncthing--servers nil
   "List of currently active Syncthing servers.")

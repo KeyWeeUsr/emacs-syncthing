@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(require 'syncthing-constants)
+(require 'syncthing-custom)
 (require 'syncthing-network)
 (require 'syncthing-state)
 

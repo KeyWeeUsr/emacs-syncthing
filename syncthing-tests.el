@@ -7,6 +7,10 @@
 
 (require 'ert)
 
+(require 'syncthing-custom)
+(require 'syncthing-network)
+(require 'syncthing-state)
+
 (require 'syncthing)
 
 

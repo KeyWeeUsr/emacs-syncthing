@@ -5,6 +5,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'iso8601)
 (require 'org-table)
 (require 'subr-x)
@@ -13,7 +14,6 @@
 
 (require 'syncthing-common)
 (require 'syncthing-custom)
-(require 'syncthing-constants)
 (require 'syncthing-faces)
 (require 'syncthing-state)
 

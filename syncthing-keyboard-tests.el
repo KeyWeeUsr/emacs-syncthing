@@ -8,10 +8,9 @@
 (require 'ert)
 (require 'widget)
 
-(require 'syncthing-common)
 (require 'syncthing-constants)
-(require 'syncthing-errors)
 (require 'syncthing-keyboard)
+(require 'syncthing-state)
 
 
 (defun syncthing-ert-cleanup ()
@@ -32,7 +31,7 @@
       (should called))))
 
 (ert-deftest syncthing-keyboard-newline-apply-non-widget ()
-  "Throw an error when interacting with a non-widget."
+  "Show a message when interacting with a non-widget."
   (syncthing-ert-cleanup)
   (with-temp-buffer
     (let (called args)

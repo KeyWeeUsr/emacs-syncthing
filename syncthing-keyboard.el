@@ -5,14 +5,10 @@
 
 ;;; Code:
 
-(require 'widget)
 (require 'wid-edit)
 
 (require 'syncthing-common)
-(require 'syncthing-constants)
 (require 'syncthing-draw)
-(require 'syncthing-errors)
-(require 'syncthing-state)
 
 
 (defvar-local syncthing-keyboard-map

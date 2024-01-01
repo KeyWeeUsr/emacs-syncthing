@@ -8,6 +8,7 @@
 (require 'cl-lib)
 (require 'subr-x)
 
+(require 'syncthing-constants)
 (require 'syncthing-custom)
 (require 'syncthing-state)
 

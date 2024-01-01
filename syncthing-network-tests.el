@@ -6,9 +6,11 @@
 ;;; Code:
 
 (require 'ert)
+(require 'cl-lib)
 
 (require 'syncthing-errors)
 (require 'syncthing-network)
+(require 'syncthing-state)
 
 
 (defun syncthing-ert-cleanup ()

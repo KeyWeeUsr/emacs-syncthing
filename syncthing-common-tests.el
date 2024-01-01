@@ -8,7 +8,9 @@
 (require 'ert)
 
 (require 'syncthing-common)
+(require 'syncthing-custom)
 (require 'syncthing-keyboard)
+(require 'syncthing-state)
 
 
 (defun syncthing-ert-cleanup ()

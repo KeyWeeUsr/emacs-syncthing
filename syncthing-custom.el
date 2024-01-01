@@ -6,7 +6,6 @@
 ;;; Code:
 
 (require 'syncthing-groups)
-(require 'syncthing-constants)
 
 
 (defcustom syncthing-format-buffer
