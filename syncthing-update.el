@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(require 'subr-x)
+
 (require 'syncthing-common)
 (require 'syncthing-custom)
 (require 'syncthing-draw)
@@ -157,7 +159,7 @@ Argument DATA server data."
         (dolist (device (alist-get 'devices data))
           (let* ((fol-dev-id (alist-get 'deviceID fol-dev))
                  ;; TODO: https://github.com/syncthing/syncthing/issues/9313
-                 (fol-dev-id-short (car (string-split fol-dev-id "-"))))
+                 (fol-dev-id-short (car (split-string fol-dev-id "-"))))
             (when (string= fol-dev-id
                            (alist-get 'deviceID device))
               (setf (alist-get (intern `,fol-dev-id) device-map)
