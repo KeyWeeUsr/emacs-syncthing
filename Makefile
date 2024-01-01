@@ -29,7 +29,6 @@ byte-compile: \
 	syncthing-constants.elc \
 	syncthing-custom.elc \
 	syncthing-draw.elc \
-	syncthing.elc \
 	syncthing-errors.elc \
 	syncthing-faces.elc \
 	syncthing-groups.elc \
@@ -40,7 +39,8 @@ byte-compile: \
 	syncthing-state.elc \
 	syncthing-tests.elc \
 	syncthing-update.elc \
-	syncthing-watcher.elc
+	syncthing-watcher.elc \
+	syncthing.elc
 
 .PHONY: test
 test: byte-compile main-tests keyboard-tests common-tests network-tests
