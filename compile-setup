@@ -1,0 +1,2 @@
+;; because --eval X --eval Y doesn't work
+(setq byte-compile-error-on-warn t)

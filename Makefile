@@ -16,8 +16,9 @@ clean:
 %.elc: %.el
 	@$(EMACS) --batch --quick \
 		--directory . \
-		--eval \
-		'(byte-compile-file (replace-regexp-in-string ".elc" ".el" "$@"))'
+		--load compile-setup \
+		--eval '(byte-compile-file "$(subst .elc,.el,$@)")' \
+		&& test -f "$@"
 
 byte-compile: \
 	syncthing-common.elc \
