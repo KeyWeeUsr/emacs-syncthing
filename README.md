@@ -13,6 +13,11 @@ all viewing functionality, later on even with editing/writing.
 Install it from [Melpa](https://melpa.org/#/getting-started) or clone and
 install manually, then simply <kbd>M</kbd>-<kbd>x</kbd> <kbd>syncthing</kbd>.
 
+Note that if you have `debug-on-error` enabled on your first run, the customize
+buffer for setting up the API token might be somewhere in the background. Use
+<kbd>M</kbd>-<kbd>x</kbd> <kbd>customize-group</kbd> <kbd>syncthing</kbd> for
+setting it manually, then re-run.
+
 ## Key bindings
 
 Ensure you are in the Syncthing buffer:
