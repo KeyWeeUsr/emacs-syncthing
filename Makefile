@@ -11,10 +11,35 @@ all: tests
 
 .PHONY: tests
 clean:
-	@-rm syncthing.elc 2>/dev/null
+	@-rm syncthing*.elc 2>/dev/null
+
+%.elc: %.el
+	@$(EMACS) --batch --quick \
+		--directory . \
+		--eval \
+		'(byte-compile-file (replace-regexp-in-string ".elc" ".el" "$@"))'
+
+byte-compile: \
+	syncthing-common.elc \
+	syncthing-common-tests.elc \
+	syncthing-constants.elc \
+	syncthing-custom.elc \
+	syncthing-draw.elc \
+	syncthing.elc \
+	syncthing-errors.elc \
+	syncthing-faces.elc \
+	syncthing-groups.elc \
+	syncthing-keyboard.elc \
+	syncthing-keyboard-tests.elc \
+	syncthing-network.elc \
+	syncthing-network-tests.elc \
+	syncthing-state.elc \
+	syncthing-tests.elc \
+	syncthing-update.elc \
+	syncthing-watcher.elc
 
 .PHONY: tests
-tests: clean main-tests keyboard-tests common-tests network-tests
+tests: clean byte-compile main-tests keyboard-tests common-tests network-tests
 
 .PHONY: network-tests
 network-tests:
