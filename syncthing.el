@@ -30,18 +30,10 @@
 
 (require 'autorevert)
 
-;; import all
-(require 'syncthing-common)
-(require 'syncthing-constants)
 (require 'syncthing-custom)
-(require 'syncthing-draw)
-(require 'syncthing-faces)
-(require 'syncthing-groups)
 (require 'syncthing-keyboard)
-(require 'syncthing-network)
 (require 'syncthing-state)
 (require 'syncthing-update)
-(require 'syncthing-watcher)
 
 
 ;; private/helper funcs
