@@ -17,6 +17,7 @@
     (define-key map (kbd "RET") #'syncthing--newline)
     (define-key map (kbd "SPC") #'syncthing--newline)
     (define-key map (kbd "TAB") #'syncthing--newline)
+    (define-key map (kbd "<mouse-1>") #'syncthing--newline)
     (define-key map (kbd "<backtab>") #'syncthing--tab)
     (define-key map (kbd "?") #'describe-bindings)
     (define-key map (kbd "n") #'next-line)
