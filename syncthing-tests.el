@@ -6,6 +6,7 @@
 ;;; Code:
 
 (require 'ert)
+
 (require 'syncthing)
 
 

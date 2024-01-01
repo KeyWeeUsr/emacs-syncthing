@@ -12,6 +12,7 @@
 (require 'syncthing-errors)
 (require 'syncthing-state)
 
+
 (defun syncthing--ping (server)
   "Check whether we can use the API at SERVER with TOKEN."
   (syncthing-trace)

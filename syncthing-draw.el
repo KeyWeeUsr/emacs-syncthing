@@ -17,6 +17,7 @@
 (require 'syncthing-faces)
 (require 'syncthing-state)
 
+
 (defun syncthing--draw-folders-header (&optional &key before after)
   "Draw folder header with optional BEFORE and AFTER separator."
   (syncthing-trace)

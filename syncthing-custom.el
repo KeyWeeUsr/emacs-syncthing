@@ -8,6 +8,7 @@
 (require 'syncthing-groups)
 (require 'syncthing-constants)
 
+
 (defcustom syncthing-format-buffer
   "*syncthing(%s)*"
   "Client's buffer name with a `%s' placeholder for address."

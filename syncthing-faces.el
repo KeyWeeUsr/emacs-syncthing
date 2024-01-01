@@ -7,6 +7,7 @@
 
 (require 'syncthing-common)
 
+
 (defface syncthing-title
   '((((class color) (background dark))
      (:inherit 'info-title-1))

@@ -13,6 +13,7 @@
 (require 'syncthing-errors)
 (require 'syncthing-state)
 
+
 (defvar-local syncthing-keyboard-map
   (let ((map (make-keymap)))
     ;; custom handler for RET / widget input handler

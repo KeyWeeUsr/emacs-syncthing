@@ -42,7 +42,7 @@
     (advice-add 'url-insert-file-contents
                 :override
                 `(lambda (&rest _) (insert ,ret)))
-    (condition-case err
+    (condition-case nil
         (should (string= (syncthing--ping server) ret))
       (syncthing-error (setq thrown t)))
     (should-not thrown)
@@ -77,7 +77,7 @@
     (advice-add 'url-insert-file-contents
                 :override
                 (lambda (&rest _) (insert json) (goto-char 0)))
-    (condition-case err
+    (condition-case nil
         (should (string=
                  (format "%s" (syncthing--request "GET" url "token" nil))
                  (format "%s" '((result . "ok")))))

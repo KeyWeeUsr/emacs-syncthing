@@ -6,7 +6,9 @@
 ;;; Code:
 
 (require 'ert)
-(require 'syncthing)
+
+(require 'syncthing-common)
+(require 'syncthing-keyboard)
 
 
 (defun syncthing-ert-cleanup ()
@@ -29,6 +31,10 @@
     (should (eq var (intern `,var-str)))
     (should (eq 1 (alist-get (intern `,var-str) data)))))
 
+(defun dummy (num str sym lst cns &optional opt &key opt-key)
+  (syncthing-trace)
+  (ignore num str sym lst cns opt opt-key))
+
 (ert-deftest syncthing-trace-get-prev-func ()
   "Retrieve full func call and insert it into own buffer."
   (syncthing-ert-cleanup)
@@ -36,13 +42,10 @@
          (syncthing-server (syncthing--server :name name))
          (syncthing-debug t)
          (repr "(dummy 1 \"2\" 3 (4) (5 . 6) 7 :opt-key 8)")
-         prev-func
-         result)
+         prev-func)
     (advice-add 'syncthing--previous-func
                 :filter-return
                 (lambda (ret) (setq prev-func ret) prev-func))
-    (defun dummy (num str sym lst cns &optional opt &key opt-key)
-      (syncthing-trace))
     (dummy 1 "2" '3 (list 4) (cons 5 6) 7 :opt-key 8)
     (should-not (null prev-func))
     (should (eq (type-of prev-func) 'cons))

@@ -11,6 +11,7 @@
 (require 'syncthing-custom)
 (require 'syncthing-state)
 
+
 (defsubst syncthing-trace ()
   "Simple tracing inline func to dump caller and its args into a buffer."
   (when syncthing-debug
@@ -24,18 +25,27 @@
 Optional argument NAME Caller's name if called by other than `syncthing-trace'."
   (let* ((idx 0) current)
     (setq current (backtrace-frame idx))
-    ;; Trace from the current frame, find *this* func and get previous one
+    ;; Trace from the current frame, find *this* func and get next frame
     (while (and (not (string= "syncthing--previous-func"
                               (format "%s" (car (cdr current)))))
                 (< idx 30)) ; shouldn't get larger or inf
       (setq idx (1+ idx))
       (setq current (backtrace-frame idx)))
+
+    ;; increment until tracing func is found
     (while (and (not (string= (or name "syncthing-trace")
                               (format "%s" (car (cdr current)))))
                 (< idx 30)) ; shouldn't get larger or inf
       (setq idx (1+ idx))
       (setq current (backtrace-frame idx)))
-    (cdr (backtrace-frame idx))))
+
+    ;; increment until past the tracing func (might not be just +1)
+    (while (and (string= (or name "syncthing-trace")
+                         (format "%s" (car (cdr current))))
+                (< idx 30)) ; shouldn't get larger or inf
+      (setq idx (1+ idx))
+      (setq current (backtrace-frame idx)))
+    (cdr current)))
 
 (defun syncthing--get-widget (pos)
   "Try to find an Emacs Widget at POS."
@@ -197,6 +207,16 @@ Optional argument THS-SEP custom thousands separator or default of ` '."
         (push (string char) out)
         (setq idx (1+ idx)))
       (string-join out ""))))
+
+(defun syncthing--init-state ()
+  "Reset all variables holding initial state.
+Optional argument SKIP-CANCEL Skip removing auto-refresh."
+  (syncthing-trace)
+  ;; everything += or appendable has to reset in each update
+  (setf (syncthing-buffer-collapse-after-start syncthing-buffer)
+        syncthing-start-collapsed
+        (syncthing-buffer-fold-folders syncthing-buffer) (list))
+  (setf (syncthing-buffer-fold-devices syncthing-buffer) (list)))
 
 (provide 'syncthing-common)
 ;;; syncthing-common.el ends here

@@ -28,6 +28,8 @@
 
 ;;; Code:
 
+(require 'autorevert)
+
 (require 'syncthing-groups)
 (require 'syncthing-custom)
 (require 'syncthing-faces)
@@ -39,6 +41,7 @@
 (require 'syncthing-update)
 (require 'syncthing-watcher)
 (require 'syncthing-draw)
+
 
 ;; private/helper funcs
 (defun syncthing--interactive-common (name url token)

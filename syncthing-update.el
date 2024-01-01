@@ -12,6 +12,7 @@
 (require 'syncthing-state)
 (require 'syncthing-watcher)
 
+
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
   (syncthing-trace)

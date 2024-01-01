@@ -8,6 +8,7 @@
 (require 'syncthing-network)
 (require 'syncthing-state)
 
+
 (defun syncthing--watcher-start (server)
   "Start `syncthing-watcher' and continue polling for events.
 Argument SERVER `syncthing-server' instance."
