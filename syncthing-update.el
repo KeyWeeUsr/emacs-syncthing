@@ -155,10 +155,14 @@ Argument DATA server data."
     (dolist (folder (alist-get 'folders data))
       (dolist (fol-dev (alist-get 'devices folder))
         (dolist (device (alist-get 'devices data))
-          (let ((fol-dev-id (alist-get 'deviceID fol-dev)))
+          (let* ((fol-dev-id (alist-get 'deviceID fol-dev))
+                 ;; TODO: https://github.com/syncthing/syncthing/issues/9313
+                 (fol-dev-id-short (car (string-split fol-dev-id "-"))))
             (when (string= fol-dev-id
                            (alist-get 'deviceID device))
               (setf (alist-get (intern `,fol-dev-id) device-map)
+                    (alist-get 'name device)
+                    (alist-get (intern `,fol-dev-id-short) device-map)
                     (alist-get 'name device)))))))
     (setf (alist-get 'device-map data) device-map))
   data)

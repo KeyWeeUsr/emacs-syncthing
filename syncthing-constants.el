@@ -13,6 +13,8 @@
 (defconst syncthing-min-seconds (* 1 60))
 (defconst syncthing-msg-cant-edit-buffer
   "You can not edit this part of the Syncthing buffer")
+;; TODO: https://github.com/syncthing/syncthing/issues/9313
+(defconst syncthing-device-short-length 6)
 
 ;; Docstrings from Syncthing (MPL-2.0)
 ;; https://www.fsf.org/blogs/licensing/mpl-2.0-release

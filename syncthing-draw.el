@@ -13,6 +13,7 @@
 (require 'wid-edit)
 
 (require 'syncthing-common)
+(require 'syncthing-constants)
 (require 'syncthing-custom)
 (require 'syncthing-faces)
 (require 'syncthing-state)
@@ -442,7 +443,7 @@
                   (cond ((string= compression "always") "All Data")
                         ((string= compression "metadata") "Metadata Only")
                         ((string= compression "never") "Off"))
-                  (substring id 0 6)))
+                  (substring id 0 syncthing-device-short-length)))
     (when (alist-get 'connected dev-conn)
       (setq text
             (format "%s \tVersion\t\t\t\t\t%s\n"
@@ -597,7 +598,7 @@
                (format syncthing-format-my-id
                        (substring
                         (alist-get 'myID (alist-get 'system-status data)
-                                   "n/a") 0 6)))
+                                   "n/a") 0 syncthing-device-short-length)))
               line))
       (when (string= item syncthing-header-version)
         (push (format syncthing-format-version
