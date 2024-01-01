@@ -2,6 +2,7 @@
 [![MELPA][melpa-badge]][melpa-package]
 [![MELPA Stable][melpa-stable-badge]][melpa-stable-package]
 [![Buy me a coffee][bmc-badge]][bmc-link]
+[![Liberapay][lp-badge]][lp-link]
 [![PayPal][ppl-badge]][ppl-link]
 
 Emacs client for [Syncthing](https://syncthing.net). Currently it tries to port
@@ -37,3 +38,5 @@ Check the manual for Emacs Customization: <kbd>C</kbd>-<kbd>h</kbd><kbd>i</kbd>
 [ppl-link]: https://paypal.me/peterbadida
 [demo]: https://raw.githubusercontent.com/KeyWeeUsr/emacs-syncthing/master/screenshot.png
 [demo-term]: https://raw.githubusercontent.com/KeyWeeUsr/emacs-syncthing/master/screenshot-term.png
+[lp-badge]: https://img.shields.io/badge/-liberapay-grey?logo=liberapay
+[lp-link]: https://liberapay.com/keyweeusr
