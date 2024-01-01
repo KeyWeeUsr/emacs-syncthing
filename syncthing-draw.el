@@ -132,12 +132,17 @@
          (push "|-|-|-|-|-|-|" text)
          (dolist (item change)
            (let-alist (alist-get 'data item)
-             (push (format "|%s|%s|%s|%s|%s|%s|"
-                           .modifiedBy .action .type .label .path
-                           (format-time-string
-                            "%F %T"
-                            (encode-time
-                             (iso8601-parse (alist-get 'time item)))))
+             (push (format
+                    "|%s|%s|%s|%s|%s|%s|"
+                    (alist-get
+                     (intern `,.modifiedBy)
+                     (alist-get 'device-map
+                                (syncthing-server-data syncthing-server)))
+                    .action .type .label .path
+                    (format-time-string
+                     "%F %T"
+                     (encode-time
+                      (iso8601-parse (alist-get 'time item)))))
                    text)))
          (insert (string-join (reverse text) "\n")))
        (org-mode)
