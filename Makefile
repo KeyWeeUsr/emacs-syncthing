@@ -12,6 +12,7 @@ all: tests
 .PHONY: tests
 clean:
 	@-rm syncthing*.elc 2>/dev/null
+	@-rm syncthing*.ok 2>/dev/null
 
 %.elc: %.el
 	@$(EMACS) --batch --quick \
@@ -20,6 +21,7 @@ clean:
 		--eval '(byte-compile-file "$(subst .elc,.el,$@)")' \
 		&& test -f "$@"
 
+.PHONY: byte-compile
 byte-compile: \
 	syncthing-common.elc \
 	syncthing-common-tests.elc \
@@ -40,35 +42,39 @@ byte-compile: \
 	syncthing-watcher.elc
 
 .PHONY: tests
-tests: clean byte-compile main-tests keyboard-tests common-tests network-tests
+tests: byte-compile main-tests keyboard-tests common-tests network-tests
 
-.PHONY: network-tests
-network-tests:
+syncthing-network-tests.ok: syncthing-network.elc syncthing-network-tests.elc
 	@$(EMACS) --batch --quick \
 		--directory . \
 		--load syncthing-network-tests.el \
-		--funcall ert-run-tests-batch
+		--funcall ert-run-tests-batch-and-exit \
+	&& touch syncthing-network-tests.ok
+network-tests: syncthing-network-tests.ok
 
-.PHONY: common-tests
-common-tests:
+syncthing-common-tests.ok: syncthing-common.elc syncthing-common-tests.elc
 	@$(EMACS) --batch --quick \
 		--directory . \
 		--load syncthing-common-tests.el \
-		--funcall ert-run-tests-batch
+		--funcall ert-run-tests-batch-and-exit \
+	&& touch syncthing-common-tests.ok
+common-tests: syncthing-common-tests.ok
 
-.PHONY: keyboard-tests
-keyboard-tests:
+syncthing-keyboard-tests.ok: syncthing-keyboard.elc syncthing-keyboard-tests.elc
 	@$(EMACS) --batch --quick \
 		--directory . \
 		--load syncthing-keyboard-tests.el \
-		--funcall ert-run-tests-batch
+		--funcall ert-run-tests-batch-and-exit \
+	&& touch syncthing-keyboard-tests.ok
+keyboard-tests: syncthing-keyboard-tests.ok
 
-.PHONY: main-tests
-main-tests:
+syncthing-tests.ok: syncthing.elc syncthing-tests.elc
 	@$(EMACS) --batch --quick \
 		--directory . \
 		--load syncthing-tests.el \
-		--funcall ert-run-tests-batch
+		--funcall ert-run-tests-batch-and-exit \
+	&& touch syncthing-tests.ok
+main-tests: syncthing-tests.ok
 
 .PHONY: demo-server
 demo-server:

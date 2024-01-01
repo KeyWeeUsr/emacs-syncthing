@@ -6,3 +6,4 @@
 *.swp
 *.elc
 __pycache__
+*.ok
