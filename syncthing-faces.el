@@ -235,5 +235,10 @@
   (syncthing-trace)
   (propertize text 'face 'syncthing-my-id))
 
+(defun syncthing--space (pos)
+  "Insert space aligned to POS in buffer."
+  (syncthing-trace)
+  (propertize " " 'display `(space :align-to ,pos)))
+
 (provide 'syncthing-faces)
 ;;; syncthing-faces.el ends here

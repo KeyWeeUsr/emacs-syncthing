@@ -287,5 +287,29 @@ Special meaning for empty list / nil to skip rendering the header line."
                  (const :tag "000d 00h 00m 00s"
                         ,syncthing-header-uptime-padded-full)))
 
+(defcustom syncthing-align-folder-headers
+  3
+  "`:align-to' value for aligning text block for values in folder widget."
+  :group 'syncthing-display
+  :type 'number)
+
+(defcustom syncthing-align-folder-values
+  20
+  "`:align-to' value for aligning text block for values in folder widget."
+  :group 'syncthing-display
+  :type 'number)
+
+(defcustom syncthing-align-device-headers
+  3
+  "`:align-to' value for aligning text block for values in device widget."
+  :group 'syncthing-display
+  :type 'number)
+
+(defcustom syncthing-align-device-values
+  20
+  "`:align-to' value for aligning text block for values in device widget."
+  :group 'syncthing-display
+  :type 'number)
+
 (provide 'syncthing-custom)
 ;;; syncthing-custom.el ends here

@@ -179,12 +179,20 @@
       (push id (syncthing-buffer-fold-folders syncthing-buffer)))
 
     (setq text
-          (format "%s \tFolder ID\t\t\t%s\n \tFolder Path\t\t\t%s\n"
-                  text id path))
+          (format "%s %sFolder ID%s%s\n %sFolder Path%s%s\n"
+                  text
+                  (syncthing--space syncthing-align-folder-headers)
+                  (syncthing--space syncthing-align-folder-values)
+                  id
+                  (syncthing--space syncthing-align-folder-headers)
+                  (syncthing--space syncthing-align-folder-values)
+                  path))
     (unless paused
       (setq text
-            (format "%s \tGlobal State\t\t%s\n \tLocal State\t\t\t%s\n"
+            (format "%s %sGlobal State%s%s\n %sLocal State%s%s\n"
                     text
+                    (syncthing--space syncthing-align-folder-headers)
+                    (syncthing--space syncthing-align-folder-values)
                     (format "%s %s %s"
                           (format
                            syncthing-format-count-local-files
@@ -204,6 +212,8 @@
                            (syncthing--scale-bytes
                             (alist-get 'globalBytes
                                        (alist-get 'status folder)) 2)))
+                    (syncthing--space syncthing-align-folder-headers)
+                    (syncthing--space syncthing-align-folder-values)
                     (format "%s %s %s"
                           (format
                            syncthing-format-count-local-files
@@ -225,8 +235,10 @@
                                        (alist-get 'status folder)) 2))))))
     (setq text
           (format
-           "%s \tFolder Type\t\t\t%s\n"
+           "%s %sFolder Type%s%s\n"
            text
+           (syncthing--space syncthing-align-folder-headers)
+           (syncthing--space syncthing-align-folder-values)
            (cond ((string= type "sendreceive") "Send & Receive")
                  ((string= type "sendonly") "Send Only")
                  ((string= type "receiveonly") "Receive Only")
@@ -234,8 +246,10 @@
     (setq
      text
      (format
-      "%s \tRescans\t\t\t\t%s\n"
+      "%s %sRescans%s%s\n"
       text
+      (syncthing--space syncthing-align-folder-headers)
+      (syncthing--space syncthing-align-folder-values)
       (format " %s  %s"
               (format (syncthing--sec-to-uptime
                        (alist-get 'rescanIntervalS folder)
@@ -251,8 +265,10 @@
               (if (alist-get 'fsWatcherEnabled folder)
                   "Enabled" "Disabled"))))
     (setq text
-          (format "%s \tFile Pull Order\t\t%s\n"
+          (format "%s %sFile Pull Order%s%s\n"
                   text
+                  (syncthing--space syncthing-align-folder-headers)
+                  (syncthing--space syncthing-align-folder-values)
                   (cond ((string= order "random") "Random")
                         ((string= order "alphabetic") "Alphabetic")
                         ((string= order "smallestFirst") "Smallest First")
@@ -260,8 +276,10 @@
                         ((string= order "oldestFirst") "Oldest First")
                         ((string= order "newestFirst") "Newest First"))))
     (setq text
-          (format "%s \tShared With\t\t\t%s\n"
+          (format "%s %sShared With%s%s\n"
                   text
+                  (syncthing--space syncthing-align-folder-headers)
+                  (syncthing--space syncthing-align-folder-values)
                   (string-join
                    (mapcar (lambda (dev)
                              (alist-get
@@ -270,8 +288,10 @@
                            devices)
                    ", ")))
     (setq text
-          (format "%s \tLast Scan\t\t\t%s\n"
+          (format "%s %sLast Scan%s%s\n"
                   text
+                  (syncthing--space syncthing-align-folder-headers)
+                  (syncthing--space syncthing-align-folder-values)
                   (format-time-string
                             "%F %T"
                             (encode-time
@@ -279,8 +299,10 @@
                               (alist-get 'stateChanged
                                          (alist-get 'status folder)))))))
     (setq text
-          (format "%s ⇄\tLatest Change\t\t%s\n"
+          (format "%s ⇄%sLatest Change%s%s\n"
                   text
+                  (syncthing--space syncthing-align-folder-headers)
+                  (syncthing--space syncthing-align-folder-values)
                   (when stats
                     (concat
                      (if (alist-get 'deleted (alist-get 'lastFile stats))
@@ -402,25 +424,35 @@
     (if connected
         (setq text
               (concat text
-                      (format " \tDownload Rate\t\t\t%s\n"
+                      (format " %sDownload Rate%s%s\n"
+                              (syncthing--space syncthing-align-device-headers)
+                              (syncthing--space syncthing-align-device-values)
                               (syncthing--bytes-to-rate
                                (or (alist-get 'rate-download device) -1)))
-                      (format " \tUpload Rate\t\t\t\t%s\n"
+                      (format " %sUpload Rate%s%s\n"
+                              (syncthing--space syncthing-align-device-headers)
+                              (syncthing--space syncthing-align-device-values)
                               (syncthing--bytes-to-rate
                                (or (alist-get 'rate-upload device) -1)))))
       (setq text
-            (format "%s \tLast seen\t\t\t\t%s\n \tSync Status\t\t\t\t%s\n"
+            (format "%s %sLast seen%s%s\n %sSync Status%s%s\n"
                     text
+                    (syncthing--space syncthing-align-device-headers)
+                    (syncthing--space syncthing-align-device-values)
                     (format-time-string
                      "%F %T"
                      (encode-time (iso8601-parse (alist-get 'lastSeen stats))))
+                    (syncthing--space syncthing-align-device-headers)
+                    (syncthing--space syncthing-align-device-values)
                     (if (< (floor sync-state) 100)
                         (format "Out of Sync (%.2f%%)" sync-state)
                       "Up to Date")))
       (when (< (floor sync-state) 100)
         (setq text
-              (format "%s ⇄\tOut of Sync Items\t\t%s items, ~%s\n"
+              (format "%s ⇄%sOut of Sync Items%s%s items, ~%s\n"
                       text
+                      (syncthing--space syncthing-align-device-headers)
+                      (syncthing--space syncthing-align-device-values)
                       (syncthing--num-group
                        (+ (alist-get 'needItems completion)
                           (alist-get 'needDeletes completion))
@@ -429,34 +461,55 @@
                       (syncthing--scale-bytes
                        (alist-get 'needBytes completion) 2)))))
     (setq text
-          (format "%s \tAddress\t\t\t\t\t%s\n"
+          (format "%s %sAddress%s%s\n"
                   text
+                  (syncthing--space syncthing-align-device-headers)
+                  (syncthing--space syncthing-align-device-values)
                   (or (unless (string= "" (alist-get 'address dev-conn))
                         (alist-get 'address dev-conn))
-                      (string-join addresses "\n\t\t\t\t\t\t\t"))))
+                      (string-join
+                       addresses
+                       (format "\n%s"
+                               (syncthing--space
+                                syncthing-align-device-values))))))
     (when connected
       (setq text
             (format
-             "%s \tConnection Type\t\t\t%s\n \tNumber of Connections\t%s\n"
+             "%s %sConnection Type%s%s\n %sNumber of Connections%s%s\n"
              text
+             (syncthing--space syncthing-align-device-headers)
+             (syncthing--space syncthing-align-device-values)
              conn-type
+             (syncthing--space syncthing-align-device-headers)
+             (syncthing--space syncthing-align-device-values)
              (+ 1 (length (alist-get 'secondary dev-conn))))))
     (setq text
-          (format "%s \tCompression\t\t\t\t%s\n \tIdentification\t\t\t%s\n"
+          (format "%s %sCompression%s%s\n %sIdentification%s%s\n"
                   text
+                  (syncthing--space syncthing-align-device-headers)
+                  (syncthing--space syncthing-align-device-values)
                   (cond ((string= compression "always") "All Data")
                         ((string= compression "metadata") "Metadata Only")
                         ((string= compression "never") "Off"))
+                  (syncthing--space syncthing-align-device-headers)
+                  (syncthing--space syncthing-align-device-values)
                   (substring id 0 syncthing-device-short-length)))
     (when (alist-get 'connected dev-conn)
       (setq text
-            (format "%s \tVersion\t\t\t\t\t%s\n"
+            (format "%s %sVersion%s%s\n"
                     text
+                    (syncthing--space syncthing-align-device-headers)
+                    (syncthing--space syncthing-align-device-values)
                     (alist-get 'clientVersion dev-conn))))
     (setq text
-          (format "%s \tFolders\t\t\t\t\t%s\n"
+          (format "%s %sFolders%s%s\n"
                   text
-                  (string-join folders "\n\t\t\t\t\t\t\t")))
+                  (syncthing--space syncthing-align-device-headers)
+                  (syncthing--space syncthing-align-device-values)
+                  (string-join
+                   folders
+                   (format "\n%s"
+                           (syncthing--space syncthing-align-device-values)))))
     (save-window-excursion
       (switch-to-buffer
        (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
