@@ -210,8 +210,7 @@ Optional argument THS-SEP custom thousands separator or default of ` '."
       (string-join out ""))))
 
 (defun syncthing--init-state ()
-  "Reset all variables holding initial state.
-Optional argument SKIP-CANCEL Skip removing auto-refresh."
+  "Reset all variables holding initial state."
   (syncthing-trace)
   ;; everything += or appendable has to reset in each update
   (setf (syncthing-buffer-collapse-after-start syncthing-buffer)
