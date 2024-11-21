@@ -40,64 +40,274 @@
   :group 'syncthing-format
   :type 'string)
 
-(defcustom syncthing-format-rate-download
-  " %s"
-  "Format for displaying download rate in header line."
-  :group 'syncthing-format
+(defcustom syncthing-icon-download ""
+  "Syncthing icon for download."
+  :group 'syncthing-icons
   :type 'string)
 
-(defcustom syncthing-format-rate-upload
-  " %s"
-  "Format for displaying upload rate in header line."
-  :group 'syncthing-format
+(defcustom syncthing-ascii-download "(v)"
+  "Syncthing ascii for download."
+  :group 'syncthing-ascii
   :type 'string)
 
-(defcustom syncthing-format-count-local-files
-  " %s"
-  "Format for displaying local files count in header line."
-  :group 'syncthing-format
+(defcustom syncthing-icon-upload ""
+  "Syncthing icon for upload."
+  :group 'syncthing-icons
   :type 'string)
 
-(defcustom syncthing-format-count-local-folders
-  " %s"
-  "Format for displaying local folders count in header line."
-  :group 'syncthing-format
+(defcustom syncthing-ascii-upload "(^)"
+  "Syncthing ascii for upload."
+  :group 'syncthing-ascii
   :type 'string)
 
-(defcustom syncthing-format-count-local-bytes
-  " ~%s"
-  "Format for displaying local size in header line."
-  :group 'syncthing-format
+(defcustom syncthing-icon-files ""
+  "Syncthing icon for files."
+  :group 'syncthing-icons
   :type 'string)
 
-(defcustom syncthing-format-count-listeners
-  " %s"
-  "Format for displaying listeners count in header line."
-  :group 'syncthing-format
+(defcustom syncthing-ascii-files "(f)"
+  "Syncthing ascii for files."
+  :group 'syncthing-ascii
   :type 'string)
 
-(defcustom syncthing-format-count-discovery
-  " %s"
-  "Format for displaying discovery count in header line."
-  :group 'syncthing-format
+(defcustom syncthing-icon-folder ""
+  "Syncthing icon for folder."
+  :group 'syncthing-icons
   :type 'string)
 
-(defcustom syncthing-format-uptime
-  " %s"
-  "Format for displaying Syncthing server uptime in header line."
-  :group 'syncthing-format
+(defcustom syncthing-ascii-folder "(F)"
+  "Syncthing ascii for folder."
+  :group 'syncthing-ascii
   :type 'string)
 
-(defcustom syncthing-format-my-id
-  " %s"
-  "Format for displaying current device's ID in header line."
-  :group 'syncthing-format
+(defcustom syncthing-icon-drive ""
+  "Syncthing icon for drive."
+  :group 'syncthing-icons
   :type 'string)
 
-(defcustom syncthing-format-version
-  " %s"
-  "Format for displaying version in header line."
-  :group 'syncthing-format
+(defcustom syncthing-ascii-drive "(S)"
+  "Syncthing ascii for drive."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-network ""
+  "Syncthing icon for network."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-network "(N)"
+  "Syncthing ascii for network."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-sign ""
+  "Syncthing icon for sign."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-sign "(d)"
+  "Syncthing ascii for sign."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-watch ""
+  "Syncthing icon for watch."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-watch "(w)"
+  "Syncthing ascii for watch."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-qr ""
+  "Syncthing icon for qr."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-qr "(I)"
+  "Syncthing ascii for qr."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-tag ""
+  "Syncthing icon for tag."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-tag "(v)"
+  "Syncthing ascii for tag."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-laptop ""
+  "Syncthing icon for laptop."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-laptop "(D)"
+  "Syncthing ascii for laptop."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-envelope "✉"
+  "Syncthing icon for envelope."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-envelope "(L)"
+  "Syncthing ascii for envelope."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-hourglass "⌛"
+  "Syncthing icon for hourglass."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-hourglass "(t)"
+  "Syncthing ascii for hourglass."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-info ""
+  "Syncthing icon for info."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-info "(i)"
+  "Syncthing ascii for info."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-folder-open ""
+  "Syncthing icon for folder open."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-folder-open "(o)"
+  "Syncthing ascii for folder open."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-world ""
+  "Syncthing icon for world."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-world "(g)"
+  "Syncthing ascii for world."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-house ""
+  "Syncthing icon for house."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-house "(h)"
+  "Syncthing ascii for house."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-sync ""
+  "Syncthing icon for sync."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-sync "(s)"
+  "Syncthing ascii for sync."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-eye ""
+  "Syncthing icon for eye."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-eye "(e)"
+  "Syncthing ascii for eye."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-lift ""
+  "Syncthing icon for lift."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-lift "(p)"
+  "Syncthing ascii for lift."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-share ""
+  "Syncthing icon for share."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-share "(s)"
+  "Syncthing ascii for share."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-swap "⇄"
+  "Syncthing icon for swap."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-swap "(T)"
+  "Syncthing ascii for swap."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-cloud ""
+  "Syncthing icon for cloud."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-cloud "(C)"
+  "Syncthing ascii for cloud."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-link ""
+  "Syncthing icon for link."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-link "(l)"
+  "Syncthing ascii for link."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-signal ""
+  "Syncthing icon for signal."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-signal "(5)"
+  "Syncthing ascii for signal."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-switch ""
+  "Syncthing icon for switch."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-switch "(m)"
+  "Syncthing ascii for switch."
+  :group 'syncthing-ascii
+  :type 'string)
+
+(defcustom syncthing-icon-press ""
+  "Syncthing icon for press."
+  :group 'syncthing-icons
+  :type 'string)
+
+(defcustom syncthing-ascii-press "(P)"
+  "Syncthing ascii for press."
+  :group 'syncthing-ascii
   :type 'string)
 
 (defcustom syncthing-cleanup-priority
@@ -116,6 +326,12 @@
   t
   "Start all items collapsed."
   :group 'syncthing-startup
+  :group 'syncthing-display
+  :type 'boolean)
+
+(defcustom syncthing-prefer-unicode
+  t
+  "Prefer unicode characters when rendering."
   :group 'syncthing-display
   :type 'boolean)
 
@@ -310,6 +526,67 @@ Special meaning for empty list / nil to skip rendering the header line."
   "`:align-to' value for aligning text block for values in device widget."
   :group 'syncthing-display
   :type 'number)
+
+(defcustom syncthing-format-rate-download
+  "<icon> %s"
+  "Format for displaying download rate in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-rate-upload
+  "<icon> %s"
+  "Format for displaying upload rate in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-count-local-files
+  "<icon> %s"
+  "Format for displaying local files count in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-count-local-folders
+  "<icon> %s"
+  "Format for displaying local folders count in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-count-local-bytes
+  "<icon> ~%s"
+  "Format for displaying local size in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-count-listeners
+  "<icon> %s"
+  "Format for displaying listeners count in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-count-discovery
+  "<icon> %s"
+  "Format for displaying discovery count in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-uptime
+  "<icon> %s"
+  "Format for displaying Syncthing server uptime in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-my-id
+  "<icon> %s"
+  "Format for displaying current device's ID in header line."
+  :group 'syncthing-format
+  :type 'string)
+
+(defcustom syncthing-format-version
+  "<icon> %s"
+  "Format for displaying version in header line."
+  :group 'syncthing-format
+  :type 'string)
+
 
 (provide 'syncthing-custom)
 ;;; syncthing-custom.el ends here

@@ -218,5 +218,19 @@ Optional argument THS-SEP custom thousands separator or default of ` '."
         (syncthing-buffer-fold-folders syncthing-buffer) (list))
   (setf (syncthing-buffer-fold-devices syncthing-buffer) (list)))
 
+(defun syncthing--can-display (char)
+  "Check if CHAR can be rendered with the current font."
+  (fontp (char-displayable-p (string-to-char char))))
+
+(defun syncthing--fallback-ascii (icon)
+  "Try rendering ICON with the current font or fallback into ASCII."
+  (let ((name (format "syncthing-icon-%s" icon))
+        (alt-name (format "syncthing-ascii-%s" icon)))
+    (if (and syncthing-prefer-unicode
+             (syncthing--can-display-custom (symbol-value (intern `,name))))
+        (symbol-value (intern `,name))
+      (symbol-value (intern `,alt-name)))))
+
+
 (provide 'syncthing-common)
 ;;; syncthing-common.el ends here
