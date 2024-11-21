@@ -10,6 +10,7 @@
 
 (require 'syncthing-constants)
 (require 'syncthing-custom)
+(require 'syncthing-themes)
 (require 'syncthing-state)
 
 
@@ -222,14 +223,15 @@ Optional argument THS-SEP custom thousands separator or default of ` '."
   "Check if CHAR can be rendered with the current font."
   (fontp (char-displayable-p (string-to-char char))))
 
-(defun syncthing--fallback-ascii (icon)
-  "Try rendering ICON with the current font or fallback into ASCII."
-  (let ((name (format "syncthing-icon-%s" icon))
-        (alt-name (format "syncthing-ascii-%s" icon)))
-    (if (and syncthing-prefer-unicode
-             (syncthing--can-display-custom (symbol-value (intern `,name))))
-        (symbol-value (intern `,name))
-      (symbol-value (intern `,alt-name)))))
+(defun syncthing--fallback-ascii (name)
+  "Try rendering NAME with the current font or fallback into ASCII."
+  (let* ((theme (symbol-value (if (consp syncthing-theme)
+                                  (cadr syncthing-theme)
+                                syncthing-theme)))
+         (key (intern (format ":%s" name)))
+         (utf (plist-get (plist-get theme :icons) key)))
+    (if (and syncthing-prefer-unicode (syncthing--can-display utf)) utf
+      (plist-get (plist-get theme :text) key))))
 
 
 (provide 'syncthing-common)

@@ -206,7 +206,7 @@
                     (syncthing--space syncthing-align-folder-values)
                     (format "%s %s %s"
                           (format
-                           (string-replace
+                           (replace-regexp-in-string
                             "<icon>" (syncthing--fallback-ascii "files")
                             syncthing-format-count-local-files)
                            (syncthing--num-group
@@ -214,7 +214,7 @@
                             :dec-sep syncthing-decimal-separator
                             :ths-sep syncthing-thousands-separator))
                           (format
-                           (string-replace
+                           (replace-regexp-in-string
                             "<icon>" (syncthing--fallback-ascii "folder")
                             syncthing-format-count-local-folders)
                            (syncthing--num-group
@@ -223,7 +223,7 @@
                             :dec-sep syncthing-decimal-separator
                             :ths-sep syncthing-thousands-separator))
                           (format
-                           (string-replace
+                           (replace-regexp-in-string
                             "<icon>" (syncthing--fallback-ascii "drive")
                             syncthing-format-count-local-bytes)
                            (syncthing--scale-bytes
@@ -234,7 +234,7 @@
                     (syncthing--space syncthing-align-folder-values)
                     (format "%s %s %s"
                           (format
-                           (string-replace
+                           (replace-regexp-in-string
                             "<icon>" (syncthing--fallback-ascii "files")
                             syncthing-format-count-local-files)
                            (syncthing--num-group
@@ -242,7 +242,7 @@
                             :dec-sep syncthing-decimal-separator
                             :ths-sep syncthing-thousands-separator))
                           (format
-                           (string-replace
+                           (replace-regexp-in-string
                             "<icon>" (syncthing--fallback-ascii "folder")
                             syncthing-format-count-local-folders)
                            (syncthing--num-group
@@ -251,7 +251,7 @@
                             :dec-sep syncthing-decimal-separator
                             :ths-sep syncthing-thousands-separator))
                           (format
-                           (string-replace
+                           (replace-regexp-in-string
                             "<icon>" (syncthing--fallback-ascii "drive")
                             syncthing-format-count-local-bytes)
                            (syncthing--scale-bytes
@@ -604,7 +604,7 @@
     (dolist (item syncthing-header-items)
       (when (string= item syncthing-header-rate-download)
         (push (syncthing--rate-download
-               (format (string-replace
+               (format (replace-regexp-in-string
                         "<icon>" (syncthing--fallback-ascii "download")
                         syncthing-format-rate-download)
                        (syncthing--bytes-to-rate
@@ -612,7 +612,7 @@
               line))
       (when (string= item syncthing-header-rate-upload)
         (push (syncthing--rate-upload
-               (format (string-replace
+               (format (replace-regexp-in-string
                         "<icon>" (syncthing--fallback-ascii "upload")
                         syncthing-format-rate-upload)
                        (syncthing--bytes-to-rate
@@ -621,7 +621,7 @@
       (when (string= item syncthing-header-count-local-files)
         (push (syncthing--count-local-files
                (format
-                (string-replace
+                (replace-regexp-in-string
                  "<icon>" (syncthing--fallback-ascii "files")
                  syncthing-format-count-local-files)
                 (syncthing--num-group
@@ -636,7 +636,7 @@
       (when (string= item syncthing-header-count-local-folders)
         (push (syncthing--count-local-folders
                (format
-                (string-replace
+                (replace-regexp-in-string
                  "<icon>" (syncthing--fallback-ascii "folder")
                  syncthing-format-count-local-folders)
                 (syncthing--num-group
@@ -651,7 +651,7 @@
       (when (string= item syncthing-header-count-local-bytes)
         (push (syncthing--count-local-bytes
                (format
-                (string-replace
+                (replace-regexp-in-string
                  "<icon>" (syncthing--fallback-ascii "drive")
                  syncthing-format-count-local-bytes)
                 (syncthing--scale-bytes
@@ -665,7 +665,7 @@
       (when (string= item syncthing-header-count-listeners)
         (push (syncthing--count-listeners
                (format
-                (string-replace
+                (replace-regexp-in-string
                  "<icon>" (syncthing--fallback-ascii "network")
                  syncthing-format-count-listeners)
                 (format
@@ -680,7 +680,7 @@
       (when (string= item syncthing-header-count-discovery)
         (push (syncthing--count-discovery
                (format
-                (string-replace
+                (replace-regexp-in-string
                  "<icon>" (syncthing--fallback-ascii "sign")
                  syncthing-format-count-discovery)
                 (format
@@ -694,7 +694,7 @@
               line))
       (when (string= item syncthing-header-uptime)
         (push (syncthing--uptime
-               (format (string-replace
+               (format (replace-regexp-in-string
                         "<icon>" (syncthing--fallback-ascii "watch")
                         syncthing-format-uptime)
                        (syncthing--sec-to-uptime
@@ -712,7 +712,7 @@
               line))
       (when (string= item syncthing-header-my-id)
         (push (syncthing--my-id
-               (format (string-replace
+               (format (replace-regexp-in-string
                         "<icon>" (syncthing--fallback-ascii "qr")
                         syncthing-format-my-id)
                        (substring
@@ -720,7 +720,7 @@
                                    "n/a") 0 syncthing-device-short-length)))
               line))
       (when (string= item syncthing-header-version)
-        (push (format (string-replace
+        (push (format (replace-regexp-in-string
                        "<icon>" (syncthing--fallback-ascii "tag")
                        syncthing-format-version)
                       (alist-get 'system-version data "n/a"))

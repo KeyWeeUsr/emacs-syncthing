@@ -46,12 +46,8 @@
   "Cleanup configuration."
   :group 'syncthing)
 
-(defgroup syncthing-icons nil
-  "Constants for non-ASCII icons."
-  :group 'syncthing)
-
-(defgroup syncthing-ascii nil
-  "Constants for ASCII icons."
+(defgroup syncthing-themes nil
+  "Theme configuration."
   :group 'syncthing)
 
 (provide 'syncthing-groups)
