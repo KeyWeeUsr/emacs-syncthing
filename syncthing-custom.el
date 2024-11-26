@@ -252,7 +252,7 @@ Special meaning for empty list / nil to skip rendering the header line."
   :type 'number)
 
 (defcustom syncthing-align-device-values
-  20
+  22
   "`:align-to' value for aligning text block for values in device widget."
   :group 'syncthing-display
   :type 'number)
