@@ -9,16 +9,37 @@
 
 (require 'syncthing-common)
 (require 'syncthing-draw)
+(require 'syncthing-custom)
 
 
 (defvar-local syncthing-keyboard-map
   (let ((map (make-keymap)))
+    (set-keymap-parent map widget-keymap)
+
     ;; custom handler for RET / widget input handler
     (define-key map (kbd "RET") #'syncthing--newline)
     (define-key map (kbd "SPC") #'syncthing--newline)
-    (define-key map (kbd "TAB") #'syncthing--newline)
+
+    ;; X11
+    (when (eq window-system 'x)
+      (define-key function-key-map
+        [(control shift iso-lefttab)] [(control shift tab)])
+      (define-key function-key-map
+        [(meta shift iso-lefttab)] [(meta shift tab)])
+      (define-key function-key-map
+        [(meta control shift iso-lefttab)] [(meta control shift tab)]))
+
+    (if syncthing-old-tab-behavior
+        (progn
+          (define-key map (kbd "C-<tab>") nil)
+          (define-key map (kbd "C-<backtab>") nil)
+          (define-key map (kbd "TAB") #'syncthing--newline)
+          (define-key map (kbd "<backtab>") #'syncthing--tab))
+      (define-key map (kbd "C-<tab>") #'syncthing--newline)
+      (define-key map (kbd "C-<backtab>") #'syncthing--tab)
+      (define-key map (kbd "TAB") #'widget-forward)
+      (define-key map (kbd "<backtab>") #'widget-backward))
     (define-key map (kbd "<mouse-1>") #'syncthing--newline)
-    (define-key map (kbd "<backtab>") #'syncthing--tab)
     (define-key map (kbd "?") #'describe-bindings)
     (define-key map (kbd "n") #'next-line)
     (define-key map (kbd "p") #'previous-line)

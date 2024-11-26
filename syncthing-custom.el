@@ -317,6 +317,11 @@ Special meaning for empty list / nil to skip rendering the header line."
   :group 'syncthing-format
   :type 'string)
 
+(defcustom syncthing-old-tab-behavior nil
+  "Allow old TAB keyboard navigation to open collapsible widgets."
+  :group 'syncthing-display
+  :type 'boolean)
+
 
 (provide 'syncthing-custom)
 ;;; syncthing-custom.el ends here
