@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 2.3.0
+;; Version: 3.0.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -148,6 +148,4 @@ Activating this mode will launch Syncthing client in the current window.
 ;; TODO: long lines - check buffer width on each redraw
 ;;       then if > use cl-print-to-string-with-limit so it folds under '...'
 ;;       probably needs a major rework on how it's displayed
-;; TODO: fix underline/highlight for whole folder/device widget's text
-;;       needs probably creating a custom widget from scratch
 ;;; syncthing.el ends here
