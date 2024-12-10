@@ -1,0 +1,30 @@
+; -*- mode: emacs-lisp; lexical-binding: t -*-
+
+;; Uncomment some calls below as needed for your project.
+;(eldev-use-package-archive 'gnu-elpa)
+;(eldev-use-package-archive 'nongnu-elpa)
+;(eldev-use-package-archive 'melpa)
+
+(eldev-use-plugin 'autoloads)
+(eldev-use-plugin 'undercover)
+
+(eldev-defcommand tag (tag)
+  "Make a new tag"
+  :parameters "TAG"
+  (unless tag
+    (signal 'eldev-wrong-command-usage))
+  (let ((name "syncthing.el")
+        (buff (get-buffer-create "*output*")))
+    (when (< 0 (call-process "git" nil buff nil "add" "-f" "."))
+      (eldev-output (with-current-buffer buff (buffer-string)))
+      (error "Failed to add files"))
+    (when (< 0 (call-process "git" nil buff nil "stash"))
+      (eldev-output (with-current-buffer buff (buffer-string)))
+      (error "Failed to stash files"))
+    (with-temp-buffer
+      (insert-file-contents name)
+      (goto-char (point-min))
+      (re-search-forward tag))
+    (when (< 0 (call-process "git" nil buff nil "tag" tag "--sign"))
+      (eldev-output (with-current-buffer buff (buffer-string)))
+      (error "Failed to tag and sign"))))

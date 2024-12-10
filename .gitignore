@@ -7,3 +7,8 @@
 *.elc
 __pycache__
 *.ok
+
+# Added automatically by ‘eldev init’.
+/.eldev
+/Eldev-local
+*-autoloads.el
