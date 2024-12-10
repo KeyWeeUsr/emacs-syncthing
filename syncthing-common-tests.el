@@ -39,6 +39,9 @@
 
 (ert-deftest syncthing-trace-get-prev-func ()
   "Retrieve full func call and insert it into own buffer."
+  (condition-case nil (require 'undercover) (t nil))
+  (when (fboundp 'undercover)
+    (ert-skip "Undercover messing up with the call stack..."))
   (syncthing-ert-cleanup)
   (let* ((name "dummy")
          (syncthing-server (syncthing--server :name name))
