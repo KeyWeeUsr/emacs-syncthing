@@ -54,6 +54,7 @@ jobs:
               --time \
               --color=always \
               test -u on,coveralls
+          cat /tmp/undercover_coveralls_report
 
       - name: Ensure clean byte-compilation
         run: |
