@@ -1,6 +1,8 @@
 # emacs-syncthing
 [![MELPA][melpa-badge]][melpa-package]
 [![MELPA Stable][melpa-stable-badge]][melpa-stable-package]
+[![CI][ci-badge]][ci-workflow]
+[![Coverage Status][cover-badge]][cover-link]
 [![Buy me a coffee][bmc-badge]][bmc-link]
 [![Liberapay][lp-badge]][lp-link]
 [![PayPal][ppl-badge]][ppl-link]
@@ -45,3 +47,7 @@ Check the manual for Emacs Customization: <kbd>C</kbd>-<kbd>h</kbd><kbd>i</kbd>
 [demo-term]: https://raw.githubusercontent.com/KeyWeeUsr/emacs-syncthing/master/screenshot-term.png
 [lp-badge]: https://img.shields.io/badge/-liberapay-grey?logo=liberapay
 [lp-link]: https://liberapay.com/keyweeusr
+[ci-badge]: https://github.com/KeyWeeUsr/emacs-syncthing/actions/workflows/test.yml/badge.svg
+[ci-workflow]: https://github.com/KeyWeeUsr/emacs-syncthing/actions/workflows/test.yml
+[cover-badge]: https://coveralls.io/repos/github/KeyWeeUsr/emacs-syncthing/badge.svg?branch=master
+[cover-link]: https://coveralls.io/github/KeyWeeUsr/emacs-syncthing?branch=master
