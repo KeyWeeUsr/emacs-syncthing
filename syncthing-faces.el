@@ -10,10 +10,10 @@
 
 (defface syncthing-title
   '((((class color) (background dark))
-     (:inherit 'info-title-1))
+     (:inherit info-title-1))
     (((class color) (background light))
-     (:inherit 'info-title-1))
-    (t :inherit 'info-title-1))
+     (:inherit info-title-1))
+    (t :inherit info-title-1))
   "Face for section titles."
   :group 'syncthing-faces)
 
