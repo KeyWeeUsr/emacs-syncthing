@@ -109,9 +109,10 @@
          (three (list (cons 'key "3")))
          (before (list three one two))
          (after (list one two three)))
-    (should (string= (format "%s" (sort before (lambda (left right)
-                                                 (syncthing--flat-string-sort
-                                                  "key" left right))))
+    (should (string= (format "%s" (sort (copy-sequence before)
+                                        (lambda (left right)
+                                          (syncthing--flat-string-sort
+                                           "key" left right))))
                      (format "%s" after)))
     (should (eq (car before) (car (reverse after))))))
 
@@ -122,7 +123,8 @@
          (three (list (cons 'label "3")))
          (before (list three one two))
          (after (list one two three)))
-    (should (string= (format "%s" (sort before #'syncthing--sort-folders))
+    (should (string= (format "%s" (sort (copy-sequence before)
+                                        #'syncthing--sort-folders))
                      (format "%s" after)))
     (should (eq (car before) (car (reverse after))))))
 
@@ -134,7 +136,8 @@
          (three (list (cons 'name "3")))
          (before (list three one two))
          (after (list one two three)))
-    (should (string= (format "%s" (sort before #'syncthing--sort-devices))
+    (should (string= (format "%s" (sort (copy-sequence before)
+                                        #'syncthing--sort-devices))
                      (format "%s" after)))
     (should (eq (car before) (car (reverse after))))))
 
