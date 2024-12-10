@@ -451,7 +451,6 @@
     (when dev-conn
       (setq connected (alist-get 'connected dev-conn))
       (when connected
-        (alist-get 'connected dev-conn)
         (cond ((string-match "relay" (alist-get 'type dev-conn))
                (setq conn-type "Relay"))
               ((string-match "quic" (alist-get 'type dev-conn))
