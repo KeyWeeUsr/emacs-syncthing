@@ -199,7 +199,7 @@ Note:
 
 Many libs, modes and other facilities have their info messages, but can be
 annoying or hide more urgent messages when used at large scale or in short
-intervals. Setting this to non-nil allows `syncthing' to purge all of them."
+intervals.  Setting this to non-nil allows `syncthing' to purge all of them."
   :group 'syncthing-debug
   :type 'boolean)
 
