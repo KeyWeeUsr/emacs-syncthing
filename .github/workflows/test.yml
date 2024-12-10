@@ -71,7 +71,7 @@ jobs:
               --trace \
               --time \
               --color=always \
-              lint
+              lint syncthing*
 
       - name: Run all doctor tests
         run: |
