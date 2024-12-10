@@ -129,9 +129,9 @@
   'syncthing-theme-default
   "Current theme."
   :group 'syncthing-themes
-  :type '(choice (const :tag "Default" 'syncthing-theme-default)
-                 (const :tag "Emoji One" 'syncthing-theme-emoji-one)
-                 (const :tag "Emoji Two" 'syncthing-theme-emoji-two)
+  :type '(choice (const :tag "Default" syncthing-theme-default)
+                 (const :tag "Emoji One" syncthing-theme-emoji-one)
+                 (const :tag "Emoji Two" syncthing-theme-emoji-two)
                  (symbol :tag "Custom (symbol)")))
 
 (provide 'syncthing-themes)
