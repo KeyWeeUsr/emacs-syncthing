@@ -17,7 +17,7 @@
   :value-create
   (lambda (widget &rest _)
     ;; "super"
-    (apply 'widget-visibility-value-create (list widget))
+    (apply 'widget-toggle-value-create (list widget))
 
     ;; :value for opening as in 'toggle
     (let ((shown (widget-value widget)))
