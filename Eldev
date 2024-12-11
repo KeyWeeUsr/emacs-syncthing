@@ -28,3 +28,36 @@
     (when (< 0 (call-process "git" nil buff nil "tag" tag "--sign"))
       (eldev-output (with-current-buffer buff (buffer-string)))
       (error "Failed to tag and sign"))))
+
+(eldev-defcommand demo ()
+  "Run demo"
+  (let* ((client (or (getenv "EMACSCLIENT") "emacsclient"))
+         (flask (or (getenv "FLASK") "flask"))
+         (host (or (getenv "DEMO_HOST") "127.0.0.1"))
+         (port (or (getenv "DEMO_PORT") "5000"))
+         (socket (or (getenv "DEMO_SOCKET") "/run/user/1000/emacs/server"))
+         (proto "http")
+         flask-proc demo-proc)
+
+    (unless (executable-find flask)
+      (error "Flask not found"))
+    (unless (executable-find client)
+      (error "Emacsclient not found"))
+
+    (setq demo-proc
+          (start-process
+           "syncthing-demo" nil client "--socket-name" socket "--eval"
+           (format
+            "(progn (load \"demo/demo.el\") (syncthing-demo \"Demo\" \"%s\"))"
+            (format "%s://%s:%s" proto host port))))
+    (setq flask-proc
+          (start-process
+           "syncthing-demo-server" nil flask "--app" "demo/demo.py"
+           "run" "--reload" "--host" host "--port" port))
+    (set-process-filter flask-proc (lambda (_ str) (message str)))
+
+    ;; For some weird reason (call-process) with SIGINT to eldev command keeps
+    ;; the server running even though various approaches to signal handling
+    ;; have been tried from (global-set-key [signal X]), through kill-emacs*
+    ;; hooks, (condition-case), (unwind-protect)... it simply doesn't care...
+    (while t (sleep-for 1))))
