@@ -15,9 +15,17 @@
 
 (defun syncthing-ert-cleanup ()
   (should (eq nil syncthing--servers))
-  (dolist (buf (buffer-list))
-    (unless (or (string-match-p (regexp-quote "*Messages*") (buffer-name buf)))
-      (kill-buffer buf))))
+  (mapc
+   (lambda (buff)
+     (unless
+         (or (string-match-p (regexp-quote "*Messages*") (buffer-name buff))
+             (string-match-p (regexp-quote " *code-conversion-work*")
+                             (buffer-name buff))
+             (string-match-p (regexp-quote " *code-converting-work*")
+                             (buffer-name buff))
+             (string-match-p "syncthing.*\\.el" (buffer-name buff)))
+       (kill-buffer buff)))
+   (buffer-list)))
 
 (ert-deftest syncthing-keyboard-newline-apply ()
   "Call widget's `:action' when `point' is on top of it."
