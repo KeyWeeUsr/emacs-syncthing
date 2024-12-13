@@ -1,0 +1,92 @@
+200|^GET /rest/system/status
+{
+  "alloc": 32883448,
+  "connectionServiceStatus": {
+    "dynamic+https://relays.syncthing.net/endpoint": {
+      "error": null,
+      "lanAddresses": [
+        "relay://10.1.10.10:22067/?globalLimitBps=0\u0026id=relay-id\u0026networkTimeout=2m0s\u0026pingInterval=1m0s\u0026providedBy=\u0026sessionLimitBps=0\u0026statusAddr=%3A22070"
+      ],
+      "wanAddresses": [
+        "relay://10.1.10.10:22067/?globalLimitBps=0\u0026id=relay-id\u0026networkTimeout=2m0s\u0026pingInterval=1m0s\u0026providedBy=\u0026sessionLimitBps=0\u0026statusAddr=%3A22070"
+      ]
+    },
+    "quic://0.0.0.0:22000": {
+      "error": null,
+      "lanAddresses": [
+        "quic://0.0.0.0:22000",
+        "quic://10.1.10.10:22000"
+      ],
+      "wanAddresses": [
+        "quic://0.0.0.0:22000",
+        "quic://10.1.10.1:22000"
+      ]
+    },
+    "tcp://0.0.0.0:22000": {
+      "error": null,
+      "lanAddresses": [
+        "tcp://0.0.0.0:22000",
+        "tcp://10.1.10.30:22000"
+      ],
+      "wanAddresses": [
+        "tcp://0.0.0.0:0",
+        "tcp://0.0.0.0:22000"
+      ]
+    }
+  },
+  "cpuPercent": 0,
+  "discoveryEnabled": true,
+  "discoveryErrors": {
+    "global@https://discovery-v6.syncthing.net/v2/": "Post \"https://discovery-v6.syncthing.net/v2/\": dial tcp [2604:a880:400:d0::185c:f001]:443: connect: network is unreachable"
+  },
+  "discoveryMethods": 5,
+  "discoveryStatus": {
+    "IPv4 local": {
+      "error": null
+    },
+    "IPv6 local": {
+      "error": null
+    },
+    "global@https://discovery-v4.syncthing.net/v2/": {
+      "error": null
+    },
+    "global@https://discovery-v6.syncthing.net/v2/": {
+      "error": "Post \"https://discovery-v6.syncthing.net/v2/\": dial tcp [2604:a880:400:d0::185c:f001]:443: connect: network is unreachable"
+    },
+    "global@https://discovery.syncthing.net/v2/": {
+      "error": null
+    }
+  },
+  "goroutines": 124,
+  "guiAddressOverridden": false,
+  "guiAddressUsed": "127.0.0.1:8384",
+  "lastDialStatus": {
+    "tcp://10.1.10.1:22000": {
+      "when": "2024-01-01T00:54:44Z",
+      "error": "dial tcp 10.1.10.1:22000: connect: no route to host"
+    },
+    "tcp://192.168.0.4:22000": {
+      "when": "2024-01-01T00:54:48Z",
+      "error": "dial tcp 192.168.0.4:22000: i/o timeout"
+    },
+    "tcp://192.168.0.6:22000": {
+      "when": "2024-01-01T23:47:38Z",
+      "error": "dial tcp 192.168.0.6:22000: i/o timeout"
+    },
+    "tcp://192.168.0.8:22000": {
+      "when": "2024-01-01T23:47:38Z",
+      "error": "dial tcp 192.168.0.8:22000: i/o timeout"
+    },
+    "tcp://10.1.10.3:22000": {
+      "when": "2024-01-01T23:47:53Z",
+      "error": null
+    }
+  },
+  "myID": "device-current",
+  "pathSeparator": "/",
+  "startTime": "2024-01-01T01:46:33+00:00",
+  "sys": 71459096,
+  "tilde": "/home/demo",
+  "uptime": 41530000,
+  "urVersionMax": 3
+}

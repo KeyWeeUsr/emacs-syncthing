@@ -1,0 +1,48 @@
+200|^GET /rest/events/disk
+[
+  {
+    "id": 1,
+    "globalID": 36,
+    "time": "2024-01-01T01:50:06.636965013+00:00",
+    "type": "LocalChangeDetected",
+    "data": {
+      "action": "modified",
+      "folder": "folder-id-1",
+      "folderID": "folder-id-1",
+      "label": "Notes",
+      "modifiedBy": "device-id-2",
+      "path": ".#note.txt",
+      "type": "symlink"
+    }
+  },
+  {
+    "id": 2,
+    "globalID": 41,
+    "time": "2024-01-01T01:52:49.43128229+00:00",
+    "type": "LocalChangeDetected",
+    "data": {
+      "action": "modified",
+      "folder": "folder-id-1",
+      "folderID": "folder-id-1",
+      "label": "Notes",
+      "modifiedBy": "device-id-2",
+      "path": "#note.txt#",
+      "type": "file"
+    }
+  },
+  {
+    "id": 4,
+    "globalID": 53,
+    "time": "2024-01-01T01:59:07.825271167+00:00",
+    "type": "LocalChangeDetected",
+    "data": {
+      "action": "modified",
+      "folder": "folder-id-1",
+      "folderID": "folder-id-1",
+      "label": "Notes",
+      "modifiedBy": "device-id-2",
+      "path": "note.txt~",
+      "type": "file"
+    }
+  }
+]

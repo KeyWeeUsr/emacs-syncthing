@@ -1,0 +1,19 @@
+200|^GET /rest/system/version
+{
+  "arch": "amd64",
+  "codename": "Dummy Demo",
+  "container": false,
+  "date": "2024-01-01T08:44:04+00:00",
+  "extra": "",
+  "isBeta": false,
+  "isCandidate": false,
+  "isRelease": true,
+  "longVersion": "syncthing version \"Dummy Demo\" (go9.9.9 linux)",
+  "os": "linux",
+  "stamp": "1702277044",
+  "tags": [
+    "noupgrade"
+  ],
+  "user": "debian",
+  "version": "v6.6.6"
+}

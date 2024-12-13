@@ -1,0 +1,210 @@
+200|^GET /rest/system/logs
+{
+  "messages": [
+    {
+      "when": "2024-01-01T01:46:33.511845853+00:00",
+      "message": "My ID: device-current",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.419707236+00:00",
+      "message": "Single thread SHA256 performance is 1 MB/s using minio/sha256-simd (3 MB/s using crypto/sha256).",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.905295965+00:00",
+      "message": "Hashing performance is 2 MB/s",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.907774898+00:00",
+      "message": "Overall send rate is unlimited, receive rate is unlimited",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.911946991+00:00",
+      "message": "Using discovery mechanism: global discovery server https://discovery.syncthing.net/v2/?noannounce\u0026id=discovery-id",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.912120267+00:00",
+      "message": "Using discovery mechanism: global discovery server https://discovery-v4.syncthing.net/v2/?nolookup\u0026id=discovery-id",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.912204264+00:00",
+      "message": "Using discovery mechanism: global discovery server https://discovery-v6.syncthing.net/v2/?nolookup\u0026id=discovery-id",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.912364548+00:00",
+      "message": "Using discovery mechanism: IPv4 local broadcast discovery on port 21027",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.913127155+00:00",
+      "message": "Ready to synchronize \"Notes\" (folder-id-1) (sendreceive)",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.913127339+00:00",
+      "message": "...",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.913789629+00:00",
+      "message": "TCP listener ([::]:22000) starting",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.913860569+00:00",
+      "message": "Relay listener (dynamic+https://relays.syncthing.net/endpoint) starting",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.91639839+00:00",
+      "message": "Ready to synchronize \"Photos\" (folder-id-2) (sendreceive)",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.917164578+00:00",
+      "message": "Ready to synchronize \"Code\" (folder-id-3) (sendreceive)",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.922825148+00:00",
+      "message": "GUI and API listening on 127.0.0.1:8384",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.922834022+00:00",
+      "message": "Access the GUI via the following URL: https://127.0.0.1:8384/",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.923886823+00:00",
+      "message": "Detected 0 NAT services",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.923900555+00:00",
+      "message": "My name is \"Demo\"",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.923941579+00:00",
+      "message": "Device device-id-1 is \"Desktop\" at [tcp://10.1.10.1:22000 tcp://192.168.0.1:22000 dynamic]",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.924049581+00:00",
+      "message": "Device device-id-2 is \"Phone\" at [dynamic]",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.924133245+00:00",
+      "message": "Device device-id-3 is \"Laptop\" at [tcp://10.1.10.2:22000 dynamic]",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:34.932815771+00:00",
+      "message": "QUIC listener ([::]:22000) starting",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.033604284+00:00",
+      "message": "Relay listener (dynamic+https://relays.syncthing.net/endpoint) shutting down",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.033768831+00:00",
+      "message": "listenerSupervisor@dynamic+https://relays.syncthing.net/endpoint: service dynamic+https://relays.syncthing.net/endpoint failed: Get \"https://relays.syncthing.net/endpoint\": dial tcp: lookup relays.syncthing.net on 127.0.0.53:53: server misbehaving",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.033825514+00:00",
+      "message": "Relay listener (dynamic+https://relays.syncthing.net/endpoint) starting",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.057591863+00:00",
+      "message": "Completed initial scan of sendreceive folder \"Photos\" (folder-id-2)",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.062180067+00:00",
+      "message": "Relay listener (dynamic+https://relays.syncthing.net/endpoint) shutting down",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.062278762+00:00",
+      "message": "listenerSupervisor@dynamic+https://relays.syncthing.net/endpoint: service dynamic+https://relays.syncthing.net/endpoint failed: Get \"https://relays.syncthing.net/endpoint\": dial tcp: lookup relays.syncthing.net on 127.0.0.53:53: server misbehaving",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.062329622+00:00",
+      "message": "Relay listener (dynamic+https://relays.syncthing.net/endpoint) starting",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.135214538+00:00",
+      "message": "Relay listener (dynamic+https://relays.syncthing.net/endpoint) shutting down",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:35.135275627+00:00",
+      "message": "listenerSupervisor@dynamic+https://relays.syncthing.net/endpoint: service dynamic+https://relays.syncthing.net/endpoint failed: Get \"https://relays.syncthing.net/endpoint\": dial tcp: lookup relays.syncthing.net on 127.0.0.53:53: server misbehaving",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:38.314413625+00:00",
+      "message": "Completed initial scan of sendreceive folder \"Notes\" (folder-id-1)",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:46:39.340305333+00:00",
+      "message": "Completed initial scan of sendreceive folder \"Code\" (folder-id-3)",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:47:50.212171543+00:00",
+      "message": "Relay listener (dynamic+https://relays.syncthing.net/endpoint) starting",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:47:53.257966908+00:00",
+      "message": "Established secure connection to device-id-1 at somewhere/tcp-client/TLS1.3-TLS/WAN-SOMETHING",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:47:53.259813923+00:00",
+      "message": "Device device-id-1 client is \"syncthing version\" named \"Desktop\" at somewhere/tcp-client/TLS1.3-TLS/WAN-SOMETHING",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:48:38.706627903+00:00",
+      "message": "Joined relay relay://127.0.0.1:22067",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T01:51:45.386873318+00:00",
+      "message": "quic://0.0.0.0:22000 detected NAT type: Yes",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T02:22:53.314860507+00:00",
+      "message": "quic://0.0.0.0:22000 detected NAT type: Yes",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T02:22:53.31558948+00:00",
+      "message": "quic://0.0.0.0:22000 resolved external address quic://meow (via stun.syncthing.net:3478)",
+      "level": 2
+    },
+    {
+      "when": "2024-01-01T02:25:53.358245682+00:00",
+      "message": "quic://0.0.0.0:22000 resolved external address quic://bark:22000 (via stun.syncthing.net:3478)",
+      "level": 2
+    }
+  ]
+}

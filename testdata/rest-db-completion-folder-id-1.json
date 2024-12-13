@@ -1,0 +1,11 @@
+200|^GET /rest/db/completion\?folder=folder-id-1
+{
+  "completion": 100,
+  "globalBytes": 892400428200,
+  "globalItems": 25777,
+  "needBytes": 0,
+  "needDeletes": 0,
+  "needItems": 0,
+  "remoteState": "unknown",
+  "sequence": 167814
+}

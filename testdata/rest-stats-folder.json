@@ -1,0 +1,27 @@
+200|^GET /rest/stats/folder
+{
+  "folder-id-1": {
+    "lastFile": {
+      "at": "2024-01-01T14:31:36+01:00",
+      "filename": "note.txt",
+      "deleted": false
+    },
+    "lastScan": "2024-01-01T02:43:27+00:00"
+  },
+  "folder-id-2": {
+    "lastFile": {
+      "at": "2024-01-01T01:23:05+01:00",
+      "filename": "photo.jpg",
+      "deleted": false
+    },
+    "lastScan": "2024-01-01T02:51:17+00:00"
+  },
+  "folder-id-3": {
+    "lastFile": {
+      "at": "2024-01-01T12:47:21+00:00",
+      "filename": "code.el",
+      "deleted": false
+    },
+    "lastScan": "2024-01-01T02:45:05+00:00"
+  }
+}

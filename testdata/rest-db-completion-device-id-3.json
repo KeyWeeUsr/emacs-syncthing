@@ -1,0 +1,11 @@
+200|^GET /rest/db/completion\?device=device-id-3
+{
+  "completion": 0,
+  "globalBytes": 23889889728,
+  "globalItems": 53571,
+  "needBytes": 0,
+  "needDeletes": 0,
+  "needItems": 0,
+  "remoteState": "unknown",
+  "sequence": 0
+}

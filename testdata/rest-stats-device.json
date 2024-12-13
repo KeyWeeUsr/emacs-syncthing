@@ -1,0 +1,19 @@
+200|^GET /rest/stats/device
+{
+  "device-id-2": {
+    "lastSeen": "2024-01-01T23:41:28+00:00",
+    "lastConnectionDurationS": 3017.948663252
+  },
+  "device-id-3": {
+    "lastSeen": "2024-01-01T01:08:53+01:00",
+    "lastConnectionDurationS": 60.962836684
+  },
+  "device-id-1": {
+    "lastSeen": "2024-01-01T02:57:47+00:00",
+    "lastConnectionDurationS": 1544.237146131
+  },
+  "device-current": {
+    "lastSeen": "1970-01-01T02:00:00+00:00",
+    "lastConnectionDurationS": 0
+  }
+}

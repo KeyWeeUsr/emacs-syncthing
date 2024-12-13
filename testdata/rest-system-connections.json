@@ -1,0 +1,79 @@
+200|^GET /rest/system/connections
+{
+  "connections": {
+    "device-id-2": {
+      "at": "0001-01-01T00:00:00Z",
+      "inBytesTotal": #(+ 1024 (random (expt 1024 4))),
+      "outBytesTotal": #(+ 1024 (random (expt 1024 4))),
+      "startedAt": "0001-01-01T00:00:00Z",
+      "connected": false,
+      "paused": false,
+      "clientVersion": "",
+      "address": "",
+      "type": "",
+      "isLocal": false,
+      "crypto": "",
+      "primary": {
+        "at": "0001-01-01T00:00:00Z",
+        "inBytesTotal": 0,
+        "outBytesTotal": 0,
+        "startedAt": "0001-01-01T00:00:00Z",
+        "address": "",
+        "type": "",
+        "isLocal": false,
+        "crypto": ""
+      }
+    },
+    "device-id-3": {
+      "at": "0001-01-01T00:00:00Z",
+      "inBytesTotal": #(+ 1024 (random (expt 1024 4))),
+      "outBytesTotal": #(+ 1024 (random (expt 1024 4))),
+      "startedAt": "0001-01-01T00:00:00Z",
+      "connected": false,
+      "paused": false,
+      "clientVersion": "",
+      "address": "",
+      "type": "",
+      "isLocal": false,
+      "crypto": "",
+      "primary": {
+        "at": "0001-01-01T00:00:00Z",
+        "inBytesTotal": 0,
+        "outBytesTotal": 0,
+        "startedAt": "0001-01-01T00:00:00Z",
+        "address": "",
+        "type": "",
+        "isLocal": false,
+        "crypto": ""
+      }
+    },
+    "device-id-1": {
+      "at": "2024-01-01T02:56:13+00:00",
+      "inBytesTotal": #(+ 1024 (random (expt 1024 4))),
+      "outBytesTotal": #(+ 1024 (random (expt 1024 4))),
+      "startedAt": "2024-01-01T01:47:54+00:00",
+      "connected": true,
+      "paused": false,
+      "clientVersion": "v6.6.6",
+      "address": "10.1.10.2:22000",
+      "type": "tcp-client",
+      "isLocal": false,
+      "crypto": "TLS1.3-TLS",
+      "primary": {
+        "at": "2024-01-01T02:56:13+00:00",
+        "inBytesTotal": #(+ 1024 (random (expt 1024 4))),
+        "outBytesTotal": #(+ 1024 (random (expt 1024 4))),
+        "startedAt": "2024-01-01T01:47:54+00:00",
+        "address": "10.1.10.2:22000",
+        "type": "tcp-client",
+        "isLocal": false,
+        "crypto": "TLS1.3-TLS"
+      }
+    }
+  },
+  "total": {
+    "at": "2024-01-01T02:56:13+00:00",
+    "inBytesTotal": #(+ 1024 (random (expt 1024 4))),
+    "outBytesTotal": #(+ 1024 (random (expt 1024 4)))
+  }
+}
