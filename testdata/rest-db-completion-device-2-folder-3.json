@@ -1,4 +1,4 @@
-200|^GET /rest/db/completion\?device=device-id-2&folder=folder-id-3
+200|^GET /rest/db/completion\?device=device-id-2&folder=folder-id-3 HTTP/1\.1
 {
   "completion": 78,
   "globalBytes": 892400428200,

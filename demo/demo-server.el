@@ -1,9 +1,11 @@
 (defun demo-server-load-handlers ()
-  (let (handlers)
-    (dolist (item (directory-files "../testdata"))
+  (let ((data (or (getenv "DEMO_DATA")
+                  (file-name-concat default-directory "testdata")))
+        handlers)
+    (dolist (item (directory-files data))
       (when (string-suffix-p ".json" item)
         (with-temp-buffer
-          (insert-file-contents (file-name-concat ".." "testdata" item))
+          (insert-file-contents (file-name-concat data item))
           (let ((tmp (buffer-substring-no-properties
                       (line-beginning-position) (1+ (line-end-position)))))
             (delete-region (line-beginning-position) (1+ (line-end-position)))
@@ -56,7 +58,7 @@
                                       ,(demo-server-eval-sexprs data))
                                     "\r\n"))
                  (throw 'done t)))))
-         (message "%s %s %s"
+         (message "%s %S %s"
                   (format-time-string "[%d/%b/%Y %H:%M:%S]" (current-time))
                   (when (string-match "\n" req-line)
                     (substring req-line 0 (match-beginning 0)))

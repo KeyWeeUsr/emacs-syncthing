@@ -1,4 +1,4 @@
-200|^GET /rest/db/status
+200|^GET /rest/db/status\?folder=folder-id-3 HTTP/1\.1
 {
   "errors": 0,
   "pullErrors": 0,

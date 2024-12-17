@@ -1,4 +1,4 @@
-200|^GET /rest/system/status
+200|^GET /rest/system/status HTTP/1\.1
 {
   "alloc": 32883448,
   "connectionServiceStatus": {

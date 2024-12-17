@@ -1,4 +1,4 @@
-200|^GET /rest/config
+200|^GET /rest/config HTTP/1\.1
 {
   "version": 37,
   "folders": [

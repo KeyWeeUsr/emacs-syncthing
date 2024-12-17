@@ -1,4 +1,4 @@
-200|^GET /rest/stats/folder
+200|^GET /rest/stats/folder HTTP/1\.1
 {
   "folder-id-1": {
     "lastFile": {

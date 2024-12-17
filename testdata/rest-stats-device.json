@@ -1,4 +1,4 @@
-200|^GET /rest/stats/device
+200|^GET /rest/stats/device HTTP/1\.1
 {
   "device-id-2": {
     "lastSeen": "2024-01-01T23:41:28+00:00",

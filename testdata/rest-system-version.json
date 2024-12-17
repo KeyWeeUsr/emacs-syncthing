@@ -1,4 +1,4 @@
-200|^GET /rest/system/version
+200|^GET /rest/system/version HTTP/1\.1
 {
   "arch": "amd64",
   "codename": "Dummy Demo",

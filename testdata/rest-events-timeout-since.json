@@ -1,0 +1,2 @@
+200|^GET /rest/events\?timeout=0&since=1 HTTP/1\.1
+[]

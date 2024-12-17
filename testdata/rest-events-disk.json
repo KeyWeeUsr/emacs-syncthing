@@ -1,4 +1,4 @@
-200|^GET /rest/events/disk
+200|^GET /rest/events/disk\?limit=25&timeout=0 HTTP/1\.1
 [
   {
     "id": 1,

@@ -1,4 +1,4 @@
-200|^GET /rest/system/connections
+200|^GET /rest/system/connections HTTP/1\.1
 {
   "connections": {
     "device-id-2": {

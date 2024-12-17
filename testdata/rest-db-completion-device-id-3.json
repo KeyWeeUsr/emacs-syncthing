@@ -1,4 +1,4 @@
-200|^GET /rest/db/completion\?device=device-id-3
+200|^GET /rest/db/completion\?device=device-id-3 HTTP/1\.1
 {
   "completion": 0,
   "globalBytes": 23889889728,
