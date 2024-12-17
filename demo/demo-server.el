@@ -1,11 +1,11 @@
 (defun demo-server-load-handlers ()
   (let ((data (or (getenv "DEMO_DATA")
-                  (file-name-concat default-directory "testdata")))
+                  (format "%s/%s" default-directory "testdata")))
         handlers)
     (dolist (item (directory-files data))
       (when (string-suffix-p ".json" item)
         (with-temp-buffer
-          (insert-file-contents (file-name-concat data item))
+          (insert-file-contents (format "%s/%s" data item))
           (let ((tmp (buffer-substring-no-properties
                       (line-beginning-position) (1+ (line-end-position)))))
             (delete-region (line-beginning-position) (1+ (line-end-position)))

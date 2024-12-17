@@ -29,35 +29,35 @@
       (eldev-output (with-current-buffer buff (buffer-string)))
       (error "Failed to tag and sign"))))
 
-(eldev-defcommand demo ()
-  "Run demo"
-  (let* ((client (or (getenv "EMACSCLIENT") "emacsclient"))
-         (flask (or (getenv "FLASK") "flask"))
-         (host (or (getenv "DEMO_HOST") "127.0.0.1"))
-         (port (or (getenv "DEMO_PORT") "5000"))
-         (socket (or (getenv "DEMO_SOCKET") "/run/user/1000/emacs/server"))
-         (proto "http")
-         flask-proc demo-proc)
+(defsubst eval-in-client (name script)
+  (unless (consp script)
+    (user-error "Invalid script: %s" script))
 
-    (unless (executable-find flask)
-      (error "Flask not found"))
+  (let ((client (or (getenv "EMACSCLIENT") "emacsclient"))
+        (sock (or (getenv "EMACS_SOCKET_NAME") "/run/user/1000/emacs/server")))
     (unless (executable-find client)
       (error "Emacsclient not found"))
 
-    (setq demo-proc
-          (start-process
-           "syncthing-demo" nil client "--socket-name" socket "--eval"
-           (format
-            "(progn (load \"demo/demo.el\") (syncthing-demo \"Demo\" \"%s\"))"
-            (format "%s://%s:%s" proto host port))))
-    (setq flask-proc
-          (start-process
-           "syncthing-demo-server" nil flask "--app" "demo/demo.py"
-           "run" "--reload" "--host" host "--port" port))
-    (set-process-filter flask-proc (lambda (_ str) (message str)))
+    (start-process name nil client "--socket-name" sock "--eval"
+                   (format "%S" script))))
 
-    ;; For some weird reason (call-process) with SIGINT to eldev command keeps
-    ;; the server running even though various approaches to signal handling
-    ;; have been tried from (global-set-key [signal X]), through kill-emacs*
-    ;; hooks, (condition-case), (unwind-protect)... it simply doesn't care...
-    (while t (sleep-for 1))))
+(eldev-defcommand demo ()
+  "Run demo"
+  (let* ((host (or (getenv "DEMO_HOST") "127.0.0.1"))
+         (port (or (getenv "DEMO_PORT") "5000"))
+         (proto "http")
+         (demo-addr (format "%s://%s:%s" proto host port))
+         (data-dir (or (getenv "DEMO_DATA") default-directory))
+         (server-name "syncthing-demo-server"))
+
+    (eval-in-client "syncthing-demo"
+                    `(progn (load-file "demo/demo.el")
+                            (syncthing-demo "Demo" ,demo-addr)))
+
+    (let ((process-environment
+           (append process-environment
+                   `(,(format "DEMO_HOST=%s" host)
+                     ,(format "DEMO_PORT=%s" port)
+                     ,(format "DEMO_DATA=%s" data-dir)))))
+      (load-file "demo/demo-server.el"))
+    (while t (sit-for 1))))
