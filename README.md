@@ -31,6 +31,12 @@ Check the manual for Emacs Customization: <kbd>C</kbd>-<kbd>h</kbd><kbd>i</kbd>
 <kbd>m</kbd><kbd>Emacs</kbd><kbd>m</kbd><kbd>Customization</kbd> and group
 <kbd>M</kbd>-<kbd>x</kbd> <kbd>customize-group</kbd> <kbd>syncthing</kbd>.
 
+## Example
+
+You can run a demo without having Syncthing installed on your system. You'll
+need [Eldev](https://github.com/emacs-eldev/eldev) and afterwards you can issue
+`eldev demo` command.
+
 ## Screenshots
 
 ![Screenshot][demo]![Screenshot][demo-term]
