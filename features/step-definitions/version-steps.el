@@ -5,8 +5,10 @@
 (defconst default-buff-name "*syncthing(Default Localhost)*")
 (defconst launch-fail "<fail>")
 (defconst launch-success "<success>")
+
 (defconst set-how-customize "<customize>")
 (defconst set-how-manual "<manual>")
+(defconst set-how-setq "<setq>")
 
 (Given "^Server is running in the background$"
   (lambda ()
@@ -55,45 +57,56 @@
 (When "^I set a API token in \"\\([^\"]+\\)\" to \"\\([^\"]+\\)\"$"
   (lambda (how raw-token)
     (should (string= syncthing-default-server-token ""))
-    (if (string= how set-how-manual)
-        (cond ((string= token empty) 
-               (customize-set-variable 'syncthing-default-server-token "")
-               (should (string= syncthing-default-server-token "")))
-              ((string= token token-apikey)
-               (customize-set-variable 'syncthing-default-server-token
-                                       ecukes-syncthing-apikey)
-               (should (string= syncthing-default-server-token
-                                ecukes-syncthing-apikey)))
-              (t (error "Unhandled case: '%s'" token)))
-      ;; navigate to token value input in Customize buffer
-      (dotimes (_ 8)
-        (execute-kbd-macro (kbd "TAB")))
+    (cond ((string= how set-how-manual)
+           (cond ((string= raw-token empty)
+                  (customize-set-variable 'syncthing-default-server-token "")
+                  (should (string= syncthing-default-server-token "")))
+                 ((string= raw-token token-apikey)
+                  (customize-set-variable 'syncthing-default-server-token
+                                          ecukes-syncthing-apikey)
+                  (should (string= syncthing-default-server-token
+                                   ecukes-syncthing-apikey)))
+                 (t (error "Unhandled case: '%s'" token))))
+          ((string= how set-how-setq)
+           (cond ((string= raw-token empty)
+                  (setq syncthing-default-server-token "")
+                  (should (string= syncthing-default-server-token "")))
+                 ((string= raw-token token-apikey)
+                  (setq syncthing-default-server-token ecukes-syncthing-apikey)
+                  (should (string= syncthing-default-server-token
+                                   ecukes-syncthing-apikey)))
+                 (t (error "Unhandled case: '%s'" token))))
+          ((string= how set-how-customize)
+           ;; navigate to token value input in Customize buffer
+           (dotimes (_ 8)
+             (execute-kbd-macro (kbd "TAB")))
 
-      (cond ((string= raw-token empty)
-             ;; no insert
-             )
-            ((string= raw-token token-apikey)
-             (should-not (string= "" ecukes-syncthing-apikey))
-             (insert ecukes-syncthing-apikey))
-            (t (error "Unhandled case: '%s'" token)))
+           (cond ((string= raw-token empty)
+                  ;; no insert
+                  )
+                 ((string= raw-token token-apikey)
+                  (should-not (string= "" ecukes-syncthing-apikey))
+                  (insert ecukes-syncthing-apikey))
+                 (t (error "Unhandled case: '%s'" token)))
 
-      ;; navigate to =Apply= button in Customize buffer
-      (goto-char (point-min))
-      (dotimes (_ 6)
-        (execute-kbd-macro (kbd "TAB")))
-      (when-let* ((wid (widget-at (point)))
-                  (active (not (widget-get wid :inactive))))
-        ;; apply for the current session only
-        (execute-kbd-macro (kbd "RET")))
+           ;; navigate to =Apply= button in Customize buffer
+           (goto-char (point-min))
+           (dotimes (_ 6)
+             (execute-kbd-macro (kbd "TAB")))
+           (when-let* ((wid (widget-at (point)))
+                       (active (not (widget-get wid :inactive))))
+             ;; apply for the current session only
+             (execute-kbd-macro (kbd "RET")))
 
-      (cond ((string= raw-token empty)
-             (should (string= syncthing-default-server-token "")))
-            ((string= raw-token token-apikey)
-             (should (string= syncthing-default-server-token
-                              ecukes-syncthing-apikey)))
-            (t (error "Unhandled case: '%s'" token)))
+           (cond ((string= raw-token empty)
+                  (should (string= syncthing-default-server-token "")))
+                 ((string= raw-token token-apikey)
+                  (should (string= syncthing-default-server-token
+                                   ecukes-syncthing-apikey)))
+                 (t (error "Unhandled case: '%s'" token)))
 
-      (kill-buffer))))
+           (kill-buffer))
+          (t (error "Unhandled case: '%s'" how)))))
 
 (Then "^client buffer header contains \"\\([^\"]+\\)\"$"
   (lambda (header)
