@@ -125,9 +125,10 @@
             :press "🖲️")
     :text ,syncthing-theme--default-ascii))
 
-(condition-case err
+(condition-case nil
     (require 'all-the-icons)
   (error (defun all-the-icons-faicon (&rest _) "N/A") t))
+(with-no-warnings
 (defconst syncthing-theme-external-ati
   `(:icons (:download ,(all-the-icons-faicon "cloud-download")
             :upload ,(all-the-icons-faicon "cloud-upload")
@@ -156,7 +157,7 @@
             :signal ,(all-the-icons-faicon "signal")
             :switch ,(all-the-icons-faicon "random")
             :press ,(all-the-icons-faicon "compress"))
-    :text ,syncthing-theme--default-ascii))
+    :text ,syncthing-theme--default-ascii)))
 
 (defcustom syncthing-theme
   'syncthing-theme-default
