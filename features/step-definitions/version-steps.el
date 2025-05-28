@@ -187,8 +187,7 @@
    (call-process "docker" nil (get-buffer-create cont-name) nil
                  "exec" cont-name "cat" "/var/syncthing/config/config.xml")
    (with-current-buffer (get-buffer-create cont-name)
-     (goto-char (point-max))
-     (setq config (libxml-parse-xml-region)))
+     (setq config (libxml-parse-xml-region (point-min) (point-max))))
    (should config)
 
    (should (string= "true" (alist-get 'enabled (cadr (assoc 'gui config)))))
