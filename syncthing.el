@@ -1,6 +1,6 @@
 ;;; syncthing.el --- Client for Syncthing -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2024 Peter Badida
+;; Copyright (C) 2025 Peter Badida
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
