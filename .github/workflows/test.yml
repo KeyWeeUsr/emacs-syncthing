@@ -47,13 +47,92 @@ jobs:
               --trace \
               --time \
               --color=always \
-              test
+              test-ert
           eldev \
               --debug \
               --trace \
               --time \
               --color=always \
-              test -u on,coveralls
+              test-ert -u on,coveralls
+
+      - name: Ensure clean byte-compilation
+        run: |
+          eldev \
+              --debug \
+              --trace \
+              --time \
+              --color=always \
+              compile \
+              --warnings-as-errors
+
+      - name: Lint the project
+        run: |
+          eldev \
+              --debug \
+              --trace \
+              --time \
+              --color=always \
+              lint
+
+      - name: Run all doctor tests
+        run: |
+          eldev \
+              --verbose \
+              --debug \
+              --packaged \
+              --trace \
+              --time \
+              --color=always \
+              --backtrace-on-abort \
+              doctor --all-tests
+
+  integration-test:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.emacs_version == 'snapshot' }}
+
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        emacs_version: [
+          '27.1', '27.2',
+          '28.1', '28.2',
+          '29.1', '29.2', '29.3',
+          'snapshot'
+        ]
+
+    steps:
+      - name: Set up Emacs
+        uses: jcs090218/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+
+      - name: Install Eldev
+        uses: emacs-eldev/setup-eldev@v1
+
+      - name: Check out the source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Test the project
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: |
+          rm -r demo
+          eldev \
+              --debug \
+              --packaged \
+              --trace \
+              --time \
+              --color=always \
+              test-ecukes
+          eldev \
+              --debug \
+              --trace \
+              --time \
+              --color=always \
+              test-ecukes -u on,coveralls
 
       - name: Ensure clean byte-compilation
         run: |
