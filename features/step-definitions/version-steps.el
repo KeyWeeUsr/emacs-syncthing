@@ -10,8 +10,57 @@
 (defconst set-how-manual "<manual>")
 (defconst set-how-setq "<setq>")
 
-(Given "^Server is running in the background$"
-  (lambda ()
+(Given "^Server \"\\([^\"]+\\)\" is running in the background$"
+  (lambda (version)
+    (setq ecukes-syncthing-container (make-temp-name "ecukes-syncthing-"))
+    (setq ecukes-syncthing-mode nil)
+    (let* ((waiting-for-start t)
+           (wait-for-start-attempts 60)
+           (cont-name ecukes-syncthing-container)
+           (proc (start-process "ecukes-syncthing" nil
+                                "docker" "run" "--rm" "--name" cont-name
+                                "--publish" (format "127.0.0.1:%s:8384"
+                                                    ecukes-syncthing-port)
+                                (ecukes-syncthing-image version)))
+           config)
+      (push cont-name ecukes-syncthing-containers)
+
+      (while (and waiting-for-start (> wait-for-start-attempts 0))
+        (setq wait-for-start-attempts (1- wait-for-start-attempts))
+        (let ((url-request-method "GET") (url-show-status nil) resp)
+          (ignore url-request-method url-show-status)
+          (with-temp-buffer
+            (condition-case nil
+                (progn
+                  (url-insert-file-contents
+                   (format "%s://%s:%s/rest/noauth/health"
+                           ecukes-syncthing-proto
+                           ecukes-syncthing-host
+                           ecukes-syncthing-port))
+                  (setq resp (json-parse-buffer :object-type 'alist))
+                  (when (string= "OK" (alist-get 'status resp))
+                    (setq waiting-for-start nil)))
+              (t nil))))
+        (sleep-for 0.1))
+
+      (should-not waiting-for-start)
+
+      (with-current-buffer (get-buffer-create cont-name)
+        (delete-region (point-min) (point-max)))
+      (call-process "docker" nil (get-buffer-create cont-name) nil
+                    "exec" cont-name "cat" "/var/syncthing/config/config.xml")
+      (with-current-buffer (get-buffer-create cont-name)
+        (setq config (libxml-parse-xml-region (point-min) (point-max))))
+      (should config)
+
+      (should (string= "true" (alist-get 'enabled (cadr (assoc 'gui config)))))
+      (let ((tmp (caddr (assoc 'apikey (assoc 'gui config)))))
+        (should-not (string= "" tmp))
+        (setq ecukes-syncthing-apikey tmp))
+      (let ((tmp (cadr (assoc 'device config))))
+        (should tmp)
+        (setq ecukes-syncthing-device tmp)))
+
     (let (proc)
       (unwind-protect
           (condition-case err
@@ -28,24 +77,28 @@
 
 (When "^I have no API token set$"
   (lambda ()
-    (customize-set-variable 'syncthing-default-server-token "")
+    (let ((inhibit-message t))
+      (customize-set-variable 'syncthing-default-server-token ""))
     (should (string= syncthing-default-server-token ""))))
 
 (And "^I launch client \"\\([^\"]+\\)\"$"
   (lambda (how)
     (if (string= how launch-success)
         (cond ((string= ecukes-syncthing-mode "non-interactive")
-               (syncthing))
+               (let ((inhibit-message t)) (syncthing)))
               ((string= ecukes-syncthing-mode "interactive")
-               (call-interactively 'syncthing))
+               (let ((inhibit-message t)) (call-interactively 'syncthing)))
               (t (error "Bad mode" ecukes-syncthing-mode)))
       (cond ((string= ecukes-syncthing-mode "non-interactive")
              (condition-case nil
-                 (progn (syncthing) (should nil))
+                 (progn (let ((inhibit-message t)) (syncthing)) (should nil))
                (user-error t)))
             ((string= ecukes-syncthing-mode "interactive")
              (condition-case nil
-                 (progn (call-interactively 'syncthing) (should nil))
+                 (progn
+                   (let ((inhibit-message t))
+                     (call-interactively 'syncthing))
+                   (should nil))
                (user-error t)))
             (t (error "Bad mode" ecukes-syncthing-mode))))))
 
@@ -59,11 +112,13 @@
     (should (string= syncthing-default-server-token ""))
     (cond ((string= how set-how-manual)
            (cond ((string= raw-token empty)
-                  (customize-set-variable 'syncthing-default-server-token "")
+                  (let ((inhibit-message t))
+                    (customize-set-variable 'syncthing-default-server-token ""))
                   (should (string= syncthing-default-server-token "")))
                  ((string= raw-token token-apikey)
-                  (customize-set-variable 'syncthing-default-server-token
-                                          ecukes-syncthing-apikey)
+                  (let ((inhibit-message t))
+                    (customize-set-variable 'syncthing-default-server-token
+                                            ecukes-syncthing-apikey))
                   (should (string= syncthing-default-server-token
                                    ecukes-syncthing-apikey)))
                  (t (error "Unhandled case: '%s'" token))))
@@ -78,8 +133,9 @@
                  (t (error "Unhandled case: '%s'" token))))
           ((string= how set-how-customize)
            ;; navigate to token value input in Customize buffer
-           (dotimes (_ 8)
-             (execute-kbd-macro (kbd "TAB")))
+           (let ((inhibit-message t))
+             (dotimes (_ 8)
+               (execute-kbd-macro (kbd "TAB"))))
 
            (cond ((string= raw-token empty)
                   ;; no insert
@@ -91,12 +147,13 @@
 
            ;; navigate to =Apply= button in Customize buffer
            (goto-char (point-min))
-           (dotimes (_ 6)
-             (execute-kbd-macro (kbd "TAB")))
-           (when-let* ((wid (widget-at (point)))
-                       (active (not (widget-get wid :inactive))))
-             ;; apply for the current session only
-             (execute-kbd-macro (kbd "RET")))
+           (let ((inhibit-message t))
+             (dotimes (_ 6)
+               (execute-kbd-macro (kbd "TAB")))
+             (when-let* ((wid (widget-at (point)))
+                         (active (not (widget-get wid :inactive))))
+               ;; apply for the current session only
+               (execute-kbd-macro (kbd "RET"))))
 
            (cond ((string= raw-token empty)
                   (should (string= syncthing-default-server-token "")))
@@ -149,51 +206,4 @@
    (makunbound 'ecukes-syncthing-container)))
 
 (Before
- (setq ecukes-syncthing-container (make-temp-name "ecukes-syncthing-"))
- (setq ecukes-syncthing-mode nil)
- (let* ((waiting-for-start t)
-        (wait-for-start-attempts 60)
-        (cont-name ecukes-syncthing-container)
-        (proc (start-process "ecukes-syncthing" nil
-                             "docker" "run" "--rm" "--name" cont-name
-                             "--publish" (format "127.0.0.1:%s:8384"
-                                                 ecukes-syncthing-port)
-                             ecukes-syncthing-image))
-        config)
-   (push cont-name ecukes-syncthing-containers)
-
-   (while (and waiting-for-start (> wait-for-start-attempts 0))
-     (setq wait-for-start-attempts (1- wait-for-start-attempts))
-     (let ((url-request-method "GET") (url-show-status nil) resp)
-       (ignore url-request-method url-show-status)
-       (with-temp-buffer
-         (condition-case nil
-             (progn
-               (url-insert-file-contents
-                (format "%s://%s:%s/rest/noauth/health"
-                        ecukes-syncthing-proto
-                        ecukes-syncthing-host
-                        ecukes-syncthing-port))
-               (setq resp (json-parse-buffer :object-type 'alist))
-               (when (string= "OK" (alist-get 'status resp))
-                 (setq waiting-for-start nil)))
-           (t nil))))
-     (sleep-for 0.1))
-
-   (should-not waiting-for-start)
-
-   (with-current-buffer (get-buffer-create cont-name)
-     (delete-region (point-min) (point-max)))
-   (call-process "docker" nil (get-buffer-create cont-name) nil
-                 "exec" cont-name "cat" "/var/syncthing/config/config.xml")
-   (with-current-buffer (get-buffer-create cont-name)
-     (setq config (libxml-parse-xml-region (point-min) (point-max))))
-   (should config)
-
-   (should (string= "true" (alist-get 'enabled (cadr (assoc 'gui config)))))
-   (let ((tmp (caddr (assoc 'apikey (assoc 'gui config)))))
-     (should-not (string= "" tmp))
-     (setq ecukes-syncthing-apikey tmp))
-   (let ((tmp (cadr (assoc 'device config))))
-     (should tmp)
-     (setq ecukes-syncthing-device tmp))))
+ )

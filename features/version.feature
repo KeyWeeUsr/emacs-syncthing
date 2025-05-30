@@ -1,6 +1,6 @@
 Feature: Connect to already online Syncthing server
   Scenario Outline: Can connect after token input
-    Given Server is running in the background
+    Given Server "<version>" is running in the background
     And I am running client in "<mode>" mode
 
     When I have no API token set
@@ -13,34 +13,58 @@ Feature: Connect to already online Syncthing server
     Then client buffer header contains "<header contains>"
 
     Examples:
-      | mode            | first-launch | token    | how         | second-launch | header contains |
-      | non-interactive | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
-      | non-interactive | <fail>       | <apikey> | <customize> | <success>     | <version>       |
-      | interactive     | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
-      | interactive     | <fail>       | <apikey> | <customize> | <success>     | <version>       |
-      | non-interactive | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
-      | non-interactive | <fail>       | <apikey> | <customize> | <success>     | <version>       |
-      | interactive     | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
-      | interactive     | <fail>       | <apikey> | <customize> | <success>     | <version>       |
-      | non-interactive | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
-      | non-interactive | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
-      | interactive     | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
-      | interactive     | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
-      | non-interactive | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
-      | non-interactive | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
-      | interactive     | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
-      | interactive     | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
-      | non-interactive | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
-      | non-interactive | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
-      | interactive     | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
-      | interactive     | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
-      | non-interactive | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
-      | non-interactive | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
-      | interactive     | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
-      | interactive     | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
+      | version | mode            | first-launch | token    | how         | second-launch | header contains |
+      |  1.26.0 | non-interactive | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
+      |  1.26.0 | non-interactive | <fail>       | <apikey> | <customize> | <success>     | <version>       |
+      |  1.26.0 | interactive     | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
+      |  1.26.0 | interactive     | <fail>       | <apikey> | <customize> | <success>     | <version>       |
+      |  1.26.0 | non-interactive | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
+      |  1.26.0 | non-interactive | <fail>       | <apikey> | <customize> | <success>     | <version>       |
+      |  1.26.0 | interactive     | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
+      |  1.26.0 | interactive     | <fail>       | <apikey> | <customize> | <success>     | <version>       |
+      |  1.26.0 | non-interactive | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
+      |  1.26.0 | non-interactive | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
+      |  1.26.0 | interactive     | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
+      |  1.26.0 | interactive     | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
+      |  1.26.0 | non-interactive | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
+      |  1.26.0 | non-interactive | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
+      |  1.26.0 | interactive     | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
+      |  1.26.0 | interactive     | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
+      |  1.26.0 | non-interactive | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
+      |  1.26.0 | non-interactive | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
+      |  1.26.0 | interactive     | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
+      |  1.26.0 | interactive     | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
+      |  1.26.0 | non-interactive | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
+      |  1.26.0 | non-interactive | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
+      |  1.26.0 | interactive     | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
+      |  1.26.0 | interactive     | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
+      |  1.29.6 | non-interactive | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
+      |  1.29.6 | non-interactive | <fail>       | <apikey> | <customize> | <success>     | <version>       |
+      |  1.29.6 | interactive     | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
+      |  1.29.6 | interactive     | <fail>       | <apikey> | <customize> | <success>     | <version>       |
+      |  1.29.6 | non-interactive | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
+      |  1.29.6 | non-interactive | <fail>       | <apikey> | <customize> | <success>     | <version>       |
+      |  1.29.6 | interactive     | <fail>       | <empty>  | <customize> | <fail>        | <empty>         |
+      |  1.29.6 | interactive     | <fail>       | <apikey> | <customize> | <success>     | <version>       |
+      |  1.29.6 | non-interactive | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
+      |  1.29.6 | non-interactive | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
+      |  1.29.6 | interactive     | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
+      |  1.29.6 | interactive     | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
+      |  1.29.6 | non-interactive | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
+      |  1.29.6 | non-interactive | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
+      |  1.29.6 | interactive     | <fail>       | <empty>  | <manual>    | <fail>        | <empty>         |
+      |  1.29.6 | interactive     | <fail>       | <apikey> | <manual>    | <success>     | <version>       |
+      |  1.29.6 | non-interactive | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
+      |  1.29.6 | non-interactive | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
+      |  1.29.6 | interactive     | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
+      |  1.29.6 | interactive     | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
+      |  1.29.6 | non-interactive | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
+      |  1.29.6 | non-interactive | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
+      |  1.29.6 | interactive     | <fail>       | <empty>  | <setq>      | <fail>        | <empty>         |
+      |  1.29.6 | interactive     | <fail>       | <apikey> | <setq>      | <success>     | <version>       |
 
   Scenario Outline: Can connect with a pre-configured key
-    Given Server is running in the background
+    Given Server "<version>" is running in the background
     And I am running client in "<mode>" mode
 
     When I set a API token in "<how>" to "<token>"
@@ -48,20 +72,36 @@ Feature: Connect to already online Syncthing server
     Then client buffer header contains "<header contains>"
 
     Examples:
-      | mode            | token    | how         | launch    | header contains |
-      | non-interactive | <empty>  | <manual>    | <fail>    | <empty>         |
-      | non-interactive | <apikey> | <manual>    | <success> | <version>       |
-      | interactive     | <empty>  | <manual>    | <fail>    | <empty>         |
-      | interactive     | <apikey> | <manual>    | <success> | <version>       |
-      | non-interactive | <empty>  | <manual>    | <fail>    | <empty>         |
-      | non-interactive | <apikey> | <manual>    | <success> | <version>       |
-      | interactive     | <empty>  | <manual>    | <fail>    | <empty>         |
-      | interactive     | <apikey> | <manual>    | <success> | <version>       |
-      | non-interactive | <empty>  | <setq>      | <fail>    | <empty>         |
-      | non-interactive | <apikey> | <setq>      | <success> | <version>       |
-      | interactive     | <empty>  | <setq>      | <fail>    | <empty>         |
-      | interactive     | <apikey> | <setq>      | <success> | <version>       |
-      | non-interactive | <empty>  | <setq>      | <fail>    | <empty>         |
-      | non-interactive | <apikey> | <setq>      | <success> | <version>       |
-      | interactive     | <empty>  | <setq>      | <fail>    | <empty>         |
-      | interactive     | <apikey> | <setq>      | <success> | <version>       |
+      | version | mode            | token    | how      | launch    | header contains |
+      |  1.26.0 | non-interactive | <empty>  | <manual> | <fail>    | <empty>         |
+      |  1.26.0 | non-interactive | <apikey> | <manual> | <success> | <version>       |
+      |  1.26.0 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
+      |  1.26.0 | interactive     | <apikey> | <manual> | <success> | <version>       |
+      |  1.26.0 | non-interactive | <empty>  | <manual> | <fail>    | <empty>         |
+      |  1.26.0 | non-interactive | <apikey> | <manual> | <success> | <version>       |
+      |  1.26.0 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
+      |  1.26.0 | interactive     | <apikey> | <manual> | <success> | <version>       |
+      |  1.26.0 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
+      |  1.26.0 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
+      |  1.26.0 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
+      |  1.26.0 | interactive     | <apikey> | <setq>   | <success> | <version>       |
+      |  1.26.0 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
+      |  1.26.0 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
+      |  1.26.0 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
+      |  1.26.0 | interactive     | <apikey> | <setq>   | <success> | <version>       |
+      |  1.29.6 | non-interactive | <empty>  | <manual> | <fail>    | <empty>         |
+      |  1.29.6 | non-interactive | <apikey> | <manual> | <success> | <version>       |
+      |  1.29.6 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
+      |  1.29.6 | interactive     | <apikey> | <manual> | <success> | <version>       |
+      |  1.29.6 | non-interactive | <empty>  | <manual> | <fail>    | <empty>         |
+      |  1.29.6 | non-interactive | <apikey> | <manual> | <success> | <version>       |
+      |  1.29.6 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
+      |  1.29.6 | interactive     | <apikey> | <manual> | <success> | <version>       |
+      |  1.29.6 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
+      |  1.29.6 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
+      |  1.29.6 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
+      |  1.29.6 | interactive     | <apikey> | <setq>   | <success> | <version>       |
+      |  1.29.6 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
+      |  1.29.6 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
+      |  1.29.6 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
+      |  1.29.6 | interactive     | <apikey> | <setq>   | <success> | <version>       |

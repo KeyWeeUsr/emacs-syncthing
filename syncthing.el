@@ -143,7 +143,6 @@ Activating this mode will launch Syncthing client in the current window.
      syncthing-default-server-token)))
 
 (provide 'syncthing)
-;; TODO: test with native-comp
 ;; TODO: allow switching between time format and raw timestamps
 ;; TODO: long lines - check buffer width on each redraw
 ;;       then if > use cl-print-to-string-with-limit so it folds under '...'
