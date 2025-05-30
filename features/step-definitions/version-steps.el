@@ -33,12 +33,11 @@
             (condition-case nil
                 (progn
                   (url-insert-file-contents
-                   (format "%s://%s:%s/rest/noauth/health"
+                   (format "%s://%s:%s/qr/"
                            ecukes-syncthing-proto
                            ecukes-syncthing-host
                            ecukes-syncthing-port))
-                  (setq resp (json-parse-buffer :object-type 'alist))
-                  (when (string= "OK" (alist-get 'status resp))
+                  (unless (string= "" (buffer-string))
                     (setq waiting-for-start nil)))
               (t nil))))
         (sleep-for 0.1))
