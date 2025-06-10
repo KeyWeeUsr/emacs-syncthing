@@ -10,6 +10,7 @@
 (defconst set-how-manual "<manual>")
 (defconst set-how-setq "<setq>")
 
+(defvar quiet nil)
 (defvar skipping nil)
 
 (Given "^I override default base URL$"
@@ -84,7 +85,7 @@
 
 (When "^I have no API token set$"
   (lambda ()
-    (let ((inhibit-message t))
+    (let ((inhibit-message quiet))
       (customize-set-variable 'syncthing-default-server-token ""))
     (should (string= syncthing-default-server-token ""))))
 
@@ -92,18 +93,19 @@
   (lambda (how)
     (if (string= how launch-success)
         (cond ((string= ecukes-syncthing-mode "non-interactive")
-               (let ((inhibit-message t)) (syncthing)))
+               (let ((inhibit-message quiet)) (syncthing)))
               ((string= ecukes-syncthing-mode "interactive")
-               (let ((inhibit-message t)) (call-interactively 'syncthing)))
+               (let ((inhibit-message quiet)) (call-interactively 'syncthing)))
               (t (error "Bad mode" ecukes-syncthing-mode)))
       (cond ((string= ecukes-syncthing-mode "non-interactive")
              (condition-case nil
-                 (progn (let ((inhibit-message t)) (syncthing)) (should nil))
+                 (progn (let ((inhibit-message quiet)) (syncthing))
+                        (should nil))
                (user-error t)))
             ((string= ecukes-syncthing-mode "interactive")
              (condition-case nil
                  (progn
-                   (let ((inhibit-message t))
+                   (let ((inhibit-message quiet))
                      (call-interactively 'syncthing))
                    (should nil))
                (user-error t)))
@@ -125,11 +127,12 @@
     (should (string= syncthing-default-server-token ""))
     (cond ((string= how set-how-manual)
            (cond ((string= raw-token empty)
-                  (let ((inhibit-message t))
-                    (customize-set-variable 'syncthing-default-server-token ""))
+                  (let ((inhibit-message quiet))
+                    (customize-set-variable
+                     'syncthing-default-server-token ""))
                   (should (string= syncthing-default-server-token "")))
                  ((string= raw-token token-apikey)
-                  (let ((inhibit-message t))
+                  (let ((inhibit-message quiet))
                     (customize-set-variable 'syncthing-default-server-token
                                             ecukes-syncthing-apikey))
                   (should (string= syncthing-default-server-token
@@ -146,7 +149,7 @@
                  (t (error "Unhandled case: '%s'" token))))
           ((string= how set-how-customize)
            ;; navigate to token value input in Customize buffer
-           (let ((inhibit-message t))
+           (let ((inhibit-message quiet))
              (dotimes (_ 8)
                (execute-kbd-macro (kbd "TAB"))))
 
@@ -160,7 +163,7 @@
 
            ;; navigate to =Apply= button in Customize buffer
            (goto-char (point-min))
-           (let ((inhibit-message t))
+           (let ((inhibit-message quiet))
              (dotimes (_ 6)
                (execute-kbd-macro (kbd "TAB")))
              (when-let* ((wid (widget-at (point)))
@@ -186,7 +189,7 @@
         (while (not (get-buffer buff))
           (sleep-for 1))
         ;; TODO: Why doesn't it switch automatically?
-        ;; TODO: Make an interactive func to switch around Syncthing-only buffers
+        ;; TODO: Make an interactive func to switch around Syncthing buffers
         (switch-to-buffer buff)))))
 
 (And "^client buffer header contains \"\\([^\"]+\\)\"$"
