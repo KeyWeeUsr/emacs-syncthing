@@ -10,7 +10,7 @@
 (defconst set-how-manual "<manual>")
 (defconst set-how-setq "<setq>")
 
-(defvar quiet nil)
+(defvar quiet t)
 (defvar show-trace nil)
 (defvar skipping nil)
 
