@@ -23,14 +23,6 @@ Feature: Connect to already online Syncthing server
       |      1.18.0 | non-interactive | <apikey> | <customize> | <success>     | <version>       |
       |      1.18.0 | interactive     | <empty>  | <customize> | <fail>        | <empty>         |
       |      1.18.0 | interactive     | <apikey> | <customize> | <success>     | <version>       |
-      |      1.18.0 | non-interactive | <empty>  | <customize> | <fail>        | <empty>         |
-      |      1.18.0 | non-interactive | <apikey> | <customize> | <success>     | <version>       |
-      |      1.18.0 | interactive     | <empty>  | <customize> | <fail>        | <empty>         |
-      |      1.18.0 | interactive     | <apikey> | <customize> | <success>     | <version>       |
-      |      1.18.0 | non-interactive | <empty>  | <manual>    | <fail>        | <empty>         |
-      |      1.18.0 | non-interactive | <apikey> | <manual>    | <success>     | <version>       |
-      |      1.18.0 | interactive     | <empty>  | <manual>    | <fail>        | <empty>         |
-      |      1.18.0 | interactive     | <apikey> | <manual>    | <success>     | <version>       |
       |      1.18.0 | non-interactive | <empty>  | <manual>    | <fail>        | <empty>         |
       |      1.18.0 | non-interactive | <apikey> | <manual>    | <success>     | <version>       |
       |      1.18.0 | interactive     | <empty>  | <manual>    | <fail>        | <empty>         |
@@ -39,14 +31,6 @@ Feature: Connect to already online Syncthing server
       |      1.18.0 | non-interactive | <apikey> | <setq>      | <success>     | <version>       |
       |      1.18.0 | interactive     | <empty>  | <setq>      | <fail>        | <empty>         |
       |      1.18.0 | interactive     | <apikey> | <setq>      | <success>     | <version>       |
-      |      1.18.0 | non-interactive | <empty>  | <setq>      | <fail>        | <empty>         |
-      |      1.18.0 | non-interactive | <apikey> | <setq>      | <success>     | <version>       |
-      |      1.18.0 | interactive     | <empty>  | <setq>      | <fail>        | <empty>         |
-      |      1.18.0 | interactive     | <apikey> | <setq>      | <success>     | <version>       |
-      |      1.26.0 | non-interactive | <empty>  | <customize> | <fail>        | <empty>         |
-      |      1.26.0 | non-interactive | <apikey> | <customize> | <success>     | <version>       |
-      |      1.26.0 | interactive     | <empty>  | <customize> | <fail>        | <empty>         |
-      |      1.26.0 | interactive     | <apikey> | <customize> | <success>     | <version>       |
       |      1.26.0 | non-interactive | <empty>  | <customize> | <fail>        | <empty>         |
       |      1.26.0 | non-interactive | <apikey> | <customize> | <success>     | <version>       |
       |      1.26.0 | interactive     | <empty>  | <customize> | <fail>        | <empty>         |
@@ -55,14 +39,6 @@ Feature: Connect to already online Syncthing server
       |      1.26.0 | non-interactive | <apikey> | <manual>    | <success>     | <version>       |
       |      1.26.0 | interactive     | <empty>  | <manual>    | <fail>        | <empty>         |
       |      1.26.0 | interactive     | <apikey> | <manual>    | <success>     | <version>       |
-      |      1.26.0 | non-interactive | <empty>  | <manual>    | <fail>        | <empty>         |
-      |      1.26.0 | non-interactive | <apikey> | <manual>    | <success>     | <version>       |
-      |      1.26.0 | interactive     | <empty>  | <manual>    | <fail>        | <empty>         |
-      |      1.26.0 | interactive     | <apikey> | <manual>    | <success>     | <version>       |
-      |      1.26.0 | non-interactive | <empty>  | <setq>      | <fail>        | <empty>         |
-      |      1.26.0 | non-interactive | <apikey> | <setq>      | <success>     | <version>       |
-      |      1.26.0 | interactive     | <empty>  | <setq>      | <fail>        | <empty>         |
-      |      1.26.0 | interactive     | <apikey> | <setq>      | <success>     | <version>       |
       |      1.26.0 | non-interactive | <empty>  | <setq>      | <fail>        | <empty>         |
       |      1.26.0 | non-interactive | <apikey> | <setq>      | <success>     | <version>       |
       |      1.26.0 | interactive     | <empty>  | <setq>      | <fail>        | <empty>         |
@@ -71,14 +47,6 @@ Feature: Connect to already online Syncthing server
       |      1.29.6 | non-interactive | <apikey> | <customize> | <success>     | <version>       |
       |      1.29.6 | interactive     | <empty>  | <customize> | <fail>        | <empty>         |
       |      1.29.6 | interactive     | <apikey> | <customize> | <success>     | <version>       |
-      |      1.29.6 | non-interactive | <empty>  | <customize> | <fail>        | <empty>         |
-      |      1.29.6 | non-interactive | <apikey> | <customize> | <success>     | <version>       |
-      |      1.29.6 | interactive     | <empty>  | <customize> | <fail>        | <empty>         |
-      |      1.29.6 | interactive     | <apikey> | <customize> | <success>     | <version>       |
-      |      1.29.6 | non-interactive | <empty>  | <manual>    | <fail>        | <empty>         |
-      |      1.29.6 | non-interactive | <apikey> | <manual>    | <success>     | <version>       |
-      |      1.29.6 | interactive     | <empty>  | <manual>    | <fail>        | <empty>         |
-      |      1.29.6 | interactive     | <apikey> | <manual>    | <success>     | <version>       |
       |      1.29.6 | non-interactive | <empty>  | <manual>    | <fail>        | <empty>         |
       |      1.29.6 | non-interactive | <apikey> | <manual>    | <success>     | <version>       |
       |      1.29.6 | interactive     | <empty>  | <manual>    | <fail>        | <empty>         |
@@ -87,14 +55,6 @@ Feature: Connect to already online Syncthing server
       |      1.29.6 | non-interactive | <apikey> | <setq>      | <success>     | <version>       |
       |      1.29.6 | interactive     | <empty>  | <setq>      | <fail>        | <empty>         |
       |      1.29.6 | interactive     | <apikey> | <setq>      | <success>     | <version>       |
-      |      1.29.6 | non-interactive | <empty>  | <setq>      | <fail>        | <empty>         |
-      |      1.29.6 | non-interactive | <apikey> | <setq>      | <success>     | <version>       |
-      |      1.29.6 | interactive     | <empty>  | <setq>      | <fail>        | <empty>         |
-      |      1.29.6 | interactive     | <apikey> | <setq>      | <success>     | <version>       |
-      | 2.0.0-rc.18 | non-interactive | <empty>  | <customize> | <fail>        | <empty>         |
-      | 2.0.0-rc.18 | non-interactive | <apikey> | <customize> | <success>     | <version>       |
-      | 2.0.0-rc.18 | interactive     | <empty>  | <customize> | <fail>        | <empty>         |
-      | 2.0.0-rc.18 | interactive     | <apikey> | <customize> | <success>     | <version>       |
       | 2.0.0-rc.18 | non-interactive | <empty>  | <customize> | <fail>        | <empty>         |
       | 2.0.0-rc.18 | non-interactive | <apikey> | <customize> | <success>     | <version>       |
       | 2.0.0-rc.18 | interactive     | <empty>  | <customize> | <fail>        | <empty>         |
@@ -103,14 +63,6 @@ Feature: Connect to already online Syncthing server
       | 2.0.0-rc.18 | non-interactive | <apikey> | <manual>    | <success>     | <version>       |
       | 2.0.0-rc.18 | interactive     | <empty>  | <manual>    | <fail>        | <empty>         |
       | 2.0.0-rc.18 | interactive     | <apikey> | <manual>    | <success>     | <version>       |
-      | 2.0.0-rc.18 | non-interactive | <empty>  | <manual>    | <fail>        | <empty>         |
-      | 2.0.0-rc.18 | non-interactive | <apikey> | <manual>    | <success>     | <version>       |
-      | 2.0.0-rc.18 | interactive     | <empty>  | <manual>    | <fail>        | <empty>         |
-      | 2.0.0-rc.18 | interactive     | <apikey> | <manual>    | <success>     | <version>       |
-      | 2.0.0-rc.18 | non-interactive | <empty>  | <setq>      | <fail>        | <empty>         |
-      | 2.0.0-rc.18 | non-interactive | <apikey> | <setq>      | <success>     | <version>       |
-      | 2.0.0-rc.18 | interactive     | <empty>  | <setq>      | <fail>        | <empty>         |
-      | 2.0.0-rc.18 | interactive     | <apikey> | <setq>      | <success>     | <version>       |
       | 2.0.0-rc.18 | non-interactive | <empty>  | <setq>      | <fail>        | <empty>         |
       | 2.0.0-rc.18 | non-interactive | <apikey> | <setq>      | <success>     | <version>       |
       | 2.0.0-rc.18 | interactive     | <empty>  | <setq>      | <fail>        | <empty>         |
@@ -132,14 +84,6 @@ Feature: Connect to already online Syncthing server
       |      1.18.0 | non-interactive | <apikey> | <manual> | <success> | <version>       |
       |      1.18.0 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
       |      1.18.0 | interactive     | <apikey> | <manual> | <success> | <version>       |
-      |      1.18.0 | non-interactive | <empty>  | <manual> | <fail>    | <empty>         |
-      |      1.18.0 | non-interactive | <apikey> | <manual> | <success> | <version>       |
-      |      1.18.0 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
-      |      1.18.0 | interactive     | <apikey> | <manual> | <success> | <version>       |
-      |      1.18.0 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
-      |      1.18.0 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
-      |      1.18.0 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
-      |      1.18.0 | interactive     | <apikey> | <setq>   | <success> | <version>       |
       |      1.18.0 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
       |      1.18.0 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
       |      1.18.0 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
@@ -148,14 +92,6 @@ Feature: Connect to already online Syncthing server
       |      1.26.0 | non-interactive | <apikey> | <manual> | <success> | <version>       |
       |      1.26.0 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
       |      1.26.0 | interactive     | <apikey> | <manual> | <success> | <version>       |
-      |      1.26.0 | non-interactive | <empty>  | <manual> | <fail>    | <empty>         |
-      |      1.26.0 | non-interactive | <apikey> | <manual> | <success> | <version>       |
-      |      1.26.0 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
-      |      1.26.0 | interactive     | <apikey> | <manual> | <success> | <version>       |
-      |      1.26.0 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
-      |      1.26.0 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
-      |      1.26.0 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
-      |      1.26.0 | interactive     | <apikey> | <setq>   | <success> | <version>       |
       |      1.26.0 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
       |      1.26.0 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
       |      1.26.0 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
@@ -164,14 +100,6 @@ Feature: Connect to already online Syncthing server
       |      1.29.6 | non-interactive | <apikey> | <manual> | <success> | <version>       |
       |      1.29.6 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
       |      1.29.6 | interactive     | <apikey> | <manual> | <success> | <version>       |
-      |      1.29.6 | non-interactive | <empty>  | <manual> | <fail>    | <empty>         |
-      |      1.29.6 | non-interactive | <apikey> | <manual> | <success> | <version>       |
-      |      1.29.6 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
-      |      1.29.6 | interactive     | <apikey> | <manual> | <success> | <version>       |
-      |      1.29.6 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
-      |      1.29.6 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
-      |      1.29.6 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
-      |      1.29.6 | interactive     | <apikey> | <setq>   | <success> | <version>       |
       |      1.29.6 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
       |      1.29.6 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
       |      1.29.6 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
@@ -180,14 +108,6 @@ Feature: Connect to already online Syncthing server
       | 2.0.0-rc.18 | non-interactive | <apikey> | <manual> | <success> | <version>       |
       | 2.0.0-rc.18 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
       | 2.0.0-rc.18 | interactive     | <apikey> | <manual> | <success> | <version>       |
-      | 2.0.0-rc.18 | non-interactive | <empty>  | <manual> | <fail>    | <empty>         |
-      | 2.0.0-rc.18 | non-interactive | <apikey> | <manual> | <success> | <version>       |
-      | 2.0.0-rc.18 | interactive     | <empty>  | <manual> | <fail>    | <empty>         |
-      | 2.0.0-rc.18 | interactive     | <apikey> | <manual> | <success> | <version>       |
-      | 2.0.0-rc.18 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
-      | 2.0.0-rc.18 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
-      | 2.0.0-rc.18 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
-      | 2.0.0-rc.18 | interactive     | <apikey> | <setq>   | <success> | <version>       |
       | 2.0.0-rc.18 | non-interactive | <empty>  | <setq>   | <fail>    | <empty>         |
       | 2.0.0-rc.18 | non-interactive | <apikey> | <setq>   | <success> | <version>       |
       | 2.0.0-rc.18 | interactive     | <empty>  | <setq>   | <fail>    | <empty>         |
