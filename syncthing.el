@@ -4,7 +4,7 @@
 
 ;; Author: Peter Badida <keyweeusr@gmail.com>
 ;; Keywords: convenience, syncthing, sync, client, view
-;; Version: 3.0.2
+;; Version: 3.0.3
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/KeyWeeUsr/emacs-syncthing
 
@@ -42,6 +42,7 @@
 Argument NAME Display name for Syncthing buffer.
 Argument URL API server URL.
 Argument TOKEN API server token."
+  ;; TODO: Check output of this, switch to (syncthing-trace)
   (when syncthing-debug
     (with-current-buffer
         (get-buffer-create (format syncthing-trace-format-buffer name))
@@ -69,6 +70,7 @@ Argument TOKEN API server token."
 (defun syncthing-cleanup ()
   "Clean resources when closing the client."
   (interactive)
+  ;; TODO: Add (possibly missing) syncthing-common require
   (syncthing-trace)
   (when syncthing-info
     (message "%s: Cleaning up client %s"
@@ -121,6 +123,7 @@ Activating this mode will launch Syncthing client in the current window.
   "Launch Syncthing instance NAME for BASE-URL and TOKEN in a new buffer."
   (interactive
    "sName: \nSyncthing REST API base URL: \nsSynchting REST API token: ")
+  ;; TODO: Check output of this, switch to (syncthing-trace)
   (when syncthing-debug
     (with-current-buffer
         (get-buffer-create (format syncthing-trace-format-buffer name))
