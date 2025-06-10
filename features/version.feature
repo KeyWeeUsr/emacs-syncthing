@@ -1,4 +1,7 @@
 Feature: Connect to already online Syncthing server
+  Background:
+    Given I override default base URL
+
   Scenario Outline: Can connect after token input
     Given Server "<version>" is running in the background
     And I am running client in "<mode>" mode
@@ -9,8 +12,10 @@ Feature: Connect to already online Syncthing server
     Then client redirects to token customization
 
     When I set a API token in "<how>" to "<token>"
-    And I launch client "<second-launch>"
-    Then client buffer header contains "<header contains>"
+    And I launch client "<second-launch>" or skip
+    Then client launches new buffer
+    And client buffer header contains "<header contains>"
+    And client buffer contains default folder
 
     Examples:
       |     version | mode            | token    | how         | second-launch | header contains |
@@ -116,8 +121,10 @@ Feature: Connect to already online Syncthing server
     And I am running client in "<mode>" mode
 
     When I set a API token in "<how>" to "<token>"
-    And I launch client "<launch>"
-    Then client buffer header contains "<header contains>"
+    And I launch client "<launch>" or skip
+    Then client launches new buffer
+    And client buffer header contains "<header contains>"
+    And client buffer contains default folder
 
     Examples:
       |     version | mode            | token    | how      | launch    | header contains |

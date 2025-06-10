@@ -10,6 +10,13 @@
 (defconst set-how-manual "<manual>")
 (defconst set-how-setq "<setq>")
 
+(defvar skipping nil)
+
+(Given "^I override default base URL$"
+  (lambda ()
+    (setq syncthing-base-url
+          (format "https://127.0.0.1:%s" ecukes-syncthing-port))))
+
 (Given "^Server \"\\([^\"]+\\)\" is running in the background$"
   (lambda (version)
     (setq ecukes-syncthing-container (make-temp-name "ecukes-syncthing-"))
@@ -51,6 +58,7 @@
       (with-current-buffer (get-buffer-create cont-name)
         (setq config (libxml-parse-xml-region (point-min) (point-max))))
       (should config)
+      (kill-buffer (get-buffer-create cont-name))
 
       (should (string= "true" (alist-get 'enabled (cadr (assoc 'gui config)))))
       (let ((tmp (caddr (assoc 'apikey (assoc 'gui config)))))
@@ -100,6 +108,12 @@
                    (should nil))
                (user-error t)))
             (t (error "Bad mode" ecukes-syncthing-mode))))))
+
+(And "^I launch client \"\\([^\"]+\\)\" or skip$"
+  (lambda (how)
+    (if (string= how launch-fail)
+        (setq skipping t)
+      (And "I launch client \"%s\"" how))))
 
 (Then "^client redirects to token customization$"
   (lambda ()
@@ -159,26 +173,65 @@
                  ((string= raw-token token-apikey)
                   (should (string= syncthing-default-server-token
                                    ecukes-syncthing-apikey)))
-                 (t (error "Unhandled case: '%s'" token)))
+                 (t (error "Unhandled case: '%s'" token))))
+          (t (error "Unhandled case: '%s'" how)))
+    (setq syncthing-debug t)
+    (kill-buffer)))
 
-           (kill-buffer))
-          (t (error "Unhandled case: '%s'" how)))))
+(Then "^client launches new buffer$"
+  (lambda ()
+    (if skipping
+        (message "skipping")
+      (let ((buff "*syncthing(Default Localhost)*"))
+        (while (not (get-buffer buff))
+          (sleep-for 1))
+        ;; TODO: Why doesn't it switch automatically?
+        ;; TODO: Make an interactive func to switch around Syncthing-only buffers
+        (switch-to-buffer buff)))))
 
-(Then "^client buffer header contains \"\\([^\"]+\\)\"$"
+(And "^client buffer header contains \"\\([^\"]+\\)\"$"
   (lambda (header)
-    ;; TODO: Why doesn't it switch automatically?
-    ;; TODO: Make an interactive func to switch around Syncthing-only buffers
-    (dolist (buff (buffer-list))
-      (when (string= default-buff-name (buffer-name buff))
-        (switch-to-buffer buff)))
-    (cond ((string= header empty)
-           (should-not header-line-format))
-          ((string= header version)
-           (string-match ecukes-syncthing-version (or header-line-format "")))
-          (t (error "Unhandled case: '%s'" header)))))
+    (if skipping
+        (message "skipping")
+      (cond ((string= header empty)
+             (should-not header-line-format))
+            ((string= header version)
+             (string-match ecukes-syncthing-version
+                           (or header-line-format "")))
+            (t (error "Unhandled case: '%s'" header))))))
+
+(And "^client buffer contains default folder$"
+  (lambda ()
+    (if skipping
+        (message "skipping")
+      (should (string= (buffer-string)
+                       #("(F) Folders
+Show  100.00% Default Folder
+
+(D) Devices
+
+(t) Recent Changes
+| Device | Action | Type | Folder | Path | Time |
+|--------+--------+------+--------+------+------|
+"
+                         0 12 (face syncthing-title)
+                         18 25 (face syncthing-progress-100)
+                         25 40 (face syncthing-bold)
+                         41 42 (face syncthing-title)
+                         42 54 (face syncthing-title)
+                         54 55 (face syncthing-title)
+                         55 74 (face syncthing-title)))))))
 
 (After
- (ignore-error (kill-buffer default-buff-name))
+ (when-let ((buff (get-buffer default-buff-name)))
+   ;; Current can be Customize or Syncthing
+   (kill-buffer buff))
+ (when-let ((buff (get-buffer "*syncthing trace(Default Localhost)*")))
+   (kill-buffer buff))
+ (when syncthing--servers
+   (should (= 0 syncthing--servers)))
+ (setq skipping nil)
+
  (let ((cont-name ecukes-syncthing-container))
    (call-process "docker" nil nil nil "kill" cont-name)
    (let* ((waiting-for-end t)
@@ -197,12 +250,18 @@
           (lambda (status)
             (when-let* ((err (plist-get status :error))
                         (is-conn-err (eq (cadr err) 'connection-failed)))
-              (setq waiting-for-end nil)))))
+              (setq waiting-for-end nil)
+              ;; clean up HTTP leftovers
+              (kill-buffer (current-buffer))))))
        (sleep-for 0.1)))
    (setq syncthing-default-server-token
          (eval (car (get 'syncthing-default-server-token 'standard-value))))
 
-   (makunbound 'ecukes-syncthing-container)))
+   (makunbound 'ecukes-syncthing-container)
+   (with-temp-buffer
+     (insert (format "%s" (buffer-list)))
+     (should-not (string-match-p "http" (buffer-string)))
+     (should-not (string-match-p "syncthing" (buffer-string))))))
 
 (Before
  )
