@@ -81,11 +81,12 @@
   (syncthing-trace)
   (let-alist (syncthing-server-data server)
     (syncthing--draw-folders-header)
-    (cond ((>= .version 37)
+    (cond ((>= .version 35)
            (mapc (lambda (folder)
                    (syncthing--list-37-folder folder)
                    (widget-insert "\n"))
-                 (sort (copy-alist .folders) #'syncthing--sort-folders))))))
+                 (sort (copy-alist .folders) #'syncthing--sort-folders)))
+          (t (message "Syncthing: problematic version %s" .version)))))
 
 (defun syncthing--draw-devices (server)
   "Draw device widget in buffer from SERVER."
@@ -98,28 +99,31 @@
                  (alist-get 'deviceID dev)
                  (alist-get 'myID .system-status))
           (push dev filtered)))
-      (cond ((>= .version 37)
+      (cond ((>= .version 35)
              (mapc (lambda (device)
                      (syncthing--list-37-device device)
                      (widget-insert "\n"))
                    (sort (copy-alist filtered)
-                         #'syncthing--sort-devices)))))))
+                         #'syncthing--sort-devices)))
+            (t (message "Syncthing: problematic version %s" .version))))))
 
 (defun syncthing--draw-logs (server)
   "Draw logs widget in buffer from SERVER."
   (syncthing-trace)
   (let-alist (syncthing-server-data server)
     (syncthing--draw-logs-header :before t)
-    (cond ((>= .version 37)
-           (syncthing--list-logs .logs)))))
+    (cond ((>= .version 35)
+           (syncthing--list-logs .logs))
+          (t (message "Syncthing: problematic version %s" .version)))))
 
 (defun syncthing--draw-changes (server)
   "Draw recent-changes widget in buffer from SERVER."
   (syncthing-trace)
   (let-alist (syncthing-server-data server)
     (syncthing--draw-changes-header :before t)
-    (cond ((>= .version 37)
-           (syncthing--list-changes .changes)))))
+    (cond ((>= .version 35)
+           (syncthing--list-changes .changes))
+          (t (message "Syncthing: problematic version %s" .version)))))
 
 (defun syncthing--list-logs (logs)
   "Render LOGS as a widget."
