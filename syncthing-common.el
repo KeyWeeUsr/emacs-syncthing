@@ -22,6 +22,31 @@
                                    (syncthing-server-name syncthing-server)))
       (insert (format "%S\n" (syncthing--previous-func))))))
 
+(defsubst syncthing-trace-log--buffer (fmt fmt-args &optional server)
+  (let* ((dest (get-buffer-create
+                (format syncthing-trace-format-buffer
+                        (syncthing-server-name server)))))
+    (with-current-buffer dest
+      (insert (format "%s\n" `(trace ,(apply 'format `(,fmt ,@fmt-args))))))))
+
+(defsubst syncthing-trace-log--message (fmt fmt-args)
+  (message "syncthing: %s" `(trace ,(apply 'format `(,fmt ,@fmt-args)))))
+
+(defsubst syncthing-trace-log (&rest plist-args)
+  "Simple logging inline func."
+  (when syncthing-debug
+    (let ((server (plist-get plist-args :server))
+          (fmt (or (plist-get plist-args :format) "%s"))
+          (fmt-args (plist-get plist-args :args)))
+      (if server
+          (syncthing-trace-log--buffer fmt fmt-args server)
+        (if syncthing-server
+            (syncthing-trace-log--buffer fmt fmt-args syncthing-server)
+          ;; commonly when switching buffer due to defvar-local
+          ;; fallback when forgetting to pass
+          (warn "syncthing: failed tracing, fallback as message")
+          (syncthing-trace-log--message fmt fmt-args))))))
+
 (defun syncthing--previous-func (&optional name)
   "Retrieve previous function from `backtrace-frame'.
 Optional argument NAME Caller's name if called by other than `syncthing-trace'."

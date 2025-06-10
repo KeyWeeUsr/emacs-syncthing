@@ -11,6 +11,7 @@
 (defconst set-how-setq "<setq>")
 
 (defvar quiet nil)
+(defvar show-trace nil)
 (defvar skipping nil)
 
 (Given "^I override default base URL$"
@@ -229,8 +230,11 @@ Show  100.00% Default Folder
  (when-let ((buff (get-buffer default-buff-name)))
    ;; Current can be Customize or Syncthing
    (kill-buffer buff))
- (when-let ((buff (get-buffer "*syncthing trace(Default Localhost)*")))
-   (kill-buffer buff))
+   (when-let ((buff (get-buffer "*syncthing trace(Default Localhost)*")))
+     (when show-trace
+       (with-current-buffer (get-buffer "*syncthing trace(Default Localhost)*")
+         (message "traces: %s" (buffer-string))))
+     (kill-buffer buff))
  (when syncthing--servers
    (should (= 0 syncthing--servers)))
  (setq skipping nil)

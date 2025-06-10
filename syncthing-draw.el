@@ -86,7 +86,8 @@
                    (syncthing--list-37-folder folder)
                    (widget-insert "\n"))
                  (sort (copy-alist .folders) #'syncthing--sort-folders)))
-          (t (message "Syncthing: problematic version %s" .version)))))
+          (t (syncthing-trace-log :format "problematic version %s"
+                                  :args (list .version))))))
 
 (defun syncthing--draw-devices (server)
   "Draw device widget in buffer from SERVER."
@@ -105,7 +106,8 @@
                      (widget-insert "\n"))
                    (sort (copy-alist filtered)
                          #'syncthing--sort-devices)))
-            (t (message "Syncthing: problematic version %s" .version))))))
+            (t (syncthing-trace-log :format "problematic version %s"
+                                    :args (list .version)))))))
 
 (defun syncthing--draw-logs (server)
   "Draw logs widget in buffer from SERVER."
@@ -114,7 +116,8 @@
     (syncthing--draw-logs-header :before t)
     (cond ((>= .version 35)
            (syncthing--list-logs .logs))
-          (t (message "Syncthing: problematic version %s" .version)))))
+          (t (syncthing-trace-log :format "problematic version %s"
+                                  :args (list .version))))))
 
 (defun syncthing--draw-changes (server)
   "Draw recent-changes widget in buffer from SERVER."
@@ -123,7 +126,8 @@
     (syncthing--draw-changes-header :before t)
     (cond ((>= .version 35)
            (syncthing--list-changes .changes))
-          (t (message "Syncthing: problematic version %s" .version)))))
+          (t (syncthing-trace-log :format "problematic version %s"
+                                  :args (list .version))))))
 
 (defun syncthing--list-logs (logs)
   "Render LOGS as a widget."

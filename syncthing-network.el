@@ -39,7 +39,8 @@ Argument TOKEN API token."
   (let ((url-request-method method)
         (url-request-data data)
         (url-request-extra-headers `(("X-Api-Key" . ,token)))
-        (url-show-status (null syncthing-no-upstream-noise)))
+        (url-show-status (null syncthing-no-upstream-noise))
+        (server syncthing-server))
     (ignore url-request-method method
             url-request-data data
             url-request-extra-headers
@@ -48,6 +49,10 @@ Argument TOKEN API token."
         (with-temp-buffer
           ;; TODO: fetch status and message, compare, throw on mismatch
           (url-insert-file-contents url)
+          (syncthing-trace-log :format "%s %s >%S<"
+                               :args (list url-request-method url
+                                           (buffer-string))
+                               :server server)
           (json-parse-buffer :object-type 'alist
                              :array-type 'list
                              :null-object nil
