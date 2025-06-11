@@ -18,14 +18,13 @@
 (defun syncthing--update (&rest _)
   "Update function for every refresh iteration."
   (syncthing-trace)
-  (save-window-excursion
-    (switch-to-buffer
-     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (syncthing--ping syncthing-server)
-    (syncthing--server-update syncthing-server)
-    (syncthing--init-state)
-    (syncthing--draw syncthing-server)
-    (setf (syncthing-buffer-collapse-after-start syncthing-buffer) nil)))
+  (when-let* ((buf (syncthing-buffer-name syncthing-buffer)))
+    (with-current-buffer buf
+      (syncthing--ping syncthing-server)
+      (syncthing--server-update syncthing-server)
+      (syncthing--init-state)
+      (syncthing--draw syncthing-server)
+      (setf (syncthing-buffer-collapse-after-start syncthing-buffer) nil))))
 
 (defun syncthing--calc-speed (server data)
   "Calculate upload and download rate DATA for SERVER."

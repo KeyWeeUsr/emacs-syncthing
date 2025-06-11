@@ -23,58 +23,46 @@
 (defun syncthing--draw-folders-header (&optional &key before after)
   "Draw folder header with optional BEFORE and AFTER separator."
   (syncthing-trace)
-  (save-window-excursion
-    (switch-to-buffer
-     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (when before
-      (widget-insert (syncthing--title "\n")))
-    (widget-insert
-     (syncthing--title (format "%s Folders\n"
-                               (syncthing--fallback-ascii "folder"))))
-    (when after
-      (widget-insert (syncthing--title "\n")))))
+  (when before
+    (widget-insert (syncthing--title "\n")))
+  (widget-insert
+   (syncthing--title (format "%s Folders\n"
+                             (syncthing--fallback-ascii "folder"))))
+  (when after
+    (widget-insert (syncthing--title "\n"))))
 
 (defun syncthing--draw-devices-header (&optional &key before after)
   "Draw device header with optional BEFORE and AFTER separator."
   (syncthing-trace)
-  (save-window-excursion
-    (switch-to-buffer
-     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (when before
-      (widget-insert (syncthing--title "\n")))
-    (widget-insert
-     (syncthing--title (format "%s Devices\n"
-                               (syncthing--fallback-ascii "laptop"))))
-    (when after
-      (widget-insert (syncthing--title "\n")))))
+  (when before
+    (widget-insert (syncthing--title "\n")))
+  (widget-insert
+   (syncthing--title (format "%s Devices\n"
+                             (syncthing--fallback-ascii "laptop"))))
+  (when after
+    (widget-insert (syncthing--title "\n"))))
 
 (defun syncthing--draw-logs-header (&optional &key before after)
   "Draw log header with optional BEFORE and AFTER separator."
   (syncthing-trace)
-  (save-window-excursion
-    (switch-to-buffer
-     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (when before
-      (widget-insert (syncthing--title "\n")))
-    (widget-insert
-     (syncthing--title (format "%s Logs\n"
-                               (syncthing--fallback-ascii "envelope"))))
-    (when after
-      (widget-insert (syncthing--title "\n")))))
+  (when before
+    (widget-insert (syncthing--title "\n")))
+  (widget-insert
+   (syncthing--title (format "%s Logs\n"
+                             (syncthing--fallback-ascii "envelope"))))
+  (when after
+    (widget-insert (syncthing--title "\n"))))
 
 (defun syncthing--draw-changes-header (&optional &key before after)
   "Draw log header with optional BEFORE and AFTER separator."
   (syncthing-trace)
-  (save-window-excursion
-    (switch-to-buffer
-     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (when before
-      (widget-insert (syncthing--title "\n")))
-    (widget-insert
-     (syncthing--title (format "%s Recent Changes\n"
-                               (syncthing--fallback-ascii "hourglass"))))
-    (when after
-      (widget-insert (syncthing--title "\n")))))
+  (when before
+    (widget-insert (syncthing--title "\n")))
+  (widget-insert
+   (syncthing--title (format "%s Recent Changes\n"
+                             (syncthing--fallback-ascii "hourglass"))))
+  (when after
+    (widget-insert (syncthing--title "\n"))))
 
 (defun syncthing--draw-folders (server)
   "Draw folder widget in buffer from SERVER."
@@ -132,43 +120,37 @@
 (defun syncthing--list-logs (logs)
   "Render LOGS as a widget."
   (syncthing-trace)
-  (save-window-excursion
-    (switch-to-buffer
-     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (let (text)
-      (dolist (item (alist-get 'messages logs))
-        (let-alist item
-          (push (format "%s\t%s" .when .message) text)))
-      (widget-insert (string-join (reverse text) "\n")))))
+  (let (text)
+    (dolist (item (alist-get 'messages logs))
+      (let-alist item
+        (push (format "%s\t%s" .when .message) text)))
+    (widget-insert (string-join (reverse text) "\n"))))
 
 (defun syncthing--list-changes (change)
   "Render CHANGE as a widget."
   (syncthing-trace)
   (let ((data (syncthing-server-data syncthing-server)))
-    (save-window-excursion
-      (switch-to-buffer
-       (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-      (widget-insert
-       (with-temp-buffer
-         (let (text)
-           (push "|Device|Action|Type|Folder|Path|Time|" text)
-           (push "|-|-|-|-|-|-|" text)
-           (dolist (item change)
-             (let-alist (alist-get 'data item)
-               (push (format
-                      "|%s|%s|%s|%s|%s|%s|"
-                      (alist-get (intern `,.modifiedBy)
-                                 (alist-get 'device-map data))
-                      .action .type .label .path
-                      (format-time-string
-                       "%F %T"
-                       (encode-time
-                        (iso8601-parse (alist-get 'time item)))))
-                     text)))
-           (insert (string-join (reverse text) "\n")))
-         (orgtbl-mode)
-         (org-table-align)
-         (substring-no-properties (buffer-string)))))))
+    (widget-insert
+     (with-temp-buffer
+       (let (text)
+         (push "|Device|Action|Type|Folder|Path|Time|" text)
+         (push "|-|-|-|-|-|-|" text)
+         (dolist (item change)
+           (let-alist (alist-get 'data item)
+             (push (format
+                    "|%s|%s|%s|%s|%s|%s|"
+                    (alist-get (intern `,.modifiedBy)
+                               (alist-get 'device-map data))
+                    .action .type .label .path
+                    (format-time-string
+                     "%F %T"
+                     (encode-time
+                      (iso8601-parse (alist-get 'time item)))))
+                   text)))
+         (insert (string-join (reverse text) "\n")))
+       (orgtbl-mode)
+       (org-table-align)
+       (substring-no-properties (buffer-string))))))
 
 (defun syncthing--list-37-folder (folder)
   "Render single FOLDER item in a widget."
@@ -394,40 +376,37 @@
                 (file-name-base
                  (alist-get 'filename (alist-get 'lastFile stats)))))))
           items)
-    (save-window-excursion
-      (switch-to-buffer
-       (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-      (widget-create
-       'syncthing-collapsible
-       :value
-       (not (member id (syncthing-buffer-fold-folders syncthing-buffer)))
-       :tag
-       (concat
-        " "
-        (syncthing--color-perc perc)
-        (format "%s%s"
-                (syncthing--bold
-                 (format " %s" name))
-                (if paused (syncthing--italic " (Paused)") "")))
-       :items (nreverse items)
-       :spacing syncthing-align-folder-values
-       :action
-       `(lambda (widget &optional event)
-         ;; "super"
-         (apply 'widget-toggle-action `(,widget ,event))
+    (widget-create
+     'syncthing-collapsible
+     :value
+     (not (member id (syncthing-buffer-fold-folders syncthing-buffer)))
+     :tag
+     (concat
+      " "
+      (syncthing--color-perc perc)
+      (format "%s%s"
+              (syncthing--bold
+               (format " %s" name))
+              (if paused (syncthing--italic " (Paused)") "")))
+     :items (nreverse items)
+     :spacing syncthing-align-folder-values
+     :action
+     `(lambda (widget &optional event)
+        ;; "super"
+        (apply 'widget-toggle-action `(,widget ,event))
 
-         (if (member ,id (syncthing-buffer-fold-folders syncthing-buffer))
-             (progn
-               (setf (syncthing-buffer-fold-folders syncthing-buffer)
-                     (delete ,id (syncthing-buffer-fold-folders
-                                  syncthing-buffer)))
-               (push ,id (syncthing-buffer-skip-fold-folders
-                          syncthing-buffer)))
-           (progn
-             (push ,id (syncthing-buffer-fold-folders syncthing-buffer))
-             (setf (syncthing-buffer-skip-fold-folders syncthing-buffer)
-                   (delete ,id (syncthing-buffer-skip-fold-folders
-                                syncthing-buffer))))))))))
+        (if (member ,id (syncthing-buffer-fold-folders syncthing-buffer))
+            (progn
+              (setf (syncthing-buffer-fold-folders syncthing-buffer)
+                    (delete ,id (syncthing-buffer-fold-folders
+                                 syncthing-buffer)))
+              (push ,id (syncthing-buffer-skip-fold-folders
+                         syncthing-buffer)))
+          (progn
+            (push ,id (syncthing-buffer-fold-folders syncthing-buffer))
+            (setf (syncthing-buffer-skip-fold-folders syncthing-buffer)
+                  (delete ,id (syncthing-buffer-skip-fold-folders
+                               syncthing-buffer)))))))))
 
 (defun syncthing--list-37-device (device)
   "Render single DEVICE item in a widget."
@@ -623,38 +602,35 @@
                    (format "\n%s "
                            (syncthing--space syncthing-align-device-values))))
           items)
-    (save-window-excursion
-      (switch-to-buffer
-       (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-      (widget-create
-       'syncthing-collapsible
-       :value (not (member id (syncthing-buffer-fold-devices
-                               syncthing-buffer)))
-       :tag
-       (concat
-        " "
-        (syncthing--color-perc (alist-get 'completion completion))
-        (format "%s%s" (syncthing--bold (format " %s" name))
-                (if paused (syncthing--italic " (Paused)") "")))
-       :items (nreverse items)
-       :spacing syncthing-align-device-values
-       :action
-       `(lambda (widget &optional event)
-          ;; "super"
-          (apply 'widget-toggle-action `(,widget ,event))
+    (widget-create
+     'syncthing-collapsible
+     :value (not (member id (syncthing-buffer-fold-devices
+                             syncthing-buffer)))
+     :tag
+     (concat
+      " "
+      (syncthing--color-perc (alist-get 'completion completion))
+      (format "%s%s" (syncthing--bold (format " %s" name))
+              (if paused (syncthing--italic " (Paused)") "")))
+     :items (nreverse items)
+     :spacing syncthing-align-device-values
+     :action
+     `(lambda (widget &optional event)
+        ;; "super"
+        (apply 'widget-toggle-action `(,widget ,event))
 
-          (if (member ,id (syncthing-buffer-fold-devices syncthing-buffer))
-              (progn
-                (setf (syncthing-buffer-fold-devices syncthing-buffer)
-                      (delete ,id (syncthing-buffer-fold-devices
-                                   syncthing-buffer)))
-                (push ,id (syncthing-buffer-skip-fold-devices
-                           syncthing-buffer)))
+        (if (member ,id (syncthing-buffer-fold-devices syncthing-buffer))
             (progn
-              (push ,id (syncthing-buffer-fold-devices syncthing-buffer))
-              (setf (syncthing-buffer-skip-fold-devices syncthing-buffer)
-                    (delete ,id (syncthing-buffer-skip-fold-devices
-                                 syncthing-buffer))))))))))
+              (setf (syncthing-buffer-fold-devices syncthing-buffer)
+                    (delete ,id (syncthing-buffer-fold-devices
+                                 syncthing-buffer)))
+              (push ,id (syncthing-buffer-skip-fold-devices
+                         syncthing-buffer)))
+          (progn
+            (push ,id (syncthing-buffer-fold-devices syncthing-buffer))
+            (setf (syncthing-buffer-skip-fold-devices syncthing-buffer)
+                  (delete ,id (syncthing-buffer-skip-fold-devices
+                               syncthing-buffer)))))))))
 
 (defun syncthing--header-line (server)
   "Return SERVER `header-line-format' string."
@@ -792,13 +768,10 @@
 (defun syncthing--draw-buffer (server)
   "Setup widgets and draw other buffer items for SERVER."
   (syncthing-trace)
-  (save-window-excursion
-    (switch-to-buffer
-     (get-buffer-create (syncthing-buffer-name syncthing-buffer)))
-    (widget-setup)
-    (setq header-line-format (syncthing--header-line server))
-    ;; header drawing messes up with cursor position, reset to 0,0
-    (goto-char (or (syncthing-buffer-point syncthing-buffer) 0))))
+  (widget-setup)
+  (setq header-line-format (syncthing--header-line server))
+  ;; header drawing messes up with cursor position, reset to 0,0
+  (goto-char (or (syncthing-buffer-point syncthing-buffer) 0)))
 
 (defun syncthing--draw (server)
   "Setup buffer and draw widgets for SERVER."
