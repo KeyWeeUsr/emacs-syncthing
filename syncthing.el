@@ -111,7 +111,10 @@ Activating this mode will launch Syncthing client in the current window.
     (user-error "Buffer not in `syncthing-mode'"))
   (setq-local
    buffer-stale-function
-   (when syncthing-auto-refresh-mode (lambda (&rest _) t))
+   (when syncthing-auto-refresh-mode
+     (lambda (&rest _)
+       (or (zerop (buffer-size))               ; Initial update.
+           (get-buffer-window nil 'visible)))) ; Or if the buffer is visible.
    auto-revert-interval
    (when syncthing-auto-refresh-mode syncthing-auto-refresh-interval))
   (when syncthing-no-upstream-noise
