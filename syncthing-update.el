@@ -15,16 +15,27 @@
 (require 'syncthing-watcher)
 
 
-(defun syncthing--update (&rest _)
-  "Update function for every refresh iteration."
-  (syncthing-trace)
-  (when-let* ((buf (syncthing-buffer-name syncthing-buffer)))
-    (with-current-buffer buf
+(defun syncthing--update-synchronous (buffer)
+  "Synchronously update the specified syncthing BUFFER."
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
       (syncthing--ping syncthing-server)
       (syncthing--server-update syncthing-server)
       (syncthing--init-state)
       (syncthing--draw syncthing-server)
-      (setf (syncthing-buffer-collapse-after-start syncthing-buffer) nil))))
+      (setf (syncthing-buffer-collapse-after-start syncthing-buffer) nil
+            (syncthing-buffer-update-thread syncthing-buffer) nil))))
+
+(defun syncthing--update (&rest _)
+  "Update function for every refresh iteration."
+  (syncthing-trace)
+  (when-let* ((buf (current-buffer)))
+    (if (and (bound-and-true-p main-thread)
+             (not (and-let* ((thread (syncthing-buffer-update-thread syncthing-buffer)))
+                    (thread-live-p thread))))
+        (setf (syncthing-buffer-update-thread syncthing-buffer)
+              (make-thread (lambda () (syncthing--update-synchronous buf)) "Syncthing Update"))
+      (syncthing--update-synchronous buf))))
 
 (defun syncthing--calc-speed (server data)
   "Calculate upload and download rate DATA for SERVER."

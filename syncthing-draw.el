@@ -776,6 +776,16 @@
 (defun syncthing--draw (server)
   "Setup buffer and draw widgets for SERVER."
   (syncthing-trace)
+  (cond
+   ;; Threading isn't supported, continue.
+   ((not (bound-and-true-p main-thread)))
+   ;; We are the sync thread, continue.
+   ((eq (current-thread) (syncthing-buffer-update-thread syncthing-buffer)))
+   ;; We are the main thread, wait for syncing to complete before drawing.
+   ((eq (current-thread) main-thread)
+        (when-let* ((thread (syncthing-buffer-update-thread syncthing-buffer)))
+          (thread-join thread)))
+   (t (error "Can only draw in the syncthing buffer from the update thread or the main thread")))
   (when (syncthing-buffer-initialized syncthing-buffer)
     (setf (syncthing-buffer-point syncthing-buffer) (point)))
   (let ((inhibit-read-only t))

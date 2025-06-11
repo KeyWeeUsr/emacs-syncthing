@@ -32,7 +32,7 @@
   name collapse-after-start initialized
   fold-folders skip-fold-folders
   fold-devices skip-fold-devices
-  point)
+  point update-thread)
 
 (defvar-local syncthing-watcher nil
   "Buffer-local instance for event poller.")
