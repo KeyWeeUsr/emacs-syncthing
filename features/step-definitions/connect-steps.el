@@ -266,6 +266,9 @@ Show  100.00% Default Folder
 
    (makunbound 'ecukes-syncthing-container)
    (with-temp-buffer
+     (dolist (item (buffer-list))
+       (when (string-match-p "syncthing.*\\.el")
+         (kill-buffer item)))
      (insert (format "%s" (buffer-list)))
      (should-not (string-match-p "http" (buffer-string)))
      (should-not (string-match-p "syncthing" (buffer-string))))))
