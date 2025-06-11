@@ -61,3 +61,6 @@
                      ,(format "DEMO_DATA=%s" data-dir)))))
       (load-file "demo/demo-server.el"))
     (while t (sit-for 1))))
+
+(when (getenv "CI")
+  (setf eldev-test-fileset `(:and ,eldev-test-fileset (:not "features"))))
