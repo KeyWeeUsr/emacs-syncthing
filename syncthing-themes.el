@@ -46,8 +46,8 @@
             :qr ""
             :tag ""
             :laptop ""
-            :envelope "✉"
-            :hourglass "⌛"
+            :envelope ""
+            :hourglass ""
             :info ""
             :folder-open ""
             :world ""
@@ -56,14 +56,14 @@
             :eye ""
             :lift ""
             :share ""
-            :swap "⇄"
+            :swap ""
             :cloud ""
             :link ""
             :signal ""
             :switch ""
             :press "")
     :text ,syncthing-theme--default-ascii)
-  "Default theme, working with DejaVu Sans Mono.")
+  "Default theme, working with Font Awesome and/or Nerd Fonts.")
 
 (defconst syncthing-theme-emoji-one
   `(:icons (:download "⬇️"
