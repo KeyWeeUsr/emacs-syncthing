@@ -23,6 +23,10 @@
       (insert (format "%S\n" (syncthing--previous-func))))))
 
 (defsubst syncthing-trace-log--buffer (fmt fmt-args &optional server)
+  "Log trace to syncthing trace buffer.
+Argument FMT string format as in `message'.
+Argument FMT-ARGS Arguments passed to FMT.
+Optional argument SERVER When `syncthing-server' is unavailable (buffer change)."
   (let* ((dest (get-buffer-create
                 (format syncthing-trace-format-buffer
                         (syncthing-server-name server)))))
@@ -30,10 +34,18 @@
       (insert (format "%s\n" `(trace ,(apply 'format `(,fmt ,@fmt-args))))))))
 
 (defsubst syncthing-trace-log--message (fmt fmt-args)
+  "Fallback log trace to Messages.
+Argument FMT string format as in `message'.
+Argument FMT-ARGS Arguments passed to FMT."
   (message "syncthing: %s" `(trace ,(apply 'format `(,fmt ,@fmt-args)))))
 
 (defsubst syncthing-trace-log (&rest plist-args)
-  "Simple logging inline func."
+  "Simple logging inline func.
+Optional argument PLIST-ARGS
+Keys
+* `:format' string format as in `message'
+* `:args' Arguments passed to `:format'
+* `:server' to trace `syncthing-server' instance if not available by default."
   (when syncthing-debug
     (let ((server (plist-get plist-args :server))
           (fmt (or (plist-get plist-args :format) "%s"))
