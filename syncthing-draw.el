@@ -166,7 +166,7 @@
                         (iso8601-parse (alist-get 'time item)))))
                      text)))
            (insert (string-join (reverse text) "\n")))
-         (org-mode)
+         (orgtbl-mode)
          (org-table-align)
          (substring-no-properties (buffer-string)))))))
 
