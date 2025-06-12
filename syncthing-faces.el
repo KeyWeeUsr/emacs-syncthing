@@ -5,6 +5,7 @@
 
 ;;; Code:
 
+(require 'info)
 (require 'syncthing-common)
 
 
