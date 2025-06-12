@@ -15,6 +15,12 @@
   :group 'syncthing-format
   :type 'string)
 
+(defcustom syncthing-form-format-buffer
+  "*syncthing form(%s)*"
+  "Client buffer's child form name with a `%s' placeholder for address."
+  :group 'syncthing-format
+  :type 'string)
+
 (defcustom syncthing-trace-format-buffer
   "*syncthing trace(%s)*"
   "Tracing buffer name with a `%s' placeholder for address."
