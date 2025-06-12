@@ -144,10 +144,10 @@
                 (lambda (&rest largs) (setq args largs)))
     (syncthing-request server "GET" "something")
     (should (string= (format "%s" args)
-                     (format "(GET %s/something %s)" url token)))
+                     (format "(GET %s/something %s nil)" url token)))
     (syncthing-request server "GET" "/something")
     (should (string= (format "%s" args)
-                     (format "(GET %s//something %s)" url token)))
+                     (format "(GET %s//something %s nil)" url token)))
     (advice-remove 'syncthing--request
                    (lambda (&rest largs) (setq args largs)))))
 
