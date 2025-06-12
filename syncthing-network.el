@@ -29,7 +29,7 @@
           (buffer-string))
       (file-error (signal 'syncthing-error-cant-authenticate nil)))))
 
-(defun syncthing--request (method url token &rest data)
+(defun syncthing--request (method url token &optional data)
   "Send authenticated HTTP request to Syncthing REST API.
 Argument METHOD HTTP method/verb.
 Argument URL API to call.
@@ -38,7 +38,8 @@ Argument TOKEN API token."
   (syncthing-trace)
   (let ((url-request-method method)
         (url-request-data data)
-        (url-request-extra-headers `(("X-Api-Key" . ,token)))
+        (url-request-extra-headers `(("X-Api-Key" . ,token)
+                                     ("Content-Type" . "application/json")))
         (url-show-status (null syncthing-no-upstream-noise))
         (server syncthing-server))
     (ignore url-request-method method
@@ -59,14 +60,14 @@ Argument TOKEN API token."
                              :false-object nil))
       (file-error (signal 'syncthing-error-failed-response url)))))
 
-(defun syncthing-request (server method endpoint &rest data)
+(defun syncthing-request (server method endpoint &optional data)
   "Return SERVER response for METHOD at ENDPOINT for request with DATA."
   (syncthing-trace)
   (apply #'syncthing--request
-         (append (list method
-                       (format "%s/%s" (syncthing-server-url server) endpoint)
-                       (syncthing-server-token server))
-                 data)))
+         (list method
+               (format "%s/%s" (syncthing-server-url server) endpoint)
+               (syncthing-server-token server)
+               data)))
 
 (provide 'syncthing-network)
 ;;; syncthing-network.el ends here
